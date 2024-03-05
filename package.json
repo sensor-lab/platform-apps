@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "parcel serve src/index.html --public-url / --dist-dir dist",
+    "build": "parcel src/index.html",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
