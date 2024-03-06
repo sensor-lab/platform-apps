@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>模块化传感器平台</title>
+    <link rel="stylesheet" href="scss/styles.scss">
+    <script type="module" src="js/main.js"></script>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg bg-light">
+            <div class="container d-flex justify-content-between">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#">模块化传感器平台</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main role="main">
+        <div class="container">
+            <section class="text-center mt-4">
+                <h1>传感器控制页面</h1>
+                <p class="text-sm text-muted">点击配置按钮进行平台配置，或从下面的列表中选择传感器进行交互。</p>
+                <div class="btn btn-primary my-2">配置平台</div>
+                </p>
+            </section>
+
+            <div class="row align-items-md-stretch">
+                <div class="col-md-6">
+                    <div class="p-5 mb-4 bg-light rounded-4">
+                        <div class="container-fluid py-5">
+                            <h2 class="display-6 fw-bold">LED灯带</h2>
+                            <p class="col-md-8 fs-4">将LED灯带通过电源信号插板和平台连接，并通过插板上的跳线接头选择合适的逻辑电压。
+                                通过杜邦线连接合适的灯带供电电压。您可以选择任意的灯带颜色。点击下面的按钮开始使用。</p>
+                            <button class="btn btn-primary btn-lg" type="button">开始使用</button>
+                            <button class="btn btn-secondary btn-lg" type="button">文档</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="p-5 mb-4 text-white bg-dark rounded-4">
+                        <div class="container-fluid py-5">
+                            <h2 class="display-6 fw-bold">环境监测插板</h2>
+                            <p class="col-md-8 fs-4">将环境检测插板和平台连接，页面每秒进行更新并显示当前的温度，湿度和控制质量信息。点击下面的按钮开始使用。</p>
+                            <button class="btn btn-primary btn-lg" type="button">开始使用</button>
+                            <button class="btn btn-secondary btn-lg" type="button">文档</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="row align-items-md-stretch">
+                <div class="col-md-6">
+                    <div class="p-5 mb-4 bg-light rounded-4">
+                        <div class="container-fluid py-5">
+                            <h2 class="display-6 fw-bold">力感插板</h2>
+                            <p class="col-md-8 fs-4">将压力传感器连接到力感插板的螺丝端子，并将螺丝端子连接到平台上。
+                                您会看到根据手指触摸的力度不同，页面绘制出不同的折线。点击按钮进行使用。</p>
+                            <button class="btn btn-primary btn-lg" type="button">开始使用</button>
+                            <button class="btn btn-secondary btn-lg" type="button">文档</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="p-5 mb-4 text-white bg-dark rounded-4">
+                        <div class="container-fluid py-5">
+                            <h2 class="display-6 fw-bold">步进电机控制</h2>
+                            <p class="col-md-8 fs-4">将步进电机和步进电机驱动连接，通过杜邦线将步进电机驱动板的引脚和平台连接。
+                                通过页面可以控制驱动步进电机的方式，速度和转动角度。点击按钮进行使用。
+                            </p>
+                            <button class="btn btn-primary btn-lg" type="button">开始使用</button>
+                            <button class="btn btn-secondary btn-lg" type="button">文档</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+</body>
+
+</html>
