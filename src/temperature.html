@@ -9,9 +9,6 @@
     <link rel="stylesheet" href="scss/temperature.scss">
 </head>
 
-<script src="js/temperature.js">
-</script>
-
 <body>
     <header>
         <nav class="navbar navbar-expand-lg bg-light">
@@ -23,20 +20,17 @@
         </nav>
     </header>
     <div class="temperature-container">
-        <div>
-            <span>环境监测</span>
-            <span id="currentDate"></span>
+        <div class="mt-4 mb-2">
+            <h3 id="currentDate"></h3>
         </div>
         <div>
 
         </div>
-        <div class="card" style="width: 18rem;">
-            <img src="assets/temperature.svg" class="card-img-top" alt="...">
+        <div class="card" style="width: 18rem; height: 18rem;">
             <div class="card-body">
-                <h5 class="card-title">Card title</h5>
-                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the
-                    card's content.</p>
-                <a href="#" class="btn btn-primary" onclick="testDebug()">Go somewhere</a>
+                <h3 class="card-title">温度</h3>
+                <h3 class="card-text">32.3</h3>
+                <a href="/" class="btn btn-primary">更多</a>
             </div>
         </div>
         <div class="card" style="width: 18rem;">
@@ -68,5 +62,8 @@
         </div>
     </div>
 </body>
+
+<script src="js/temperature.js">
+</script>
 
 </html>
