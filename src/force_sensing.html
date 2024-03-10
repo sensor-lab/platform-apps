@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>力感传感器</title>
+    <link rel="stylesheet" href="scss/styles.scss">
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/force_sensing.js"></script>
+    <script src="../node_modules/chart.js/dist/chart.umd.js"></script>
+</head>
+
+<body>
+    <div id="instruction" class="alert alert-success" role="alert">
+        请用手指按压力感传感器，时间结束后会显示手指的力量曲线。
+    </div>
+
+    <div id="wrongselection" class="alert alert-danger" role="alert">
+        请在列表中选择正确的连接引脚，并点击开始按钮。
+    </div>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="mx-auto order-0">
+            <a class="navbar-brand mx-auto" href="#">力感传感器</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="progress mt-4">
+            <div id="timeoutCounter" class="progress-bar" role="progressbar" style="width: 100%;" aria-valuenow="25"
+                aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+
+        <div class="row">
+            <div class="col text-center">
+                <button id="startButton" type="button" class="btn btn-primary mt-4">开始</button>
+            </div>
+        </div>
+
+        <canvas id="lineChart" class="mt-4"></canvas>
+
+        <div id="statistics">
+            <h2>数据统计</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">条目</th>
+                            <th scope="col">时间</th>
+                            <th scope="col">数据</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="statAverage">
+                            <td>平均值</td>
+                            <td>不存在</td>
+                            <td>不存在</td>
+                        </tr>
+                        <tr id="statMax">
+                            <td>最大值</td>
+                            <td>不存在</td>
+                            <td>不存在</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="configform">
+            <select id="pinSelect" class="form-select mt-4" aria-label="Default select example">
+                <option selected value="-1">请选择力感传感器和平台连接的引脚</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+            </select>
+        </div>
+
+    </div>
+
+
+
+</body>
+
+</html>
