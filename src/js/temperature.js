@@ -16,7 +16,7 @@ function refreshTime() {
     document.getElementById("currentDate").innerHTML = `环境监测 ${time}`;
 }
 
-refreshTime()
+refreshTime();
 setInterval(refreshTime, 1000);
 
 async function startSingleShot() {
@@ -152,5 +152,5 @@ async function getAllSensors() {
     await readGasSensor()
 }
 
-getAllSensors()
+getAllSensors();
 setInterval(getAllSensors, 1000);
