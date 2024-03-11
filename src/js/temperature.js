@@ -56,9 +56,6 @@ async function readSingleShot() {
             })
     } catch (err) {
         console.error(`Error: ${err}`);
-        // Dev purpose
-        document.getElementById('humidity_value').innerHTML = "12.34";
-
     }
 }
 
@@ -85,9 +82,6 @@ async function readMts01Temperature() {
             })
     } catch (err) {
         console.error(`Error: ${err}`);
-        // Dev purpose
-        document.getElementById('temp_value').innerHTML = "32.18";
-
     }
 }
 
@@ -120,11 +114,6 @@ async function readAgs02ma() {
             })
     } catch (err) {
         console.error(`Error: ${err}`);
-
-        // Dev purpose
-        document.getElementById('air_condition_val').innerHTML = "150.00";
-        document.getElementById('air_condition_status').innerHTML = "优良";
-
     }
     return
 }
@@ -152,10 +141,6 @@ async function readGasSensor() {
             })
     } catch (err) {
         console.error(`Error: ${err}`);
-
-        // Dev purpose
-        document.getElementById('flammable_gas_val').innerHTML = "1.008";
-        document.getElementById('flammable_gas_status').innerHTML = "未监测到可燃气体";
     }
 }
 
