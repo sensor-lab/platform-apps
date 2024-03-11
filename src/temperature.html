@@ -33,10 +33,11 @@
                       <h3 class="card-title ms-2 title-margin-top">温度</h3>
                 </div>
                 <div class="d-flex flex-row mt-3">
-                    <p class="display-4">32.3</p>
+                    <p id="temp_value" class="display-4">---</p>
                     <p class="display-6 ms-1">&#8451</p>
                 </div>
-                <p class="fs-6 mt-1 text-warning">温暖</p>
+                <!-- Todo: give proper status based on temp val -->
+                <p id="temp_status" class="fs-6 mt-1 text-warning">温暖</p>
             </div>
         </div>
         <div class="card mb-2" style="width: 14rem; height: 14rem;">
@@ -48,10 +49,11 @@
                       <h3 class="card-title ms-2 title-margin-top">湿度</h3>
                 </div>
                 <div class="d-flex flex-row mt-3">
-                    <p class="display-4">28</p>
+                    <p id="humidity_value" class="display-4">--</p>
                     <p class="display-6 ms-1">&#x00025</p>
                 </div>
-                <p class="fs-6 mt-1 text-success">舒适</p>
+                <!-- Todo: give proper status based on humidity val -->
+                <p id="humidity_status" class="fs-6 mt-1 text-success">舒适</p>
             </div>
         </div>
         <div class="card mb-2" style="width: 14rem; height: 14rem;">
@@ -63,10 +65,9 @@
                       <h3 class="card-title ms-2 title-margin-top">空气质量</h3>
                 </div>
                 <div class="d-flex flex-row mt-3">
-                    <p class="display-4">28</p>
-                    <p class="display-6 ms-1">&#x00025</p>
+                    <p id="air_condition_val" class="display-4">--</p>
                 </div>
-                <p class="fs-6 mt-1 text-success">优良</p>
+                <p id="air_condition_status" class="fs-6 mt-1 text-success">优良</p>
             </div>
         </div>
         <div class="card mb-2" style="width: 14rem; height: 14rem;">
@@ -78,10 +79,9 @@
                       <h3 class="card-title ms-2 title-margin-top">可燃气体</h3>
                 </div>
                 <div class="d-flex flex-row mt-3">
-                    <p class="display-4">28</p>
-                    <p class="display-6 ms-1">&#x00025</p>
+                    <p id="flammable_gas_val" class="display-4">--</p>
                 </div>
-                <p class="fs-6 mt-1 text-warning">未监测到可燃气体</p>
+                <p id="flammable_gas_status" class="fs-6 mt-1 text-warning">未监测到可燃气体</p>
             </div>
         </div>
     </div>
