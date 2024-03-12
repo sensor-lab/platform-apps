@@ -52,7 +52,7 @@ async function readSingleShot() {
                 humidity = 100.0 * (((response["result"][0][3] << 8) + response["result"][0][4]) / 65535)
                 console.log(humidity)
                 
-                document.getElementById('humidity_value').innerHTML = humidity.toFixed(3);
+                document.getElementById('humidity_value').innerHTML = humidity.toFixed(2);
             })
     } catch (err) {
         console.error(`Error: ${err}`);
@@ -78,7 +78,7 @@ async function readMts01Temperature() {
                 }
                 temperature = 40 + (temp_val / 256)
                 console.log(temperature)
-                document.getElementById('temp_value').innerHTML = temperature.toFixed(3);
+                document.getElementById('temp_value').innerHTML = temperature.toFixed(2);
             })
     } catch (err) {
         console.error(`Error: ${err}`);
@@ -99,7 +99,7 @@ async function readAgs02ma() {
             .then(response => response.json())
             .then(response => {
                 air_pollute_val = (response["result"][1][0] << 24) + (response["result"][1][1] << 16) + (response["result"][1][2] << 8) + (response["result"][1][3])
-                document.getElementById('air_condition_val').innerHTML = air_pollute_val.toFixed(3);
+                document.getElementById('air_condition_val').innerHTML = air_pollute_val.toFixed(2);
                 if (air_pollute_val <= 300) {
                     document.getElementById('air_condition_status').innerHTML = "优良";
                 } else if (air_pollute_val <= 1500) {
@@ -132,7 +132,7 @@ async function readGasSensor() {
             .then(response => response.json())
             .then(response => {
                 gas_level = response["result"][0][0] / 4096 * 3.1
-                document.getElementById('flammable_gas_val').innerHTML = gas_level.toFixed(3);
+                document.getElementById('flammable_gas_val').innerHTML = gas_level.toFixed(2);
                 if (gas_level <= 2.5) {
                     document.getElementById('flammable_gas_status').innerHTML = "未监测到可燃气体";
                 } else {
