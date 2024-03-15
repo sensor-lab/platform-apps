@@ -214,11 +214,11 @@ document.getElementById("startButton").addEventListener("click", function (event
                 direction, driveMode, delay, repeat);
             // rotation time longer than 10 seconds
             let i = 0;
-            setInterval(() => {
+            var time_id = setInterval(() => {
                 i ++;
                 if (i == 11) {
-                    clearInterval();
                     document.getElementById("motorProgressBar").style.width = "0%";
+                    clearInterval(time_id);
                 } else {
                     document.getElementById("motorProgressBar").style.width = (i * 10) + "%";
                 }
@@ -228,11 +228,11 @@ document.getElementById("startButton").addEventListener("click", function (event
                 direction, driveMode, delay, repeat);
             // rotation time longer than 1 second
             let i = 0;
-            setInterval(() => {
+            var timer_id = setInterval(() => {
                 i ++;
                 if (i == 5) {
-                    clearInterval();
                     document.getElementById("motorProgressBar").style.width = "0%";
+                    clearInterval(timer_id);
                 } else {
                     document.getElementById("motorProgressBar").style.width = (i * 25) + "%";
                 }
