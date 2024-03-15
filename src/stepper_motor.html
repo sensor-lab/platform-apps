@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>步进电机控制</title>
+    <link rel="stylesheet" href="scss/styles.scss">
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/stepper_motor.js"></script>
+</head>
+
+<body>
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="mx-auto order-0">
+            <a class="navbar-brand mx-auto" href="#">步进电机控制器</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <p class="lead mt-3">请依次填写控制电机的各项参数，并点击开始按钮驱动电机。</p>
+
+        <div class="progress mt-4">
+            <div id="motorProgressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%"
+                aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+
+        <select id="pinSelect" class="form-select mt-4" aria-label="Default select example">
+            <option selected value="-1">选择电机相位1和平台连接的引脚</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="15">15</option>
+            <option value="16">16</option>
+        </select>
+
+        <div id="displayPins" class="row mt-4 d-none">
+            <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+                <div class="card-body">
+                    <p>步进电机相位1</p>
+                    <h5>平台引脚0</h5>
+                </div>
+            </div>
+
+            <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+                <div class="card-body">
+                    <p>步进电机相位2</p>
+                    <h5>平台引脚0</h5>
+                </div>
+            </div>
+
+            <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+                <div class="card-body">
+                    <p>步进电机相位3</p>
+                    <h5>平台引脚0</h5>
+                </div>
+            </div>
+
+            <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+                <div class="card-body">
+                    <p>步进电机相位4</p>
+                    <h5>平台引脚0</h5>
+                </div>
+            </div>
+        </div>
+
+        <select id="direction" class="form-select mt-4 border" aria-label="Default select example">
+            <option selected value="-1">转动方向</option>
+            <option value="0">正向</option>
+            <option value="1">反向</option>
+        </select>
+
+        <select id="driveMode" class="form-select mt-4" aria-label="Default select example">
+            <option selected value="-1">驱动模式</option>
+            <option value="0">全步进</option>
+            <option value="1">半步进</option>
+        </select>
+
+        <select id="speed" class="form-select mt-4" aria-label="Default select example">
+            <option selected value="-1">转动速度(单位:圈/每分钟，即RPM)</option>
+            <option value="1">1RPM</option>
+            <option value="2">2RPM</option>
+            <option value="5">5RPM</option>
+            <option value="10">10RPM</option>
+            <option value="15">15RPM</option>
+            <option value="20">20RPM</option>
+        </select>
+
+        <select id="selectAngle" class="form-select mt-4" aria-label="Default select example">
+            <option selected value="-1">转动计算方式</option>
+            <option value="0">按角度转动</option>
+            <option value="1">按圈转动</option>
+        </select>
+
+        <div id="inputAngle" class="input-group mt-4 d-none">
+            <input type="text" class="form-control" aria-label="Sizing example input" placeholder="输入转动角度(以度°为单位)，比如30"
+                aria-describedby="inputGroup-sizing-default">
+        </div>
+
+        <div id="inputCircle" class="input-group mt-4 d-none">
+            <input type="text" class="form-control" aria-label="Sizing example input" placeholder="输入转动圈数(以圈为单位)，比如1.5"
+                aria-describedby="inputGroup-sizing-default">
+        </div>
+
+        <div id="driveMessage" class="row mt-4 d-none">
+            <div class="card mb-2 mx-auto" style="width: 20rem; height: 5rem; background-color:azure;">
+                <div class="card-body">
+                    <p></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col text-center">
+                <button id="startButton" type="button" class="btn btn-primary mt-4">开始</button>
+            </div>
+        </div>
+    </div>
+
+
+
+</body>
