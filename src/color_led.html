@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>模块化传感器平台</title>
+    <link rel="stylesheet" href="scss/styles.scss">
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg bg-light">
+            <div class="container d-flex justify-content-between">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="/">模块化传感器平台</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="d-flex flex-column align-items-center">
+        <div class="mt-4 mb-2">
+            <h3>LED 灯带控制器</h3>
+        </div>
+    </div>
+    <div class="container-fluid w-50" style="border:1px solid #cecece; border-radius: 3px;">
+        <form class="text-center mt-4">
+            <div class="form-group justify-content-center mb-2">
+                <label for="colorTheme" class="mb-2">选择灯带主题</label>
+                <select class="form-control" id="colorTheme">
+                    <option>星空蓝</option>
+                    <option>青山绿</option>
+                    <option>日落红</option>
+                </select>
+            </div>
+            <div class="row px-3 mb-4" id="start-blue">
+                <div class="col-sm" style="background-color: #00a6fb; color: white;">#00a6fb</div>
+                <div class="col-sm" style="background-color: #0582ca; color: white;">#0582ca</div>
+                <div class="col-sm" style="background-color: #006494; color: white;">#006494</div>
+                <div class="col-sm" style="background-color: #003554; color: white;">#003554</div>
+                <div class="col-sm" style="background-color: #051923; color: white;">#051923</div>
+            </div>
+            <div class="row px-3 mb-4" id="mount-gree">
+                <div class="col-sm" style="background-color: #5bba6f; color: white;">#5bba6f</div>
+                <div class="col-sm" style="background-color: #3fa34d; color: white;">#3fa34d</div>
+                <div class="col-sm" style="background-color: #2a9134; color: white;">#2a9134</div>
+                <div class="col-sm" style="background-color: #137547; color: white;">#137547</div>
+                <div class="col-sm" style="background-color: #054a29; color: white;">#054a29</div>
+            </div>
+            <div class="row px-3 mb-4" id="sunset-red">
+                <div class="col-sm" style="background-color: #ea8c55; color: white;">#ea8c55</div>
+                <div class="col-sm" style="background-color: #c75146; color: white;">#c75146</div>
+                <div class="col-sm" style="background-color: #ad2e24; color: white;">#ad2e24</div>
+                <div class="col-sm" style="background-color: #81171b; color: white;">#81171b</div>
+                <div class="col-sm" style="background-color: #540804; color: white;">#540804</div>
+            </div>
+            <div class="form-group justify-content-center mb-2">
+                <label for="colorLength" class="mb-2">选择灯带长度: 米</label>
+                <select class="form-control" id="colorLength">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary mt-4 mb-2">设置</button>
+        </form>
+    </div>
+
+</body>
+
+<script src="js/color_strip.js">
+</script>
+
+</html>
