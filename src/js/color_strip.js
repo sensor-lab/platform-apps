@@ -1,50 +1,141 @@
-// GPIO config
-var num_of_leds_global = 0
-var base_color_global = 0
-var blink_color_global = 0
-var blink_index_global = 0
-var interval_global = null
-var gpio_index = parseInt(prompt("请将LED灯带和电平转换插板连接，并将电平转换插板插入平台。输入引脚号：", "0"));
+import { start } from '@popperjs/core';
+import {setupAdvanceOutput, startAdvanceOutput} from './api'
 
-if (gpio_index < 0 || gpio_index > 23) {
-    alert("请输入正确的引脚号，需要在0-23之间。")
-}
+const LEDS_PER_METER = 60
 
-// Color theme map
+var data_pin = -1;
+var color_strip_type = -1;
+var color_strip_length = -1;
+var color_scheme = -1;
+
+// Color theme selector
 const colorMap = new Map();
-colorMap.set('blue', ['#00a6fb', '#0582ca', '#006494', '#003554', '#051923']);
-colorMap.set('green', ['#5bba6f', '#3fa34d', '#2a9134', '#137547', '#054a29']);
-colorMap.set('red', ['#ea8c55', '#c75146', '#ad2e24', '#81171b', '#540804']);
+colorMap.set('bluesky', ['#00a6fb', '#0582ca', '#006494', '#003554', '#051923']);
+colorMap.set('greenmountain', ['#5bba6f', '#3fa34d', '#2a9134', '#137547', '#054a29']);
+colorMap.set('rainbow', ['#ea8c55', '#c75146', '#ad2e24', '#81171b', '#540804']);
 
-function displaySelectedTheme(selected) {
-    colorMap.forEach((val, key, map) => {
-        if (key === selected) {
-            document.getElementById(key).classList.remove("d-none");
-        } else {
-            document.getElementById(key).classList.add("d-none");
-        }
-    })
+// Strip setting
+const ledStripMap = new Map();
+ledStripMap.set('ws2811', [2.5, 0.5, 2.5, 1.2]);
+ledStripMap.set('ws2812', [1.25, 0.4, 1.25, 0.8]);
+
+function checkAllRequiredFields(setup) {
+    var error = 0;
+    if (data_pin == -1) {
+        addErrorMsg("请在列表中选择正确的连接引脚。");
+        error = 1;
+    }
+
+    if (color_strip_type == -1) {
+        addErrorMsg("请在列表中选择正确的灯带IC。");
+        error = 1;
+    }
+
+    if (color_strip_length == -1) {
+        addErrorMsg("请在列表中选择正确的灯带长度。");
+        error = 1;
+    }
+
+    if (color_scheme == -1 && setup == true) {
+        addErrorMsg("请在列表中选择正确的灯带主题。");
+        error = 1;
+    }
+    return error;
 }
 
-// Color them selector
-var colorThemeSelector = document.getElementById("colorThemeSelector")
-var selectedColor = colorThemeSelector.options[colorThemeSelector.selectedIndex].value
-console.log(selectedColor)
-displaySelectedTheme(selectedColor)
+document.getElementById("submitBut").addEventListener("click", function (event) {
+    if (checkAllRequiredFields(true) == 0) {
+        var timing = ledStripMap.get(color_strip_type);
+        setupAdvanceOutput(data_pin, timing[0], timing[1], timing[2], timing[3]);
+        var colorCodes = colorMap.get(color_scheme);
+        var colorData = []
+        var repeat = LEDS_PER_METER * color_strip_length;
+        colorCodes.map((code) => {
+            let codeInt = parseInt(code.substr(1), 16);
+            let color_red = (codeInt >> 16) & 0xFF
+            let color_green = (codeInt >> 8) & 0xFF
+            let color_blue = codeInt & 0xFF
+            colorData.push(color_red, color_green, color_blue);
+        })
+        startAdvanceOutput(data_pin, repeat, colorData);
+    }
+})
 
-colorThemeSelector.addEventListener("change", function (event) {
-    selectedColor = colorThemeSelector.options[colorThemeSelector.selectedIndex].value
-    console.log(selectedColor)
-    displaySelectedTheme(selectedColor)
+document.getElementById("shutdownBut").addEventListener("click", function (event) {
+    if (checkAllRequiredFields(false) == 0) {
+        timing = ledStripMap.get(color_strip_type);
+        setupAdvanceOutput(data_pin, timing[0], timing[1], timing[2], timing[3]);
+    }
+})
+
+function addStripMsg() {
+    if(color_strip_type != -1 && color_strip_length != -1) {
+        let msg = `选择的灯带为${color_strip_length}米 ${color_strip_type} 灯带`;
+        document.getElementById("setupMessage").children[0].children[0].children[0].innerHTML = msg;
+        document.getElementById("setupMessage").classList.remove("d-none");
+    }
+}
+
+function addErrorMsg(message) {
+    document.getElementById("errorMsg").innerHTML = message;
+    document.getElementById("errorMsg").classList.remove("d-none");
+    document.getElementById("setupMessage").classList.add("d-none");
+}
+
+document.getElementById("pinSelect").addEventListener("change", function(event) {
+    var ele = document.getElementById("pinSelect");
+    if (ele.options[ele.selectedIndex].value == -1) {
+        addErrorMsg("请在列表中选择正确的连接引脚。");
+        document.getElementById("displayPins").classList.add("d-none")
+    } else {
+        data_pin = parseInt(ele.options[ele.selectedIndex].value);
+        document.getElementById("displayPins").children[0].children[0].children[1].innerHTML="平台引脚"+data_pin;
+        document.getElementById("displayPins").classList.remove("d-none")
+        document.getElementById("errorMsg").classList.add("d-none");
+        addStripMsg();
+    }
 });
 
-// Color length selector
-var colorLengthSelector = document.getElementById("colorLengthSelector")
+document.getElementById("colorStripType").addEventListener("change", function(event) {
+    var ele = document.getElementById("colorStripType");
+    if (ele.options[ele.selectedIndex].value == -1) {
+        addErrorMsg("请在列表中选择正确的灯带IC。");
+    } else {
+        color_strip_type = ele.options[ele.selectedIndex].value;
+        document.getElementById("errorMsg").classList.add("d-none");
+        addStripMsg();
+    }
+});
 
-document.getElementById("submitButton").addEventListener("click", function (event) {
-    console.log("Light LED");
-    console.log(`Color Theme: ${selectedColor}`)
-    console.log(`Color Theme color items: ${colorMap.get(selectedColor)}`)
-    console.log(`Color Length: ${colorLengthSelector.options[colorLengthSelector.selectedIndex].value}`)
-    // Todo: send API request to board
-})
+document.getElementById("colorStripLength").addEventListener("change", function(event) {
+    var ele = document.getElementById("colorStripLength");
+    if (ele.options[ele.selectedIndex].value == -1) {
+        addErrorMsg("请在列表中选择正确的灯带长度。");
+    } else {
+        color_strip_length = parseInt(ele.options[ele.selectedIndex].value);
+        document.getElementById("errorMsg").classList.add("d-none");
+        addStripMsg();
+    }
+});
+
+document.getElementById("colorThemeSelector").addEventListener("change", function (event) {
+    var ele = document.getElementById("colorThemeSelector");
+    if (ele.options[ele.selectedIndex].value == -1) {
+        addErrorMsg("请在列表中选择正确的灯带主题。");
+        colorMap.forEach((val, key, map) => {
+            document.getElementById(key).classList.add("d-none");
+        })
+    } else {
+        color_scheme = ele.options[ele.selectedIndex].value;
+        document.getElementById("errorMsg").classList.add("d-none");
+        addStripMsg();
+
+        colorMap.forEach((val, key, map) => {
+            if (key === color_scheme) {
+                document.getElementById(key).classList.remove("d-none");
+            } else {
+                document.getElementById(key).classList.add("d-none");
+            }
+        })
+    }
+});
