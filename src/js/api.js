@@ -132,3 +132,48 @@ export async function driveMotor(phase1_pin_id, phase2_pin_id,
         console.log('Error call API:', error);
     }                       
 }
+
+export async function setupAdvanceOutput(pin_id, 
+    zero_total_duration_us, zero_high_duration_us,
+    one_total_duration_us, one_high_duration_us) {
+    let request = '/hardware/operation';
+    let body = {
+      'event': 'now',
+      'actions': [["advance_output", pin_id, "setup","us",
+            "zero", zero_total_duration_us, zero_high_duration_us, 
+            "one", one_total_duration_us, one_high_duration_us]]
+    };
+    try {
+        const response = await fetch(request, {
+            method: 'post',
+            body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        if (data.errorcode != 0) {
+            console.log('API returns error code:', data.errorcode);
+        }
+    } catch (error) {
+        console.log('Error call API:', error);
+    }
+}
+
+export async function startAdvanceOutput(pin_id, repeat, data) {
+    let request = '/hardware/operation';
+    let body = {
+        'event': 'now',
+        'repeat': repeat,
+        'actions': [["advance_output", pin_id, "start", data.length, ...data]]
+    };
+    try {
+        const response = await fetch(request, {
+            method: 'post',
+            body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        if (data.errorcode != 0) {
+            console.log('API returns error code:', data.errorcode);
+        }
+    } catch (error) {
+        console.log('Error call API:', error);
+    }
+}

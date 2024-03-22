@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>模块化传感器平台</title>
+    <link rel="stylesheet" href="scss/styles.scss">
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/color_strip.js"></script>
+</head>
+
+<body>
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+
+    <nav class="navbar navbar-expand-lg bg-light">
+        <div class="container d-flex justify-content-between">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">灯带控制器</a>
+            </div>
+        </div>
+    </nav>
+    <div class="d-flex flex-column align-items-center">
+        <div class="mt-4 mb-2">
+            <h3>LED 灯带控制器</h3>
+        </div>
+    </div>
+    <div class="container-fluid w-50" style="border:1px solid #cecece; border-radius: 3px;">
+        <div class="text-center mt-4">
+            <select id="pinSelect" class="form-select my-4" aria-label="Default select example">
+                <option selected value="-1">选择灯带和平台连接的引脚</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="16">16</option>
+                <option value="16">17</option>
+            </select>
+
+            <div id="displayPins" class="row mt-4 d-none">
+                <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+                    <div class="card-body">
+                        <p>灯带数据信号</p>
+                        <h5>平台引脚0</h5>
+                    </div>
+                </div>
+            </div>
+
+            <select id="colorStripType" class="form-select my-4">
+                <option selected value="-1">选择灯带IC</option>
+                <option value="ws2811">WS2811</option>
+                <option value="ws2812">WS2812</option>
+            </select>
+
+            <select id="colorStripLength" class="form-select my-4">
+                <option selected value="-1">选择灯带长度</option>
+                <option value="1">一米</option>
+                <option value="2">两米</option>
+                <option value="3">三米</option>
+            </select>
+
+            <select id="colorThemeSelector" class="form-select my-4">
+                <option selected value="-1">选择灯带主题</option>
+                <option value="bluesky">宁静星空蓝</option>
+                <option value="greenmountain">优雅青山绿</option>
+                <option value="redish">热烈绯红色</option>
+                <option value="rainbow">彩虹缤纷色</option>
+            </select>
+
+            <div class="row px-3 my-4 d-none" id="bluesky">
+                <div class="col-sm" style="background-color: #00a6fb; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #0582ca; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #006494; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #003554; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #051923; min-height: 2rem;"></div>
+            </div>
+            <div class="row px-3 my-4 d-none" id="greenmountain">
+                <div class="col-sm" style="background-color: #5bba6f; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #3fa34d; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #2a9134; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #137547; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #054a29; min-height: 2rem;"></div>
+            </div>
+            <div class="row px-3 my-4 d-none" id="redish">
+                <div class="col-sm" style="background-color: #ea8c55; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #c75146; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #ad2e24; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #81171b; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #540804; min-height: 2rem;"></div>
+            </div>
+            <div class="row px-3 my-4 d-none" id="rainbow">
+                <div class="col-sm" style="background-color: #ff0000; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #ffa500; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #ffff00; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #008000; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #0000ff; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #4b0082; min-height: 2rem;"></div>
+                <div class="col-sm" style="background-color: #ee82ee; min-height: 2rem;"></div>
+            </div>
+
+            <div id="setupMessage" class="row mt-4 d-none">
+                <div class="card mb-2 mx-auto" style="width: 20rem; height: 5rem; background-color: lightcyan;">
+                    <div class="card-body">
+                        <p></p>
+                    </div>
+                </div>
+            </div>
+
+            <button id="submitBut" type="submit" class="btn btn-primary my-4 mx-auto">设置</button>
+            <button id="shutdownBut" type="submit" class="btn btn-secondary my-4 mx-auto">关闭</button>
+        </div>
+    </div>
+
+</body>
+
+</html>
