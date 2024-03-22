@@ -12,12 +12,16 @@ var color_scheme = -1;
 const colorMap = new Map();
 colorMap.set('bluesky', ['#00a6fb', '#0582ca', '#006494', '#003554', '#051923']);
 colorMap.set('greenmountain', ['#5bba6f', '#3fa34d', '#2a9134', '#137547', '#054a29']);
-colorMap.set('rainbow', ['#ea8c55', '#c75146', '#ad2e24', '#81171b', '#540804']);
+colorMap.set('redish', ['#ea8c55', '#c75146', '#ad2e24', '#81171b', '#540804']);
+colorMap.set('rainbow', ['#ff0000', '#ffa500', '#ffff00', '#008000', '#0000ff', '#4b0082', '#ee82ee']);
 
 // Strip setting
 const ledStripMap = new Map();
-ledStripMap.set('ws2811', [2.5, 0.5, 2.5, 1.2]);
-ledStripMap.set('ws2812', [1.25, 0.4, 1.25, 0.8]);
+ledStripMap.set('ws2811', [2.5, 0.4, 2.5, 1.25]);
+ledStripMap.set('ws2812', [1.15, 0.35, 1.3, 0.7]);
+
+const makeRepeated = (arr, repeats) =>
+  [].concat(...Array.from({ length: repeats }, () => arr));
 
 function checkAllRequiredFields(setup) {
     var error = 0;
@@ -49,15 +53,29 @@ document.getElementById("submitBut").addEventListener("click", function (event) 
         setupAdvanceOutput(data_pin, timing[0], timing[1], timing[2], timing[3]);
         var colorCodes = colorMap.get(color_scheme);
         var colorData = []
-        var repeat = LEDS_PER_METER * color_strip_length;
-        colorCodes.map((code) => {
-            let codeInt = parseInt(code.substr(1), 16);
-            let color_red = (codeInt >> 16) & 0xFF
-            let color_green = (codeInt >> 8) & 0xFF
-            let color_blue = codeInt & 0xFF
-            colorData.push(color_red, color_green, color_blue);
-        })
-        startAdvanceOutput(data_pin, repeat, colorData);
+        var repeat = parseInt(LEDS_PER_METER * color_strip_length / colorCodes.length);
+        if (color_strip_type == 0) {
+            // WS2811
+            colorCodes.map((code) => {
+                let codeInt = parseInt(code.substr(1), 16);
+                let color_red = (codeInt >> 16) & 0xFF
+                let color_green = (codeInt >> 8) & 0xFF
+                let color_blue = codeInt & 0xFF
+                colorData.push(color_red, color_green, color_blue);
+            })
+            startAdvanceOutput(data_pin, repeat, colorData);
+        } else {
+            // WS2812
+            colorCodes.map((code) => {
+                let codeInt = parseInt(code.substr(1), 16);
+                let color_red = (codeInt >> 16) & 0xFF
+                let color_green = (codeInt >> 8) & 0xFF
+                let color_blue = codeInt & 0xFF
+                colorData.push(color_green, color_red, color_blue);
+            })
+            colorData = makeRepeated(colorData, repeat);
+            startAdvanceOutput(data_pin, 0, colorData);
+        }
     }
 })
 
@@ -65,6 +83,18 @@ document.getElementById("shutdownBut").addEventListener("click", function (event
     if (checkAllRequiredFields(false) == 0) {
         timing = ledStripMap.get(color_strip_type);
         setupAdvanceOutput(data_pin, timing[0], timing[1], timing[2], timing[3]);
+        if (color_strip_type == 0) {
+            // WS2811
+            var colorData = [0, 0, 0]
+            var repeat = LEDS_PER_METER * color_strip_length;
+            startAdvanceOutput(data_pin, repeat, colorData);
+        } else {
+            // WS2812
+            var colorData = [0, 0, 0]
+            var repeat = LEDS_PER_METER * color_strip_length;
+            colorData = makeRepeated(colorData, repeat);
+            startAdvanceOutput(data_pin, 0, colorData);
+        }
     }
 })
 
