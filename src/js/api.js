@@ -1,3 +1,35 @@
+export async function gpio(pin_id, mode, level) {
+    let request = '/hardware/operation';
+    var body;
+    if (mode == "input") {
+        body = {
+            'event': 'now',
+            'actions': [["gpio", pin_id, "input", 0]]
+          };
+    } else {
+        body = {
+            'event': 'now',
+            'actions': [["gpio", pin_id, "output", level]]
+          };
+    }
+
+    try {
+        const response = await fetch(request, {
+            method: 'post',
+            body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        if (data.errorcode == 0) {
+            ret_val = data.result[0][0];
+            return ret_val;
+        } else {
+            console.log('API returns error code:', data.errorcode);
+        }
+    } catch (error) {
+        console.log('Error call API:', error);
+    }
+}
+
 export async function readAdc(pin_id) {
     let request = '/hardware/operation';
     let body = {
@@ -48,11 +80,11 @@ export async function resetMotorDriver(phase1_pin_id, phase2_pin_id,
 
 export async function driveMotor(phase1_pin_id, phase2_pin_id, 
                                 phase3_pin_id, phase4_pin_id, 
-                                direction, mode, delay, repeat) {
+                                direction, mode, delay, cycle) {
     let request = '/hardware/operation';
     let body = {
         'event': 'now',
-        "repeat": repeat,
+        "cycle": cycle,
         "actions": []
     };
     var cycle;
@@ -157,11 +189,11 @@ export async function setupAdvanceOutput(pin_id,
     }
 }
 
-export async function startAdvanceOutput(pin_id, repeat, data) {
+export async function startAdvanceOutput(pin_id, cycle, data) {
     let request = '/hardware/operation';
     let body = {
         'event': 'now',
-        'repeat': repeat,
+        'cycle': cycle,
         'actions': [["advance_output", pin_id, "start", data.length, ...data]]
     };
     try {

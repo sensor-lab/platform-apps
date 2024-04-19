@@ -191,27 +191,27 @@ document.getElementById("startButton").addEventListener("click", function (event
             // half stepping
             delay = parseInt((60 * 1000) / speedRpm /  NUM_HALF_STEP_REVOLUTION);
         }
-        let repeat = 0;
+        let cycle = 0;
         if (selectAngle == 0) {
             // input angle information, driveMotor calls 4 full steps each time
             // the value would be same as half stepping (driveMotor calls 8 half steps each time)
-            repeat = parseInt(angleValue / ((360 / NUM_FULL_STEP_REVOLUTION) * 4))
+            cycle = parseInt(angleValue / ((360 / NUM_FULL_STEP_REVOLUTION) * 4))
         } else {
             // input circle information
-            repeat = parseInt((circleValue * 360) / ((360 / NUM_FULL_STEP_REVOLUTION) * 4))
+            cycle = parseInt((circleValue * 360) / ((360 / NUM_FULL_STEP_REVOLUTION) * 4))
         }
         let total_time_ms = 0;
         if (driveMode == 0) {
             // the meaning of *4: please refer to driveMotor function
-            total_time_ms = delay * 4 * repeat;
+            total_time_ms = delay * 4 * cycle;
         } else {
             // half stepping
             // the meaning of *8: please refer to driveMotor function
-            total_time_ms = delay * 8 * repeat;
+            total_time_ms = delay * 8 * cycle;
         }
         if (total_time_ms > 10000) {
             driveMotor(phase1_pin, phase2_pin, phase3_pin, phase4_pin, 
-                direction, driveMode, delay, repeat);
+                direction, driveMode, delay, cycle);
             // rotation time longer than 10 seconds
             let i = 0;
             var time_id = setInterval(() => {
@@ -225,7 +225,7 @@ document.getElementById("startButton").addEventListener("click", function (event
             }, total_time_ms / 10);
         } else if (total_time_ms > 1000) {
             driveMotor(phase1_pin, phase2_pin, phase3_pin, phase4_pin, 
-                direction, driveMode, delay, repeat);
+                direction, driveMode, delay, cycle);
             // rotation time longer than 1 second
             let i = 0;
             var timer_id = setInterval(() => {
@@ -239,7 +239,7 @@ document.getElementById("startButton").addEventListener("click", function (event
             }, total_time_ms / 4);
         } else {
             driveMotor(phase1_pin, phase2_pin, phase3_pin, phase4_pin, 
-                direction, driveMode, delay, repeat);
+                direction, driveMode, delay, cycle);
             document.getElementById("motorProgressBar").style.width = "100%";
             setTimeout(() => {
                 document.getElementById("motorProgressBar").style.width = "0%";
