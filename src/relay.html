@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>电源控制器</title>
+    <link rel="stylesheet" href="scss/styles.scss">
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/relay.js"></script>
+</head>
+
+<body>
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+    <div id="statusMsg" class="alert alert-primary d-none" role="alert"></div>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="mx-auto order-0">
+            <a class="navbar-brand mx-auto" href="#">电源控制器</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <select id="pinSelect" class="form-select mt-4" aria-label="Default select example">
+            <option selected value="-1">选择继电器模块和平台的连接引脚</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="14">14</option>
+            <option value="15">15</option>
+            <option value="18">18</option>
+            <option value="19">19</option>
+        </select>
+
+        <div id="displayPins" class="row mt-4 d-none">
+            <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+                <div class="card-body">
+                    <p>引脚状态</p>
+                    <h5></h5>
+                </div>
+            </div>
+        </div>
+
+        <select id="mode" class="form-select mt-4 border" aria-label="Default select example">
+            <option selected value="0">立即设置</option>
+            <option value="1">定时设置</option>
+        </select>
+
+        <div id="scheduleTime" class="cs-form mt-4">
+            <label for="appt" style="min-width: 100px">开始时间：</label>
+            <input id="startDate" class="form-control mt-4" type="date" />
+            <input id="startTime" class="form-control mt-4" type="time" />
+            <div class="form-check mt-4">
+                <input id="scheduleNow" type="checkbox" class="form-check-input" id="schNowCheck">
+                <label class="form-check-label" for="schNowCheck">现在</label>
+            </div>
+            <select id="duration" class="form-select mt-4" aria-label="Default select example">
+                <option selected value="-1">电源开启时长</option>
+                <option value="2">2分钟</option>
+                <option value="5">5分钟</option>
+                <option value="10">10分钟</option>
+                <option value="30">30分钟</option>
+                <option value="60">60分钟</option>
+                <option value="90">90分钟</option>
+                <option value="120">120分钟</option>
+            </select>
+
+        </div>
+
+        <div id="instantSetButton" class="row">
+            <div class="col text-center">
+                <button id="startButton" type="button" class="btn btn-primary mt-4">打开</button>
+                <button id="stopButton" type="button" class="btn btn-secondary mt-4">关闭</button>
+            </div>
+        </div>
+
+        <div id="scheduleButton" class="row">
+            <div class="col text-center">
+                <button id="scheduleSetButton" type="button" class="btn btn-primary mt-4">设置</button>
+            </div>
+        </div>
+    </div>
+
+</body>
