@@ -1,3 +1,44 @@
+export async function setTime(timedate) {
+    let request = '/hardware/timedate';
+    var timedate_str =  start_time.getFullYear() + "-" + (start_time.getMonth() + 1) + "-" + start_time.getDate() + 
+                        "T" + start_time.getHours() + ":" + start_time.getMinutes() + ":" + start_time.getSeconds();
+
+    var body = {
+        value: timedate_str
+    };
+    try {
+        const response = await fetch(request, {
+            method: 'post',
+            body: body 
+        });
+        const ret = await response.json();
+        if (ret.hasOwnProperty("errorcode") == false) {
+            return 0;
+        } else {
+            return -1;
+        }
+    } catch (error) {
+        console.log('Error call API:', error);
+    }
+}
+
+export async function getTime() {
+    let request = '/hardware/timedate';
+    try {
+        const response = await fetch(request, {
+            method: 'get'
+        });
+        const ret = await response.json();
+        if (ret.hasOwnProperty("errorcode") == false) {
+            return ret.value;
+        } else {
+            return -1;
+        }
+    } catch (error) {
+        console.log('Error call API:', error);
+    }
+}
+
 export async function gpio(pin_id, mode, level) {
     let request = '/hardware/operation';
     var body;
@@ -11,6 +52,40 @@ export async function gpio(pin_id, mode, level) {
             'event': 'now',
             'actions': [["gpio", pin_id, "output", level]]
           };
+    }
+
+    try {
+        const response = await fetch(request, {
+            method: 'post',
+            body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        if (data.errorcode == 0) {
+            ret_val = data.result[0][0];
+            return ret_val;
+        } else {
+            console.log('API returns error code:', data.errorcode);
+        }
+    } catch (error) {
+        console.log('Error call API:', error);
+    }
+}
+
+export async function gpio_output_schedule(pin_id, level, start_time, interval, repeat) {
+    let request = '/hardware/operation';
+    var start_time_str =  start_time.getFullYear() + "-" + (start_time.getMonth() + 1) + "-" + start_time.getDate() + 
+                        "T" + start_time.getHours() + ":" + start_time.getMinutes() + ":" + start_time.getSeconds();
+    var body = {
+        'event': 'schedule',
+        'start': start_time_str,
+        'repeat': repeat,
+        'actions': [["gpio", pin_id, "output", level]]
+    };
+
+    if (interval != null) {
+        // if no interval, give it default 10d
+        // not setting interval could result in the task get removed unexpectedly.
+        body["interval"] = interval;
     }
 
     try {

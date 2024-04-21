@@ -12,6 +12,7 @@
 
 <body>
     <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+    <div id="statusMsg" class="alert alert-primary d-none" role="alert"></div>
 
     <nav class="navbar navbar-expand-md navbar-dark bg-dark">
         <div class="mx-auto order-0">
@@ -48,21 +49,26 @@
             <option value="1">定时设置</option>
         </select>
 
-        <div id="startTime" class="cs-form mt-4" style="display: flex;">
+        <div id="scheduleTime" class="cs-form mt-4">
             <label for="appt" style="min-width: 100px">开始时间：</label>
-            <input type="time" class="form-control" style="flex-grow:1" />
-        </div>
+            <input id="startDate" class="form-control mt-4" type="date" />
+            <input id="startTime" class="form-control mt-4" type="time" />
+            <div class="form-check mt-4">
+                <input id="scheduleNow" type="checkbox" class="form-check-input" id="schNowCheck">
+                <label class="form-check-label" for="schNowCheck">现在</label>
+            </div>
+            <select id="duration" class="form-select mt-4" aria-label="Default select example">
+                <option selected value="-1">电源开启时长</option>
+                <option value="2">2分钟</option>
+                <option value="5">5分钟</option>
+                <option value="10">10分钟</option>
+                <option value="30">30分钟</option>
+                <option value="60">60分钟</option>
+                <option value="90">90分钟</option>
+                <option value="120">120分钟</option>
+            </select>
 
-        <select id="duration" class="form-select mt-4" aria-label="Default select example">
-            <option selected value="-1">电源开启时长</option>
-            <option value="2">2分钟</option>
-            <option value="5">5分钟</option>
-            <option value="10">10分钟</option>
-            <option value="30">30分钟</option>
-            <option value="60">60分钟</option>
-            <option value="90">90分钟</option>
-            <option value="120">120分钟</option>
-        </select>
+        </div>
 
         <div id="instantSetButton" class="row">
             <div class="col text-center">
@@ -71,7 +77,7 @@
             </div>
         </div>
 
-        <div id="scheduleSetButton" class="row">
+        <div id="scheduleButton" class="row">
             <div class="col text-center">
                 <button id="scheduleSetButton" type="button" class="btn btn-primary mt-4">设置</button>
             </div>
