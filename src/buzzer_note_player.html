@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>模块化传感器平台</title>
+    <link rel="stylesheet" href="scss/styles.scss">
+    <link rel="stylesheet" href="scss/buzzer_note_player.scss">
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/buzzer_note_player.js"></script>
+</head>
+
+<body>
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="mx-auto order-0">
+            <a class="navbar-brand mx-auto" href="#">音符播放器</a>
+        </div>
+    </nav>
+
+    <div class="modal fade" id="addNoteModal" tabindex="-1" aria-labelledby="addNoteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addNoteModalLabel">添加音符</h5>
+                    <button id="addNoteButton" type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label>选择音符</label>
+                            <select id="noteSelect" class="form-select my-2">
+                                <option selected value="do">do</option>
+                                <option value="do#">do#</option>
+                                <option value="re">re</option>
+                                <option value="re#">re#</option>
+                                <option value="mi">mi</option>
+                                <option value="fa">fa</option>
+                                <option value="sol">sol</option>
+                                <option value="sol#">sol#</option>
+                                <option value="la">la</option>
+                                <option value="la#">la#</option>
+                                <option value="si">si</option>
+                                <option value="pause">暂停</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label>选择音高等级</label>
+                            <select id="levelSelect" class="form-select my-2">
+                                <option value="3">3</option>
+                                <option selected value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>选择播放时长</label>
+                            <select id="durationSelect" class="form-select my-2">
+                                <option selected value="0.2">0.2秒</option>
+                                <option value="0.5">0.5秒</option>
+                                <option value="0.8">0.8秒</option>
+                                <option value="1.0">1秒</option>
+                                <option value="1.5">1.5秒</option>
+                                <option value="2.0">2秒</option>
+                                <option value="5.0">5秒</option>
+                            </select>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input id="otherDuration" type="checkbox" class="form-check-input">
+                            <label class="form-check-label" for="otherDuration">其他时长</label>
+                        </div>
+
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">音符时长：</span>
+                            <input id="durationInput" type="text" class="form-control" placeholder="0.3">
+                            <span class="input-group-text">秒</span>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button id="modifyNoteActButton" type="button" class="btn btn-primary">修改音符</button>
+                    <button id="addNoteActButton" type="button" class="btn btn-success">添加音符</button>
+                    <button id="removeNoteActButton" type="button" class="btn btn-danger">刪除音符</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="areaDeletionModal" class="modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">音符区域删除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确认删除整个音符区域吗？</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button id="areaDeletion" type="button" class="btn btn-danger">删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid w-50">
+        <select id="pinSelect" class="form-select my-2" aria-label="Default select example">
+            <option selected value="-1">选择蜂鸣器模块和平台的连接引脚</option>
+            <option value="0">0</option>
+            <option value="4">4</option>
+            <option value="8">8</option>
+            <option value="12">12</option>
+            <option value="16">16</option>
+        </select>
+        <p class="text-center">点击任意音符，进行音符的添加，修改或删除操作。点击播放按钮进行播放。</p>
+        <div id="scheduleButton" class="row">
+            <div class="col text-center">
+                <button id="scheduleSetButton" type="button" class="btn btn-primary my-2">播放</button>
+                <button id="removeAllNotes" type="button" class="btn btn-danger my-2" data-bs-toggle="modal"
+                    data-bs-target="#areaDeletionModal">删除区域</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid w-75">
+        <p class="fs-3 text-center">音符区域</p>
+        <div id="notes_area"
+            style="border:1px solid #cecece; display: flex; flex-wrap: wrap; border-radius: 20px; border-width: 3px;">
+        </div>
+    </div>
+
+</body>
