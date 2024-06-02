@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>模块化传感器平台</title>
     <link rel="stylesheet" href="scss/styles.scss">
-    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/index.js"></script>
 </head>
 
 <body>
@@ -23,95 +23,52 @@
         <div class="container">
             <section class="text-center mt-4">
                 <h1>传感器控制页面</h1>
-                <p class="text-sm text-muted">点击配置按钮进行平台配置，或从下面的列表中选择传感器进行交互。</p>
-                <div class="btn btn-primary my-2">配置平台</div>
+                <p class="text-sm text-muted">点击管理应用按钮从主页加载或删除应用。点击配置按钮进行平台配置。</p>
+                <div class="btn btn-primary my-2" data-bs-toggle="modal" data-bs-target="#appsManagerModal">管理应用</div>
+                <div class="btn btn-secondary my-2">配置平台</div>
                 </p>
             </section>
 
-            <div class="row align-items-md-stretch">
-                <div class="col-md-6">
-                    <div class="p-5 mb-4 bg-light rounded-4">
-                        <div class="container-fluid py-5">
-                            <h2 class="display-6 fw-bold">LED灯带</h2>
-                            <p class="col-md-8 fs-4">将LED灯带通过电源信号插板和平台连接，并通过插板上的跳线接头选择合适的逻辑电压。
-                                通过杜邦线连接合适的灯带供电电压。您可以选择任意的灯带颜色。点击下面的按钮开始使用。</p>
-                            <a href="color_led.html" class="btn btn-primary btn-lg">开始使用</a>
-                            <button class="btn btn-secondary btn-lg" type="button">文档</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="p-5 mb-4 text-white bg-dark rounded-4">
-                        <div class="container-fluid py-5">
-                            <h2 class="display-6 fw-bold">环境监测插板</h2>
-                            <p class="col-md-8 fs-4">将环境检测插板和平台连接，页面每秒进行更新并显示当前的温度，湿度和控制质量信息。点击下面的按钮开始使用。</p>
-                            <a href="temperature.html" class="btn btn-primary btn-lg">开始使用</a>
-                            <button class="btn btn-secondary btn-lg" type="button">文档</button>
-                        </div>
-                    </div>
-                </div>
+            <div id="appsArea" class="d-flex flex-wrap">
             </div>
-
-            <div class="row align-items-md-stretch">
-                <div class="col-md-6">
-                    <div class="p-5 mb-4 bg-light rounded-4">
-                        <div class="container-fluid py-5">
-                            <h2 class="display-6 fw-bold">力感插板</h2>
-                            <p class="col-md-8 fs-4">将压力传感器连接到力感插板的螺丝端子，并将螺丝端子连接到平台上。
-                                您会看到根据手指触摸的力度不同，页面绘制出不同的折线。点击按钮进行使用。</p>
-                            <a href="force_sensing.html"><button class="btn btn-primary btn-lg"
-                                    type="button">开始使用</button></a>
-                            <button class="btn btn-secondary btn-lg" type="button">文档</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="p-5 mb-4 text-white bg-dark rounded-4">
-                        <div class="container-fluid py-5">
-                            <h2 class="display-6 fw-bold">步进电机控制</h2>
-                            <p class="col-md-8 fs-4">将步进电机和步进电机驱动连接，通过杜邦线将步进电机驱动板的引脚和平台连接。
-                                通过页面可以控制驱动步进电机的方式，速度和转动角度。点击按钮进行使用。
-                            </p>
-                            <a href="stepper_motor.html"><button class="btn btn-primary btn-lg"
-                                    type="button">开始使用</button></a>
-                            <button class="btn btn-secondary btn-lg" type="button">文档</button>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="p-5 mb-4 bg-light rounded-4">
-                        <div class="container-fluid py-5">
-                            <h2 class="display-6 fw-bold">电源控制器</h2>
-                            <p class="col-md-8 fs-4">将电源信号模块插到平台的排针上，移动电源信号模块上的两针跳线，使其输出5V电压。
-                                然后通过杜邦线连接电源信号模块的电压输出端和继电器模块的接线端子。点击按钮进行使用。
-                            </p>
-                            <a href="relay.html"><button class="btn btn-primary btn-lg" type="button">开始使用</button></a>
-                            <button class="btn btn-secondary btn-lg" type="button">文档</button>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="p-5 mb-4 text-white bg-dark rounded-4">
-                        <div class="container-fluid py-5">
-                            <h2 class="display-6 fw-bold">音符播放器</h2>
-                            <p class="col-md-8 fs-4">将蜂鸣器模块插到平台的排针上，在网页上选择和组合自己喜欢的音符，即可进行播放。点击按钮进行使用。</p>
-                            <a href="buzzer_note_player.html"><button class="btn btn-primary btn-lg"
-                                    type="button">开始使用</button></a>
-                            <button class="btn btn-secondary btn-lg" type="button">文档</button>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
         </div>
 
+        <div id="appsManagerModal" class="modal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">管理应用</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>从下面的列表中选择应用。</p>
+                        <select id="categorySelect" class="form-select mt-4">
+                            <option selected value="-1">请选择应用类别</option>
+                        </select>
+
+                        <select id="appSelect" class="form-select mt-4 d-none">
+                        </select>
+
+                        <button id="appAddition" type="button" class="btn btn-primary mt-4 d-none">加载应用</button>
+
+                        <p class="mt-4">已添加的应用：</p>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">应用名称</th>
+                                    <th scope="col">删除应用</th>
+                                </tr>
+                            </thead>
+                            <tbody id="selectedAppsShow">
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 </body>
 
