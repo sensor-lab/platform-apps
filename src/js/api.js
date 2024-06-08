@@ -1,7 +1,76 @@
+export async function restartPlatform() {
+    let request = '/hardware/restart';
+    try {
+        const response = await fetch(request, {
+            method: 'post'
+        });
+        const ret = await response.json();
+        if (ret.hasOwnProperty("errorcode") == false) {
+            return 0;
+        } else {
+            return -1;
+        }
+    } catch (error) {
+        console.log('Error call API:', error);
+    }
+    return -1;
+}
+
+export async function getConfig() {
+    let request = '/hardware/config';
+    try {
+        const response = await fetch(request, {
+            method: 'get'
+        });
+        const ret = await response.json();
+        if (ret.hasOwnProperty("errorcode") == false) {
+            return ret;
+        } else {
+            return -1;
+        }
+    } catch (error) {
+        console.log('Error call API:', error);
+    }
+    return -1;
+}
+
+export async function setConfig(config) {
+    let request = '/hardware/config';
+    try {
+        const response = await fetch(request, {
+            method: 'post',
+            body: JSON.stringify(config)
+        });
+        const ret = await response.json();
+        return ret;
+    } catch (error) {
+        console.log('Error call API:', error);
+    }
+    return -1;
+}
+
+export async function getStatus() {
+    let request = '/hardware/status';
+    try {
+        const response = await fetch(request, {
+            method: 'get'
+        });
+        const ret = await response.json();
+        if (ret.hasOwnProperty("errorcode") == false) {
+            return ret;
+        } else {
+            return -1;
+        }
+    } catch (error) {
+        console.log('Error call API:', error);
+    }
+    return -1;
+}
+
 export async function setTime(timedate) {
     let request = '/hardware/timedate';
-    var timedate_str =  start_time.getFullYear() + "-" + (start_time.getMonth() + 1) + "-" + start_time.getDate() + 
-                        "T" + start_time.getHours() + ":" + start_time.getMinutes() + ":" + start_time.getSeconds();
+    var timedate_str =  timedate.getFullYear() + "-" + (timedate.getMonth() + 1) + "-" + timedate.getDate() + 
+                        "T" + timedate.getHours() + ":" + timedate.getMinutes() + ":" + timedate.getSeconds();
 
     var body = {
         value: timedate_str
@@ -20,6 +89,7 @@ export async function setTime(timedate) {
     } catch (error) {
         console.log('Error call API:', error);
     }
+    return 0;
 }
 
 export async function getTime() {
