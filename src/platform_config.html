@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>模块化传感器平台</title>
+    <link rel="stylesheet" href="scss/styles.scss">
+    <link rel="stylesheet" href="css/configuration.css">
+    <script type="module" src="js/configuration.js"></script>
+</head>
+
+<body>
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+    <div id="statusMsg" class="alert alert-primary d-none" role="alert"></div>
+
+    <nav class="navbar navbar-expand-lg bg-light">
+        <div class="container d-flex justify-content-between">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">平台配置页面</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="modal fade" id="resetPlatformModal" tabindex="-1" aria-labelledby="resetPlatformLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resetPlatformLabel">确定重启平台？</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    网站将会停止工作，请等待一段时间后，然后和平台连接到同一网络并访问平台。
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button id="resetButton" type="button" class="btn btn-primary">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="mt-4 d-flex justify-content-center">
+            <p class="pl px-3">是否修改平台配置</p>
+            <label class="switch">
+                <input id="enableConfig" type="checkbox">
+                <span class="slider round"></span>
+            </label>
+        </div>
+
+        <form>
+            <div class="row mt-2 align-items-center justify-content-center">
+                <label for="statusDisplay" class="col-3 col-form-label">平台状态:</label>
+                <div class="col-9">
+                    <textarea id="statusDisplay" class="form-control" disabled></textarea>
+                </div>
+            </div>
+
+            <div class="row mt-2 align-items-center justify-content-center">
+                <label for="platformtime" class="col-3 form-label">平台时间:</label>
+                <div class="col-9">
+                    <input id="platformtime" class="form-control" type="text" disabled>
+                </div>
+            </div>
+
+            <div class="row mt-2 align-items-center justify-content-center">
+                <label for="modeSelect" class="col-3 form-label">模式选择:</label>
+                <div class="col-9">
+                    <select id="modeSelect" class="form-select" disabled>
+                        <option value="router">路由器模式</option>
+                        <option value="station">连接模式</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mt-2 align-items-center justify-content-center">
+                <label for="ssid" class="col-3 form-label">路由器名称:</label>
+                <div class="col-9">
+                    <input id="ssid" class="form-control" type="text" disabled>
+                </div>
+            </div>
+
+            <div class="row mt-2 align-items-center justify-content-center">
+                <label for="password" class="col-3 form-label">密码:</label>
+                <div class="col-9">
+                    <input id="password" class="form-control" type="text" disabled>
+                </div>
+            </div>
+
+            <div class="row mt-2 align-items-center justify-content-center">
+                <label for="mdnsname" class="col-3 form-label">平台名称:</label>
+                <div class="col-9">
+                    <input id="mdnsname" class="form-control" type="text" disabled>
+                </div>
+            </div>
+
+            <div class="row mt-2 align-items-center justify-content-center">
+                <label for="voltage" class="col-3 form-label">输出电压:</label>
+                <div class="col-9">
+                    <input id="voltage" class="form-control" type="text" disabled>
+                </div>
+            </div>
+
+            <button id="submitButton" type="button" class="btn btn-primary mt-3" disabled>设置</button>
+            <button id="setTimeButton" type="button" class="btn btn-secondary mt-3">重置时间</button>
+            <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal"
+                data-bs-target="#resetPlatformModal">重启平台</button>
+        </form>
+    </div>
+
+</body>

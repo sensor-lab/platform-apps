@@ -107,7 +107,7 @@ function addApps() {
                     <div class="p-5 mb-4 ${background_style} rounded-4">
                         <div class="container-fluid py-5">
                             <h2 class="display-6 fw-bold">${main_apps_info[j].name}</h2>
-                            <p class="col-md-8 fs-4">${main_apps_info[j].description}</p>
+                            <p class="col-md-8 fs-5">${main_apps_info[j].description}</p>
                             <a href="${main_apps_info[j].id}.html" class="btn btn-primary btn-lg">开始使用</a>
                             <button href="${main_apps_info[j].document}" class="btn btn-secondary btn-lg" type="button">文档</button>
                         </div>
