@@ -221,45 +221,56 @@ document.getElementById('confirmSysupdate').addEventListener('click', async func
 
     if (fw_version != "") {
         total_num_update_files ++;
-
-        let upload_path = fw_update_file.split('/').pop();
-        let request = new XMLHttpRequest();
-        request.open("POST", upload_path, false);   // set false to use synchronize mode
-        request.send(fw_update_file);
-        if (request.status === 200 || request.status === 201) {
-            update_files_index ++;
-            current_progress_percent = update_files_index / total_num_update_files;
-            document.getElementById("updateProgress").style.width = current_progress_percent.toFixed(2) + "%";
-            document.getElementById("updateProgress").innerHTML = current_progress_percent.toFixed(2) + "%";
-        } else if (request.status == 0) {
+        const ret = await setState("fwupdate");
+        if (ret == -1) {
             fw_update_success = false;
-            alert("Server closed the connection abruptly!");
         } else {
-            fw_update_success = false;
-            alert(request.status + " Error!\n" + request.responseText);
+            let upload_path = fw_update_file.split('/').pop();
+            let request = new XMLHttpRequest();
+            request.open("POST", upload_path, false);   // set false to use synchronize mode
+            request.send(fw_update_file);
+            if (request.status === 200 || request.status === 201) {
+                update_files_index ++;
+                current_progress_percent = update_files_index / total_num_update_files;
+                document.getElementById("updateProgress").style.width = current_progress_percent.toFixed(2) + "%";
+                document.getElementById("updateProgress").innerHTML = current_progress_percent.toFixed(2) + "%";
+            } else if (request.status == 0) {
+                fw_update_success = false;
+                alert("Server closed the connection abruptly!");
+            } else {
+                fw_update_success = false;
+                alert(request.status + " Error!\n" + request.responseText);
+            }
         }
     }
 
-    for (i = 0; i < app_update_files.length; i++) {
-        let upload_file = app_update_files[i];
-        let upload_path = upload_file.split('/').pop();
-        let request = new XMLHttpRequest();
-        request.open("POST", upload_path, false);   // set false to use synchronize mode
-        request.send(upload_file);
-        if (request.status === 200 || request.status === 201) {
-            update_files_index ++;
-            current_progress_percent = update_files_index / total_num_update_files;
-            document.getElementById("updateProgress").style.width = Math.ceil(current_progress_percent * 100) + "%";
-            document.getElementById("updateProgress").innerHTML = Math.ceil(current_progress_percent * 100) + "%";
-            await sleep(100);
-        } else if (request.status == 0) {
-            alert("Server closed the connection abruptly!");
+    if (app_update_files.length > 0) {
+        const ret = await setState("appupdate");
+        if (ret == -1) {
             app_update_success = false;
-            break;
         } else {
-            app_update_success = false;
-            alert(request.status + " Error!\n" + request.responseText);
-            break;
+            for (i = 0; i < app_update_files.length; i++) {
+                let upload_file = app_update_files[i];
+                let upload_path = upload_file.split('/').pop();
+                let request = new XMLHttpRequest();
+                request.open("POST", upload_path, false);   // set false to use synchronize mode
+                request.send(upload_file);
+                if (request.status === 200 || request.status === 201) {
+                    update_files_index ++;
+                    current_progress_percent = update_files_index / total_num_update_files;
+                    document.getElementById("updateProgress").style.width = Math.ceil(current_progress_percent * 100) + "%";
+                    document.getElementById("updateProgress").innerHTML = Math.ceil(current_progress_percent * 100) + "%";
+                    await sleep(100);
+                } else if (request.status == 0) {
+                    alert("Server closed the connection abruptly!");
+                    app_update_success = false;
+                    break;
+                } else {
+                    app_update_success = false;
+                    alert(request.status + " Error!\n" + request.responseText);
+                    break;
+                }
+            }
         }
     }
 
