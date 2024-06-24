@@ -2,8 +2,8 @@ const bootstrap =  require("bootstrap");
 import {getConfig, setConfig, getStatus, restartPlatform, setState} from './api.js'
 import version from '../app_version.json'
 
-var mode, ssid, password, mdnsname, voltage;
-var app_update_files, fw_update_file, app_version_file, fw_version
+var mode, ssid, password, mdnsname, voltage, fwver;
+var app_update_files, fw_update_file, app_version_file, fw_version_file
 
 function addErrorMsg(message) {
     removeStatusMsg();
@@ -84,7 +84,6 @@ async function getPlatformConfig() {
     const ret = await getConfig();
     if (ret != -1) {
         let platformtime;
-        let fwver;
         let hwver;
         mode = ret["mode"];
         ssid = ret["ssid"];
@@ -151,6 +150,27 @@ function extractFwVersion(fw_file_name) {
     return version;
 }
 
+function extractMajorMinorBuildVer(fw_version) {
+    if (fw_version != undefined) {
+        if (fw_version.startsWith("fw")) {
+            const fw_version_no_ext = fw_version.substring(0, fw_version.lastIndexOf('.'));
+            const splitted = fw_version_no_ext.split("_");
+            const major_ver = parseInt(splitted[1].substring(1));
+            const minor_ver = parseInt(splitted[2]);
+            const build_ver = parseInt(splitted[3]);
+            return [major_ver, minor_ver, build_ver];
+        } else {
+            const splitted = fw_version.split("-");
+            const major_ver = parseInt(splitted[0].substring(1));
+            const minor_ver = parseInt(splitted[1]);
+            const build_ver = parseInt(splitted[2]);
+            return [major_ver, minor_ver, build_ver];
+        }
+    } else {
+        return [0, 0, 0];
+    }
+}
+
 document.getElementById('sysupdateFileInput').addEventListener('change', function(event) {
     app_update_files = [];
     fw_update_file = "";
@@ -170,14 +190,31 @@ document.getElementById('sysupdateFileInput').addEventListener('change', functio
             const li = document.createElement('li');
             li.textContent = event.target.files[i].webkitRelativePath;
             fw_update_file = event.target.files[i].webkitRelativePath;
-            fw_version = extractFwVersion(fw_update_file);
+            fw_version_file = extractFwVersion(fw_update_file);
             li.classList.add("list-group-item");
             fw_list.appendChild(li);
+            const [running_fw_major, running_fw_minor, running_fw_build] = extractMajorMinorBuildVer(fwver);
+            const [update_fw_major, update_fw_minor, update_fw_build] = extractMajorMinorBuildVer(filename);
+            if (running_fw_major > update_fw_major) {
+                addErrorMsg(`运行固件的版本${fwver}高于更新固件的版本${fw_version_file}，无法进行更新。请参考文档网站降低固件的版本。`);
+                document.getElementById("confirmSysupdate").setAttribute("disabled", true);
+            } else if (running_fw_minor > update_fw_minor) {
+                addErrorMsg(`运行固件的版本${fwver}高于更新固件的版本${fw_version_file}，无法进行更新。请参考文档网站降低固件的版本。`);
+                document.getElementById("confirmSysupdate").setAttribute("disabled", true);
+            } else if (running_fw_build > update_fw_build) {
+                addErrorMsg(`运行固件的版本${fwver}高于更新固件的版本${fw_version_file}，无法进行更新。请参考文档网站降低固件的版本。`);
+                document.getElementById("confirmSysupdate").setAttribute("disabled", true);
+            } else if (running_fw_major == update_fw_major && running_fw_build == update_fw_build && running_fw_build == update_fw_build) {
+                addStatusMsg(`运行固件的版本已经为${fwver}。无需进行固件更新。`);
+                document.getElementById("confirmSysupdate").removeAttribute("disabled");
+            } else {
+                document.getElementById("confirmSysupdate").removeAttribute("disabled");
+            }
             break;
         }
     }
-    if (fw_version != "") {
-        document.getElementById("fwversionText").innerHTML = `固件版本：${fw_version}`;
+    if (fw_version_file != "") {
+        document.getElementById("fwversionText").innerHTML = `固件版本：${fw_version_file}`;
     } else {
         document.getElementById("fwversionText").innerHTML = `未发现固件更新文件`;
     }
@@ -219,7 +256,7 @@ document.getElementById('confirmSysupdate').addEventListener('click', async func
     let fw_update_success = true;
     let app_update_success = true;
 
-    if (fw_version != "") {
+    if (fw_version_file != "") {
         total_num_update_files ++;
         const ret = await setState("fwupdate");
         if (ret == -1) {
