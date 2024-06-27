@@ -1,9 +1,9 @@
 const bootstrap =  require("bootstrap");
-import {getConfig, setConfig, getStatus, restartPlatform} from './api.js'
+import {getConfig, setConfig, getStatus, restartPlatform, setState} from './api.js'
+import version from '../app_version.json'
 
-const app_ver = "秦-前221"
-
-var mode, ssid, password, mdnsname, voltage;
+var mode, ssid, password, mdnsname, voltage, fwver;
+var app_update_filepaths, fw_update_filepath, app_update_files, fw_update_file, app_version_file, fw_version_file
 
 function addErrorMsg(message) {
     removeStatusMsg();
@@ -84,7 +84,6 @@ async function getPlatformConfig() {
     const ret = await getConfig();
     if (ret != -1) {
         let platformtime;
-        let fwver;
         let hwver;
         mode = ret["mode"];
         ssid = ret["ssid"];
@@ -101,7 +100,7 @@ async function getPlatformConfig() {
         document.getElementById("mdnsname").setAttribute("value", mdnsname);
         document.getElementById("voltage").setAttribute("value", voltage);
         document.getElementById("platformtime").setAttribute("value", platformtime);
-        document.getElementById("version").setAttribute("value", `应用版本：${app_ver}。固件版本：${fwver}。硬件版本：${hwver}。`);
+        document.getElementById("version").setAttribute("value", `应用版本：${version["app_ver"]}。固件版本：${fwver}。硬件版本：${hwver}。`);
     } else {
         addErrorMsg("无法得到平台配置信息，请重启平台。");
     }
@@ -144,6 +143,189 @@ document.getElementById("submitButton").addEventListener("click", async function
 
 document.getElementById("resetButton").addEventListener("click", async function(event) {
     await restartPlatform();
+});
+
+function extractFwVersion(fw_file_name) {
+    const version = fw_file_name.substring(fw_file_name.indexOf("v"), fw_file_name.lastIndexOf("."));
+    return version;
+}
+
+function extractMajorMinorBuildVer(fw_version) {
+    if (fw_version != undefined) {
+        if (fw_version.startsWith("fw")) {
+            const fw_version_no_ext = fw_version.substring(0, fw_version.lastIndexOf('.'));
+            const splitted = fw_version_no_ext.split("_");
+            const major_ver = parseInt(splitted[1].substring(1));
+            const minor_ver = parseInt(splitted[2]);
+            const build_ver = parseInt(splitted[3]);
+            return [major_ver, minor_ver, build_ver];
+        } else {
+            const splitted = fw_version.split("-");
+            const major_ver = parseInt(splitted[0].substring(1));
+            const minor_ver = parseInt(splitted[1]);
+            const build_ver = parseInt(splitted[2]);
+            return [major_ver, minor_ver, build_ver];
+        }
+    } else {
+        return [0, 0, 0];
+    }
+}
+
+document.getElementById('sysupdateFileInput').addEventListener('change', async function(event) {
+    app_update_filepaths = [];
+    fw_update_filepath = "";
+    fw_update_file = "";
+    app_update_files = [];
+    fw_version = "";
+    app_version_file = ""
+    const fw_list = document.getElementById('fwList');
+    const app_list = document.getElementById('appList');
+    app_list.innerHTML = '';
+    fw_list.innerHTML = '';
+
+    document.getElementById("updateProgress").style.width = "0%";
+    document.getElementById("updateProgress").innerHTML = "0%";
+
+    for (let i = 0; i < event.target.files.length; i++) {
+        const filename =  event.target.files[i]["name"].split('/').pop();
+        if (filename.split('.').pop() == "bin") {
+            const li = document.createElement('li');
+            li.textContent = event.target.files[i].webkitRelativePath;
+            fw_update_filepath = event.target.files[i].webkitRelativePath;
+            fw_update_file = event.target.files[i];
+            fw_version_file = extractFwVersion(fw_update_filepath);
+            li.classList.add("list-group-item");
+            fw_list.appendChild(li);
+            const [running_fw_major, running_fw_minor, running_fw_build] = extractMajorMinorBuildVer(fwver);
+            const [update_fw_major, update_fw_minor, update_fw_build] = extractMajorMinorBuildVer(filename);
+            if (running_fw_major > update_fw_major) {
+                addErrorMsg(`运行固件的版本${fwver}高于更新固件的版本${fw_version_file}，无法进行更新。请参考文档网站降低固件的版本。`);
+                document.getElementById("confirmSysupdate").setAttribute("disabled", true);
+            } else if (running_fw_minor > update_fw_minor) {
+                addErrorMsg(`运行固件的版本${fwver}高于更新固件的版本${fw_version_file}，无法进行更新。请参考文档网站降低固件的版本。`);
+                document.getElementById("confirmSysupdate").setAttribute("disabled", true);
+            } else if (running_fw_build > update_fw_build) {
+                addErrorMsg(`运行固件的版本${fwver}高于更新固件的版本${fw_version_file}，无法进行更新。请参考文档网站降低固件的版本。`);
+                document.getElementById("confirmSysupdate").setAttribute("disabled", true);
+            } else if (running_fw_major == update_fw_major && running_fw_build == update_fw_build && running_fw_build == update_fw_build) {
+                addStatusMsg(`运行固件的版本已经为${fwver}。无需进行固件更新。`);
+                document.getElementById("confirmSysupdate").removeAttribute("disabled");
+            } else {
+                document.getElementById("confirmSysupdate").removeAttribute("disabled");
+            }
+            break;
+        }
+    }
+    if (fw_version_file != "") {
+        document.getElementById("fwversionText").innerHTML = `固件版本：${fw_version_file}`;
+    } else {
+        document.getElementById("fwversionText").innerHTML = `未发现固件更新文件`;
+    }
+
+    for (let i = 0; i < event.target.files.length; i++) {
+        if (fw_update_filepath != event.target.files[i].webkitRelativePath) {
+            const li = document.createElement('li');
+            li.textContent = event.target.files[i].webkitRelativePath;
+            app_update_filepaths.push(event.target.files[i].webkitRelativePath);
+            app_update_files.push(event.target.files[i]);
+            li.classList.add("list-group-item");
+            app_list.appendChild(li);
+            if (event.target.files[i]["name"].split('/').pop() == "app_version.json") {
+                const reader = new FileReader();   
+                app_version_file = "exist";   
+                reader.addEventListener("load", () => {
+                    app_version_file = JSON.parse(reader.result)["app_ver"];
+                    document.getElementById("appversionText").innerHTML = `应用版本：${app_version_file}`;
+                }, false);
+                reader.readAsText(event.target.files[i]);
+            }
+        }
+    }
+
+    if (app_version_file == "") {
+        document.getElementById("appversionText").innerHTML = `应用版本：未知`;
+    }
+});
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+document.getElementById('confirmSysupdate').addEventListener('click', async function(event) {
+
+    let update_files_index = 0;
+    let total_num_update_files = app_update_filepaths.length;
+    let current_progress_percent = 0.0;
+    let i;
+    let fw_update_success = true;
+    let app_update_success = true;
+
+    if (fw_version_file != "") {
+        total_num_update_files ++;
+        const ret = await setState("fwupdate");
+        if (ret == -1) {
+            fw_update_success = false;
+        } else  {
+            let filename = fw_update_filepath.split('/').pop();
+            let request = new XMLHttpRequest();
+            let form_data = new FormData();
+            form_data.append(filename, fw_update_file, fw_update_filepath);
+            request.open("POST", "/upload", false);   // set false to use synchronize mode
+            request.send(form_data);
+            if (request.status === 200 || request.status === 201) {
+                update_files_index ++;
+                current_progress_percent = update_files_index / total_num_update_files;
+                document.getElementById("updateProgress").style.width = Math.ceil(current_progress_percent.toFixed(2)) + "%";
+                document.getElementById("updateProgress").innerHTML = Math.ceil(current_progress_percent.toFixed(2)) + "%";
+            } else if (request.status == 0) {
+                fw_update_success = false;
+                alert("Server closed the connection abruptly!");
+            } else {
+                fw_update_success = false;
+                alert(request.status + " Error!\n" + request.responseText);
+            }
+        }
+    }
+
+    if (app_update_filepaths.length > 0) {
+        const ret = await setState("appupdate");
+        if (ret == -1) {
+            app_update_success = false;
+        } else {
+            for (i = 0; i < app_update_filepaths.length; i++) {
+                let upload_file = app_update_filepaths[i];
+                let app_filename = upload_file.split('/').pop();
+                let request = new XMLHttpRequest();
+                let form_data = new FormData();
+                form_data.append(app_filename, app_update_files[i], upload_file);
+                request.open("POST", "/upload", false);   // set false to use synchronize mode
+                request.send(form_data);
+                if (request.status === 200 || request.status === 201) {
+                    update_files_index ++;
+                    current_progress_percent = update_files_index / total_num_update_files;
+                    document.getElementById("updateProgress").style.width = Math.ceil(current_progress_percent * 100) + "%";
+                    document.getElementById("updateProgress").innerHTML = Math.ceil(current_progress_percent * 100) + "%";
+                    await sleep(100);
+                } else if (request.status == 0) {
+                    alert("Server closed the connection abruptly!");
+                    app_update_success = false;
+                    break;
+                } else {
+                    app_update_success = false;
+                    alert(request.status + " Error!\n" + request.responseText);
+                    break;
+                }
+            }
+        }
+    }
+
+    if (fw_update_success == false) {
+        addErrorMsg("固件更新失败，请重试。");
+    } else if (app_update_success == false) {
+        addErrorMsg("应用更新失败，请重试。");
+    } else {
+        addStatusMsg("更新成功，请重启平台。");
+    }
 });
 
 // initial logic

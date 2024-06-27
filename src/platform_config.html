@@ -110,8 +110,44 @@
                 </div>
             </div>
 
+            <div class="modal fade" id="sysupdateModal" tabindex="-1" aria-labelledby="sysupdateModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="progress">
+                            <div id="updateProgress" class="progress-bar bg-success" role="progressbar"
+                                style="width: 0%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="sysupdateModalLabel">系统更新</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>请点击下面的按钮选择包含固件和应用的文件夹，并点击确认按钮进行更新。</p>
+
+                            <label class="btn btn-primary" style="width: 150px; height: 40px;">选择文件夹
+                                <input id="sysupdateFileInput" type="file" class="invisible" webkitdirectory multiple>
+                            </label>
+
+                            <p id="fwversionText" class="text-center"></p>
+                            <ul id="fwList" class="list-group mt-3"></ul>
+
+                            <p id="appversionText" class="text-center"></p>
+                            <ul id="appList" class="list-group mt-3"></ul>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                            <button id="confirmSysupdate" type="button" class="btn btn-primary">确定</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <button id="submitButton" type="button" class="btn btn-primary mt-3" disabled>设置</button>
             <button id="setTimeButton" type="button" class="btn btn-secondary mt-3">重置时间</button>
+            <button id="sysupdate" type="button" class="btn btn-warning mt-3" data-bs-toggle="modal"
+                data-bs-target="#sysupdateModal">系统更新</button>
             <button type="button" class="btn btn-danger mt-3" data-bs-toggle="modal"
                 data-bs-target="#resetPlatformModal">重启平台</button>
         </form>
