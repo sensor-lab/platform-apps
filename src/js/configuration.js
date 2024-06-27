@@ -3,7 +3,7 @@ import {getConfig, setConfig, getStatus, restartPlatform, setState} from './api.
 import version from '../app_version.json'
 
 var mode, ssid, password, mdnsname, voltage, fwver;
-var app_update_files, fw_update_file, app_version_file, fw_version_file
+var app_update_filepaths, fw_update_filepath, app_update_files, fw_update_file, app_version_file, fw_version_file
 
 function addErrorMsg(message) {
     removeStatusMsg();
@@ -171,9 +171,11 @@ function extractMajorMinorBuildVer(fw_version) {
     }
 }
 
-document.getElementById('sysupdateFileInput').addEventListener('change', function(event) {
-    app_update_files = [];
+document.getElementById('sysupdateFileInput').addEventListener('change', async function(event) {
+    app_update_filepaths = [];
+    fw_update_filepath = "";
     fw_update_file = "";
+    app_update_files = [];
     fw_version = "";
     app_version_file = ""
     const fw_list = document.getElementById('fwList');
@@ -189,8 +191,9 @@ document.getElementById('sysupdateFileInput').addEventListener('change', functio
         if (filename.split('.').pop() == "bin") {
             const li = document.createElement('li');
             li.textContent = event.target.files[i].webkitRelativePath;
-            fw_update_file = event.target.files[i].webkitRelativePath;
-            fw_version_file = extractFwVersion(fw_update_file);
+            fw_update_filepath = event.target.files[i].webkitRelativePath;
+            fw_update_file = event.target.files[i];
+            fw_version_file = extractFwVersion(fw_update_filepath);
             li.classList.add("list-group-item");
             fw_list.appendChild(li);
             const [running_fw_major, running_fw_minor, running_fw_build] = extractMajorMinorBuildVer(fwver);
@@ -220,10 +223,11 @@ document.getElementById('sysupdateFileInput').addEventListener('change', functio
     }
 
     for (let i = 0; i < event.target.files.length; i++) {
-        if (fw_update_file != event.target.files[i].webkitRelativePath) {
+        if (fw_update_filepath != event.target.files[i].webkitRelativePath) {
             const li = document.createElement('li');
             li.textContent = event.target.files[i].webkitRelativePath;
-            app_update_files.push(event.target.files[i].webkitRelativePath);
+            app_update_filepaths.push(event.target.files[i].webkitRelativePath);
+            app_update_files.push(event.target.files[i]);
             li.classList.add("list-group-item");
             app_list.appendChild(li);
             if (event.target.files[i]["name"].split('/').pop() == "app_version.json") {
@@ -250,7 +254,7 @@ function sleep(ms) {
 document.getElementById('confirmSysupdate').addEventListener('click', async function(event) {
 
     let update_files_index = 0;
-    let total_num_update_files = app_update_files.length;
+    let total_num_update_files = app_update_filepaths.length;
     let current_progress_percent = 0.0;
     let i;
     let fw_update_success = true;
@@ -261,16 +265,18 @@ document.getElementById('confirmSysupdate').addEventListener('click', async func
         const ret = await setState("fwupdate");
         if (ret == -1) {
             fw_update_success = false;
-        } else {
-            let upload_path = fw_update_file.split('/').pop();
+        } else  {
+            let filename = fw_update_filepath.split('/').pop();
             let request = new XMLHttpRequest();
-            request.open("POST", upload_path, false);   // set false to use synchronize mode
-            request.send(fw_update_file);
+            let form_data = new FormData();
+            form_data.append(filename, fw_update_file, fw_update_filepath);
+            request.open("POST", "/upload", false);   // set false to use synchronize mode
+            request.send(form_data);
             if (request.status === 200 || request.status === 201) {
                 update_files_index ++;
                 current_progress_percent = update_files_index / total_num_update_files;
-                document.getElementById("updateProgress").style.width = current_progress_percent.toFixed(2) + "%";
-                document.getElementById("updateProgress").innerHTML = current_progress_percent.toFixed(2) + "%";
+                document.getElementById("updateProgress").style.width = Math.ceil(current_progress_percent.toFixed(2)) + "%";
+                document.getElementById("updateProgress").innerHTML = Math.ceil(current_progress_percent.toFixed(2)) + "%";
             } else if (request.status == 0) {
                 fw_update_success = false;
                 alert("Server closed the connection abruptly!");
@@ -281,17 +287,19 @@ document.getElementById('confirmSysupdate').addEventListener('click', async func
         }
     }
 
-    if (app_update_files.length > 0) {
+    if (app_update_filepaths.length > 0) {
         const ret = await setState("appupdate");
         if (ret == -1) {
             app_update_success = false;
         } else {
-            for (i = 0; i < app_update_files.length; i++) {
-                let upload_file = app_update_files[i];
-                let upload_path = upload_file.split('/').pop();
+            for (i = 0; i < app_update_filepaths.length; i++) {
+                let upload_file = app_update_filepaths[i];
+                let app_filename = upload_file.split('/').pop();
                 let request = new XMLHttpRequest();
-                request.open("POST", upload_path, false);   // set false to use synchronize mode
-                request.send(upload_file);
+                let form_data = new FormData();
+                form_data.append(app_filename, app_update_files[i], upload_file);
+                request.open("POST", "/upload", false);   // set false to use synchronize mode
+                request.send(form_data);
                 if (request.status === 200 || request.status === 201) {
                     update_files_index ++;
                     current_progress_percent = update_files_index / total_num_update_files;
