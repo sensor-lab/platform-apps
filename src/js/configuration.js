@@ -185,6 +185,7 @@ document.getElementById('sysupdateFileInput').addEventListener('change', async f
 
     document.getElementById("updateProgress").style.width = "0%";
     document.getElementById("updateProgress").innerHTML = "0%";
+    document.getElementById("sysupdateModalLabel").innerHTML = "系统更新";
 
     for (let i = 0; i < event.target.files.length; i++) {
         const filename =  event.target.files[i]["name"].split('/').pop();
@@ -260,6 +261,8 @@ document.getElementById('confirmSysupdate').addEventListener('click', async func
     let fw_update_success = true;
     let app_update_success = true;
 
+    document.getElementById("sysupdateModalLabel").innerHTML = "系统更新中，请勿断电";
+
     if (fw_version_file != "") {
         total_num_update_files ++;
         const ret = await setState("fwupdate");
@@ -319,6 +322,7 @@ document.getElementById('confirmSysupdate').addEventListener('click', async func
         }
     }
 
+    document.getElementById("sysupdateModalLabel").innerHTML = "更新完成，请关闭该窗口。";
     if (fw_update_success == false) {
         addErrorMsg("固件更新失败，请重试。");
     } else if (app_update_success == false) {
