@@ -42,7 +42,7 @@ document.getElementById("submitButton").addEventListener("click", async function
         removeErrorMsg();
         JSON.parse(payload);
         const response = await sendRequest(payload);
-        document.getElementById("platform-response").innerHTML = response;
+        document.getElementById("platform-response").innerHTML = JSON.stringify(response);
     } catch (err) {
         addErrorMsg("请检查输入，输入不符合JSON格式。")
     }
