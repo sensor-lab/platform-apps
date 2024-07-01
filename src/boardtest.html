@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>模块化传感器平台</title>
+    <link rel="stylesheet" href="scss/styles.scss">
+    <script type="module" src="js/boardtest.js"></script>
+</head>
+
+<body>
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+    <div id="statusMsg" class="alert alert-primary d-none" role="alert"></div>
+
+
+    <nav class="navbar navbar-expand-lg bg-dark">
+        <div class="container d-flex justify-content-between">
+            <div class="container-fluid">
+                <a class="navbar-brand text-light" href="/">平台测试</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid w-50 mt-4" style="border:1px solid #cecece; border-radius: 8px;">
+        <div class="text-center mt-4">
+            <div class="my-4">
+                <label for="userinput" class="form-label">根据文档，输入JSON请求测试平台功能。</label>
+                <textarea id="userinput" class="form-control my-2" rows="7" spellcheck="false"></textarea>
+                <input id="filename" type="text" class="form-control my-2" placeholder="保存文件名称">
+            </div>
+        </div>
+        <div class="my-3">
+            <button id="submitButton" type="button" class="btn btn-primary">发送</button>
+            <button id="saveButton" type="button" class="btn btn-secondary">保存</button>
+        </div>
+        <div class="text-center mt-4">
+            <div class="my-4">
+                <label for="platform-response" class="form-label">平台响应：</label>
+                <textarea class="form-control" id="platform-response" rows="2" spellcheck="false" disabled></textarea>
+            </div>
+        </div>
+
+
+        <h3 class="text-center">预定义</h3>
+        <table class="table my-4">
+            <thead>
+                <tr>
+                    <th scope="col">名称</th>
+                    <th scope="col">加载</th>
+                </tr>
+            </thead>
+            <tbody id="predefinedBody">
+            </tbody>
+        </table>
+
+        <h3 class="text-center">用户定义</h3>
+        <table class="table my-4">
+            <thead>
+                <tr>
+                    <th scope="col">名称</th>
+                    <th scope="col">加载</th>
+                    <th scope="col">删除</th>
+                </tr>
+            </thead>
+            <tbody id="savedfiles">
+            </tbody>
+        </table>
+    </div>
+
+
+</body>

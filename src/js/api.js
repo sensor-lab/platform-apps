@@ -37,6 +37,21 @@ export async function restartPlatform() {
     return -1;
 }
 
+export async function sendRequest(payload) {
+    let request = '/hardware/operation';
+    try {
+        const response = await fetch(request, {
+            method: 'post',
+            body: payload
+        });
+        const ret = await response.json();
+        return ret;
+    } catch (error) {
+        console.log('Error call API:', error);
+        return -1;
+    }
+}
+
 export async function getConfig() {
     let request = '/hardware/config';
     try {

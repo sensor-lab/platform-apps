@@ -6,6 +6,9 @@ import { Tooltip as Tooltip, Toast as Toast, Popover as Popover } from 'bootstra
 
 const main_apps_categories = [
     {
+        name: "测试应用",
+        apps: ["boardtest"]
+    }, {
         name: "发光类",
         apps: ["relay", "color_led"]
     }, {
@@ -64,6 +67,12 @@ const main_apps_info = [
         id: "buzzer_note_player",
         name: "音符播放器",
         description: "将蜂鸣器模块插到平台的排针上，在网页上选择和组合自己喜欢的音符，即可进行播放。点击按钮进行使用。",
+        document: "https://www.sensor-lab.io",
+    },
+    {
+        id: "boardtest",
+        name: "用户测试",
+        description: "简单的网页窗口来熟悉平台的功能。",
         document: "https://www.sensor-lab.io",
     },
 ];

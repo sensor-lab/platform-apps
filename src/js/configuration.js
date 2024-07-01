@@ -94,6 +94,10 @@ async function getPlatformConfig() {
         fwver = ret["fwver"];
         hwver = ret["hwver"];
 
+        if (hwver === "V-1--1") {
+            hwver = "未设置";
+        }
+
         document.getElementById("modeSelect").value = mode;
         document.getElementById("ssid").setAttribute("value", ssid);
         document.getElementById("password").setAttribute("value", password);
@@ -217,7 +221,7 @@ document.getElementById('sysupdateFileInput').addEventListener('change', async f
             break;
         }
     }
-    if (fw_version_file != "") {
+    if (fw_version_file) {
         document.getElementById("fwversionText").innerHTML = `固件版本：${fw_version_file}`;
     } else {
         document.getElementById("fwversionText").innerHTML = `未发现固件更新文件`;
@@ -263,7 +267,7 @@ document.getElementById('confirmSysupdate').addEventListener('click', async func
 
     document.getElementById("sysupdateModalLabel").innerHTML = "系统更新中，请勿断电";
 
-    if (fw_version_file != "") {
+    if (fw_version_file) {
         total_num_update_files ++;
         const ret = await setState("fwupdate");
         if (ret == -1) {
