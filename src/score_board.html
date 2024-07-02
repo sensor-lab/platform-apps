@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Scoreboard</title>
+    <link rel="stylesheet" href="scss/styles.scss">
+    <script type="module" src="js/score_board.js"></script>
+</head>
+
+<body>
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+    <div id="statusMsg" class="alert alert-primary d-none" role="alert"></div>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="mx-auto order-0">
+            <a class="navbar-brand mx-auto" href="#">分数计分板</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row align-items-start my-3">
+            <div class="col text-center border-bottom">
+                <h2>主队</h2>
+            </div>
+            <div class="col text-center border-bottom">
+                <h2>客队</h2>
+            </div>
+        </div>
+
+        <div class="row align-items-start my-3">
+            <div class="col">
+                <select id="homeSegmentPinSelect" class="form-select my-2">
+                    <option selected value="-1">请选择七段数码管连接引脚</option>
+                    <option value="0">0</option>
+                    <option value="4">4</option>
+                    <option value="8">8</option>
+                    <option value="12">12</option>
+                    <option value="16">16</option>
+                </select>
+            </div>
+
+            <div class="col">
+                <select id="awaySegmentPinSelect" class="form-select my-2">
+                    <option selected value="-1">请选择七段数码管连接引脚</option>
+                    <option value="0">0</option>
+                    <option value="4">4</option>
+                    <option value="8">8</option>
+                    <option value="12">12</option>
+                    <option value="16">16</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row align-items-start my-3">
+            <div class="col text-center">
+                <div class="homeScore text-center mb-2 display-1"></div>
+            </div>
+            <div class="col text-center">
+                <div class="awayScore text-center mb-2 display-1"></div>
+            </div>
+        </div>
+
+        <div class="row align-items-start my-3">
+            <div class="col text-center">
+                <button id="addOneHome" class="btn btn-primary m-2">一分</button>
+                <button id="addTwoHome" class="btn btn-primary m-2">两分</button>
+                <button id="addThreeHome" class="btn btn-primary m-2">三分</button>
+                <button id="minusOneHome" class="btn btn-warning m-2">减一分</button>
+            </div>
+
+            <div class="col text-center">
+                <button id="addOneAway" class="btn btn-primary m-2">一分</button>
+                <button id="addTwoAway" class="btn btn-primary m-2">两分</button>
+                <button id="addThreeAway" class="btn btn-primary m-2">三分</button>
+                <button id="minusOneAway" class="btn btn-warning m-2">减一分</button>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button id="startScore" class="btn btn-success btn-lg m-2">开始</button>
+            <button id="resetScore" class="btn btn-danger btn-lg m-2">重置</button>
+        </div>
+    </div>
+</body>
+
+</html>

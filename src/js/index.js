@@ -10,7 +10,7 @@ const main_apps_categories = [
         apps: ["boardtest"]
     }, {
         name: "发光类",
-        apps: ["relay", "color_led"]
+        apps: ["relay", "color_led", "score_board"]
     }, {
         name: "传感器",
         apps: ["force_sensing", "temperature"]
@@ -75,6 +75,12 @@ const main_apps_info = [
         description: "简单的网页窗口来熟悉平台的功能。",
         document: "https://www.sensor-lab.io",
     },
+    {
+        id: "score_board",
+        name: "计分板",
+        description: "将两个七段数码管插板插到平台的排针上，裁判通过网页选择主队和客队的得分，分数会通过七段数码管展示给选手。",
+        document: "https://www.sensor-lab.io",
+    }
 ];
 
 var selected_apps = [];
