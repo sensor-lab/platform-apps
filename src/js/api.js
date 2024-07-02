@@ -417,3 +417,81 @@ export async function syncPwmReq(pin_id, operations) {
         console.log('Error call API:', error);
     }
 }
+
+export function gpioHardwareOperation(opers, pin, dir, val) {
+    let ret = 0;
+    if (opers.constructor !== Array) {
+        ret = -1;
+    } else if (pin == undefined || pin < 0 || pin >= 20) {
+        ret = -1;
+    } else if (dir != "input" && dir != "output") {
+        ret = -1;
+    } else {
+        if (dir === "input") {
+            if (val != 0 && val != 1) {
+                ret = -1;
+            } else {
+                opers.push(["gpio", pin, "input", val]);
+            }
+        } else {
+            // output
+            if (val != 0 && val != 1 && val != 2){
+                ret = -1;
+            } else {
+                opers.push(["gpio", pin, "output", val]);
+            }
+        }
+    }
+    return ret;
+}
+
+export function spiHardwareOperation(opers, spi_module_index, mosi_pin, miso_pin, clock_pin, cs_pin, 
+            speed_khz, mode, num_bytes_skip_rcv, num_bytes_rcv, ...transmit_data) {
+    let ret = 0;
+    if (opers.constructor !== Array) {
+        ret = -1;
+    } else if (spi_module_index != 0) {
+        ret = -1;
+    } else if (mosi_pin == undefined || clock_pin == undefined) {
+        ret = -1;
+    } else if (clock_pin == undefined) {
+        ret = -1;
+    } else if (!speed_khz || speed_khz > 1000 || speed_khz <= 0) {
+        ret = -1;
+    } else if (mode < 0 || mode > 3) {
+        ret = -1;
+    } else {
+        if (miso_pin == undefined) {
+            miso_pin = -1;
+        }
+        if (cs_pin == undefined) {
+            cs_pin = -1;
+        }
+        let spi_oper = ["spi", spi_module_index, mosi_pin, miso_pin, clock_pin, cs_pin, speed_khz, 
+            mode, num_bytes_skip_rcv, num_bytes_rcv, transmit_data.length];
+        spi_oper = spi_oper.concat(transmit_data);
+        opers.push(spi_oper);
+    }
+    return ret;
+}
+
+export function constructNowEvent(opers) {
+    const now_event = {
+        "event": "now",
+        "actions": opers
+    }
+    return now_event;
+}
+
+export async function postHardwareOperation(event) {
+    let request = '/hardware/operation';
+    try {
+        const response = await fetch(request, {
+            method: 'post',
+            body: JSON.stringify(event)
+        });
+        return  await response.json();
+    } catch (error) {
+        console.log('Error call API:', error);
+    }
+}
