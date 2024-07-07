@@ -13,7 +13,7 @@ const main_apps_categories = [
         apps: ["relay", "color_led", "score_board"]
     }, {
         name: "传感器",
-        apps: ["force_sensing", "temperature"]
+        apps: ["force_sensing", "temperature", "infrared_transceiver"]
     }, {
         name: "声音类", 
         apps: ["buzzer_note_player"]
@@ -79,6 +79,12 @@ const main_apps_info = [
         id: "score_board",
         name: "计分板",
         description: "将两个七段数码管插板插到平台的排针上，裁判通过网页选择主队和客队的得分，分数会通过七段数码管展示给选手。",
+        document: "https://www.sensor-lab.io",
+    },
+    {
+        id: "infrared_transceiver",
+        name: "红外线遥控器",
+        description: "将红外线插板插到平台的排针上，通过网页即可解码电视遥控器，空调遥控器等。并通过手机控制家里的电视或空调等设备。",
         document: "https://www.sensor-lab.io",
     }
 ];

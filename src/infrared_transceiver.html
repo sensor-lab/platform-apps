@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>传感器实验室</title>
+    <link rel="stylesheet" href="scss/styles.scss">
+    <script type="module" src="js/infrared_transceiver.js"></script>
+</head>
+
+<body>
+
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+    <div id="statusMsg" class="alert alert-primary d-none" role="alert"></div>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="mx-auto order-0">
+            <a class="navbar-brand mx-auto" href="#">红外线遥控器</a>
+        </div>
+    </nav>
+
+    <div id="config" class="container-sm border-bottom my-2">
+        <select id="infraredtPinSelect" class="form-select my-2">
+            <option selected value="-1">请选择红外线模块和平台的连接引脚</option>
+            <option value="0">0</option>
+            <option value="4">4</option>
+            <option value="8">8</option>
+            <option value="12">12</option>
+            <option value="16">16</option>
+        </select>
+    </div>
+
+    <div class="modal fade" id="addControl" tabindex="-1" aria-labelledby="addControlModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="addControlModal">添加控制按钮</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">输入控制按钮名称：</span>
+                        <input id="controlButtonName" type="text" class="form-control" placeholder="电视机开启按钮">
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">外线输出信号值：</span>
+                        <input id="controlButtonValue" type="text" class="form-control" placeholder="未收到" disabled>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input id="customizedCtrVal" type="checkbox" class="form-check-input">
+                        <label class="form-check-label" for="customizedCtrVal">自定义发送值</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button id="confirmAdd" class="btn btn-primary">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteControl" tabindex="-1" aria-labelledby="deleteControlModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="deleteControlModal">删除控制按钮</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text">输入控制按钮名称：</span>
+                        <input id="deleteControlName" type="text" class="form-control" placeholder="电视机开启按钮">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    <button id="confirmDelete" class="btn btn-danger">确定删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div id="decodeSection" class="container-sm border-bottom my-2 text-center">
+        <div class="display-6  my-1">红外线解码</div>
+        <p>点击开始解码按钮，然后将遥控器朝红外线模块的方向，在给定的时间内，在遥控器上按下您想要解码的按钮。</p>
+        <p>当红外线模块收到信号后，会将解码的数据显示在该页面上。</p>
+        <div id="receiveProgressbar" class="progress my-3" style="display: none;">
+            <div id="timeoutCounter" class="progress-bar" role="progressbar" style="width: 100%;" aria-valuenow="25"
+                aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <div class="card mx-auto" style="width: 18rem;">
+            <div class="card-body">
+                <h5 class="card-title">解码数据</h5>
+                <h6 id="rcvInfraredValue" class="card-subtitle mb-2 text-muted">未收到</h6>
+            </div>
+        </div>
+        <button id="startDecoding" class="btn btn-success m-2">开始解码</button>
+    </div>
+
+
+    <div id="encodeSection" class="container-sm border-bottom my-2 text-center">
+        <div class="display-6">
+            红外线遥控
+        </div>
+        <p>点击添加按钮，即可在该页面添加不同的红外线遥控按钮。</p>
+        <p>点击删除按钮，即可选择在该页面删除不同的红外线遥控按钮。</p>
+        <div id="infraredButtons"
+            style="border:1px solid #cecece; display: flex; flex-wrap: wrap; border-radius: 20px; border-width: 3px; max-width: 800px;"
+            class="py-3 px-2 mx-auto">
+
+        </div>
+        <button id="addButton" type="button" class="btn btn-primary m-2 mx-auto" data-bs-toggle="modal"
+            data-bs-target="#addControl">添加</button>
+        <button id="deleteButton" class="btn btn-primary m-2 mx-auto" data-bs-toggle="modal"
+            data-bs-target="#deleteControl">删除</button>
+    </div>
+
+</body>

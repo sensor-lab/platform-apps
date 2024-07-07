@@ -475,6 +475,126 @@ export function spiHardwareOperation(opers, spi_module_index, mosi_pin, miso_pin
     return ret;
 }
 
+export function captureRegularHardwareOperation(opers, pin_id, max_data_bytes, time_unit, 
+                capture_condition, capture_time_duration) {
+    let ret = 0;
+    if (opers.constructor !== Array) {
+        ret = -1;
+    } else if (pin_id == undefined || pin_id < 0 || pin_id >= 20) {
+        re= -1;
+    } else if (max_data_bytes <= 0) {
+        ret = -1;
+    } else if (time_unit !== "ms" && time_unit !== "us") {
+        ret = -1;
+    } else if (capture_condition !== "rising" &&
+                capture_condition !== "falling" &&
+                capture_condition !== "change") {
+        ret = -1;
+    } else if (typeof capture_time_duration !== "number") {
+        ret = -1;
+    } else {
+        const capture_oper = ["capture", pin_id, max_data_bytes,
+                time_unit, capture_condition, capture_time_duration];
+        opers.push(capture_oper);
+    }
+    return ret;
+}
+
+export function pwmAsyncHardwareOperation(opers, pwm_id, freq, duration, mode, 
+    pwm_1_pin, pwm_1_duty_cycle, pwm_2_pin, pwm_2_duty_cycle, pwm_3_pin, pwm_3_duty_cycle)
+{
+    let ret = 0;
+    if (opers.constructor != Array) {
+        ret = -1;
+    } else if (pwm_id == undefined || pwm_id < 0 || pwm_id > 3) {
+        ret = -1;
+    } else if (freq < 1 || freq > 50000) {
+        ret = -1;
+    } else if (typeof duration !== "number") {
+        ret = -1;
+    } else if (mode !== "sync" && mode !== "async") {
+        ret = -1;
+    } else if (pwm_1_pin == undefined || pwm_1_pin < 0 || pwm_1_pin >= 20) {
+        ret = -1;
+    } else if (pwm_1_duty_cycle == undefined || pwm_1_duty_cycle <= 0 || pwm_1_duty_cycle >= 1024) {
+        ret = -1;
+    } else {
+        const pwm_oper = ["pwm", pwm_id, freq, duration, mode, pwm_1_pin, pwm_1_duty_cycle];
+        if (pwm_2_pin !== undefined) {
+            if (pwm_2_duty_cycle == undefined || pwm_2_duty_cycle <= 0 || pwm_2_duty_cycle >= 1024) {
+                ret = -1;
+            } else {
+                pwm_oper.push(pwm_2_pin, pwm_2_duty_cycle);
+            }
+        }
+
+        if (pwm_3_pin !== undefined) {
+            if (pwm_3_duty_cycle == undefined || pwm_3_duty_cycle <= 0 || pwm_3_duty_cycle >= 1024) {
+                ret = -1;
+            } else {
+                pwm_oper.push(pwm_3_pin, pwm_3_duty_cycle);
+            }
+        }
+
+        if (ret == 0) {
+            opers.push(pwm_oper);
+        }
+    }
+    return ret;
+}
+
+export function delayHardwareOperation(opers, time_unit, delay_value)
+{
+    let ret = 0;
+    if (opers.constructor != Array) {
+        ret = -1;
+    } else if (time_unit != "s" && time_unit != "ms" && time_unit != "us") {
+        ret = -1;
+    } else if (delay_value <= 0 || delay_value > 65535) {
+        ret = -1;
+    } else {
+        const delay_oper = ["delay", 0, time_unit, delay_value];
+        opers.push(delay_oper);
+    }
+    return ret;
+}
+
+export function advanceOutputSetupHardwareOperation(opers, pin_id, time_unit, 
+    logic_0_duration, logic_0_duty, logic_1_duration, logic_1_duty)
+{
+    let ret = 0;
+    if (opers.constructor != Array) {
+        ret = -1;
+    } else if (pin_id == undefined || pin_id < 0 || pin_id > 19) {
+        ret = -1;
+    } else if (time_unit != "ms" && time_unit != "us") {
+        ret = -1;
+    } else {
+        const adv_setup = ["advance_output", pin_id, "setup", time_unit, 
+            "zero", logic_0_duration, logic_0_duty,
+            "one", logic_1_duration, logic_1_duty
+        ]
+        opers.push(adv_setup);
+    }
+    return ret;
+}
+
+export function advanceOutputStartHardwareOperation(opers, pin_id, data)
+{
+    let ret = 0;
+    if (opers.constructor != Array) {
+        ret = -1;
+    } else if (pin_id == undefined || pin_id < 0 || pin_id > 19) {
+        ret = -1;
+    } else {
+        let adv_start = ["advance_output", pin_id, "start", data.length];
+        adv_start = adv_start.concat(data);
+        opers.push(adv_start);
+    }
+    return ret;
+}
+
+
 export function constructNowEvent(opers) {
     const now_event = {
         "event": "now",

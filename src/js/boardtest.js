@@ -1,3 +1,5 @@
+import * as bootstrap from 'bootstrap';
+
 import {sendRequest} from './api.js'
 
 const predefinedLogo = new URL('../images/upload-solid.svg', import.meta.url);
