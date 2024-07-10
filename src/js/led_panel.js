@@ -78,25 +78,25 @@ function removeErrorMsg() {
 
 function paintEraseTiles(targetCell) {
     if (targetCell.nodeName === 'TD') {
-        let ledIndex = 0;
-        tdIndex = targetCell.cellIndex;
-        trIndex = targetCell.parentNode.rowIndex;
-        if (tdIndex % 2 == 0) {
-            ledIndex = tdIndex * board_height + trIndex;
+        let led_index = 0;
+        let td_index = targetCell.cellIndex;
+        let tr_index = targetCell.parentNode.rowIndex;
+        if (td_index % 2 == 0) {
+            led_index = td_index * board_height + tr_index;
         } else {
-            ledIndex = tdIndex * board_height + (board_height - 1 - trIndex);
+            led_index = td_index * board_height + (board_height - 1 - tr_index);
         }
         if (mode === PAINT) {
             targetCell.style.backgroundColor = selected_color.value;
             var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(selected_color.value);
-            led_panel[ledIndex * 3] = parseInt(parseInt(result[2], 16));
-            led_panel[ledIndex * 3 + 1] = parseInt(parseInt(result[1], 16));
-            led_panel[ledIndex * 3 + 2] = parseInt(parseInt(result[3], 16));
+            led_panel[led_index * 3] = parseInt(parseInt(result[2], 16));
+            led_panel[led_index * 3 + 1] = parseInt(parseInt(result[1], 16));
+            led_panel[led_index * 3 + 2] = parseInt(parseInt(result[3], 16));
         } else {
             targetCell.style.backgroundColor = 'transparent'
-            led_panel[ledIndex * 3] = 0
-            led_panel[ledIndex * 3 + 1] = 0
-            led_panel[ledIndex * 3 + 2] = 0
+            led_panel[led_index * 3] = 255;
+            led_panel[led_index * 3 + 1] = 255;
+            led_panel[led_index * 3 + 2] = 255;
         }
         localStorage.setItem("ledpanel", JSON.stringify(led_panel));
     }
