@@ -47,10 +47,10 @@ function checkAllRequiredFields(setup) {
     return error;
 }
 
-document.getElementById("submitBut").addEventListener("click", function (event) {
+document.getElementById("submitBut").addEventListener("click", async function (event) {
     if (checkAllRequiredFields(true) == 0) {
         var timing = ledStripMap.get(color_strip_type);
-        setupAdvanceOutput(data_pin, timing[0], timing[1], timing[2], timing[3]);
+        await setupAdvanceOutput(data_pin, timing[0], timing[1], timing[2], timing[3]);
         var colorCodes = colorMap.get(color_scheme);
         var colorData = []
         var cycle = parseInt(LEDS_PER_METER * color_strip_length / colorCodes.length);
@@ -63,7 +63,7 @@ document.getElementById("submitBut").addEventListener("click", function (event) 
                 let color_blue = codeInt & 0xFF
                 colorData.push(color_red, color_green, color_blue);
             })
-            startAdvanceOutput(data_pin, cycle, colorData);
+            await startAdvanceOutput(data_pin, cycle, colorData);
         } else {
             // WS2812
             colorCodes.map((code) => {
@@ -74,26 +74,26 @@ document.getElementById("submitBut").addEventListener("click", function (event) 
                 colorData.push(color_green, color_red, color_blue);
             })
             colorData = makeRepeated(colorData, cycle);
-            startAdvanceOutput(data_pin, 0, colorData);
+            await startAdvanceOutput(data_pin, 0, colorData);
         }
     }
 })
 
-document.getElementById("shutdownBut").addEventListener("click", function (event) {
+document.getElementById("shutdownBut").addEventListener("click", async function (event) {
     if (checkAllRequiredFields(false) == 0) {
         timing = ledStripMap.get(color_strip_type);
-        setupAdvanceOutput(data_pin, timing[0], timing[1], timing[2], timing[3]);
+        await setupAdvanceOutput(data_pin, timing[0], timing[1], timing[2], timing[3]);
         if (color_strip_type == 0) {
             // WS2811
             var colorData = [0, 0, 0]
             var cycle = LEDS_PER_METER * color_strip_length;
-            startAdvanceOutput(data_pin, cycle, colorData);
+            await startAdvanceOutput(data_pin, cycle, colorData);
         } else {
             // WS2812
             var colorData = [0, 0, 0]
             var cycle = LEDS_PER_METER * color_strip_length;
             colorData = makeRepeated(colorData, cycle);
-            startAdvanceOutput(data_pin, 0, colorData);
+            await startAdvanceOutput(data_pin, 0, colorData);
         }
     }
 })

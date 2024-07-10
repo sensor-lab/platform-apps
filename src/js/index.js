@@ -6,11 +6,8 @@ import { Tooltip as Tooltip, Toast as Toast, Popover as Popover } from 'bootstra
 
 const main_apps_categories = [
     {
-        name: "测试应用",
-        apps: ["boardtest"]
-    }, {
         name: "发光类",
-        apps: ["relay", "color_led", "score_board"]
+        apps: ["relay", "color_led", "score_board", "led_panel"]
     }, {
         name: "传感器",
         apps: ["force_sensing", "temperature", "infrared_transceiver"]
@@ -29,7 +26,10 @@ const main_apps_categories = [
      }, {
         name: "自定义",
         apps: []
-     }
+     }, {
+        name: "测试应用",
+        apps: ["boardtest"]
+    }
 ];
 
 const main_apps_info = [
@@ -85,6 +85,12 @@ const main_apps_info = [
         id: "infrared_transceiver",
         name: "红外线遥控器",
         description: "将红外线插板插到平台的排针上，通过网页即可解码电视遥控器，空调遥控器等。并通过手机控制家里的电视或空调等设备。",
+        document: "https://www.sensor-lab.io",
+    },
+    {
+        id: "led_panel",
+        name: "LED灯板",
+        description: "将WS2812发光灯板与平台通过电源信号插板连接，WS2812为5V电源，3.3V信号。",
         document: "https://www.sensor-lab.io",
     }
 ];

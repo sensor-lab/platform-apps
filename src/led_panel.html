@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>模块化传感器平台</title>
+    <link rel="stylesheet" href="scss/styles.scss">
+    <link rel="stylesheet" href="css/led_panel.css">
+    <script type="module" src="js/led_panel.js"></script>
+</head>
+
+<body>
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+
+    <nav class="navbar navbar-expand-lg bg-light">
+        <div class="container d-flex justify-content-between">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">灯板控制器</a>
+            </div>
+        </div>
+    </nav>
+    <div class="d-flex flex-column align-items-center">
+        <div class="mt-4 mb-2">
+            <h3>灯板控制器</h3>
+        </div>
+    </div>
+    <div class="container" style="border:1px solid #cecece; border-radius: 3px;">
+        <div class="text-center mt-4">
+
+            <p>灯板的控制芯片支持WS2812，通过接线端子为灯板提供合适的电压。</p>
+            <p>选择灯板与平台的信号连接引脚，并选择灯板的尺寸。最后点击创建画板。</p>
+
+            <select id="pinSelect" class="form-select my-4">
+                <option selected value="-1">选择灯带和平台连接的引脚</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="16">16</option>
+                <option value="16">17</option>
+            </select>
+
+            <div id="displayPins" class="row mt-4 d-none">
+                <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+                    <div class="card-body">
+                        <p>灯带数据信号</p>
+                        <h5>平台引脚0</h5>
+                    </div>
+                </div>
+            </div>
+
+            <select id="paintBoardSize" class="form-select my-4">
+                <option selected value="-1">选择灯板尺寸</option>
+                <option value="32x8">32*8</option>
+                <option value="16x16">16*16</option>
+            </select>
+
+            <button id="createPaintBoard" type="submit" class="btn btn-success my-4 mx-auto">创建画板</button>
+        </div>
+
+        <div id="paintBoard" style="display: none;">
+            <p class="text-center">选择不同的颜色，在画板上进行创作。</p>
+            <p class="text-center">点击右键可以清除颜色，或点击创建画板清楚整个画板。创作完成后点击设置灯板。</p>
+
+            <div id="gridCanvas" class="gridCanvas rotationTime my-3">
+                <table id="pixelCanvas" class="flyItIn2"></table>
+            </div>
+
+            <div class="my-4 d-flex justify-content-center">
+                <label class="mx-3"><b>选择颜色</b></label>
+                <input type="color" id="colorPicker" value="#ffffff" title="选择颜色">
+
+            </div>
+
+            <div class="my-4 d-flex justify-content-center">
+                <button id="setLedButton" class="btn btn-primary mx-3">设置灯板</button>
+                <button id="closeLedButton" class="btn btn-danger mx-3">关闭灯板</button>
+            </div>
+
+
+        </div>
+    </div>
+
+
+
+</body>
+
+</html>

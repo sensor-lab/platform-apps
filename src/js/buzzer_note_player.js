@@ -1,10 +1,11 @@
 const bootstrap =  require("bootstrap");
 import {syncPwmReq} from './api'
 
-var pin = localStorage.getItem("pin");
+var pin = undefined;
 var buzzer_notes;
 
-if (pin != null) {
+if (localStorage.getItem("pin")) {
+    pin = parseInt(localStorage.getItem("pin"));
     document.getElementById("pinSelect").value = pin;
 }
 
