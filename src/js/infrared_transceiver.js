@@ -42,11 +42,12 @@ function updateControlButtons(lst) {
         const card_body_ele = document.createElement("div");
         card_header_ele.classList.add("card-header");
         card_body_ele.classList.add("card-body");
+        card_body_ele.style.background = "#ffffff";
         card_header_ele.innerHTML = lst[i]["name"];
         card_body_ele.innerHTML = lst[i]["value"];
         card_div.append(card_header_ele, card_body_ele);
         infrared_buttons_area.appendChild(card_div);
-        card_div.addEventListener("click", async function(event) {
+        card_body_ele.addEventListener("click", async function(event) {
             if (ir_transistor_0_pin == undefined) {
                 addErrorMsg("请选择正确的红外线模块连接引脚。");
             } else {
@@ -55,6 +56,11 @@ function updateControlButtons(lst) {
                 const signals = ctr_str_array.map((ctr_str) => {
                     return parseInt(ctr_str);
                 });
+                event.target.style.background = "#808080";
+                event.target.style.transition = "background-color 1s ease";
+                setTimeout(function() {
+                    event.target.style.backgroundColor = '#ffffff';
+                }, 1000);
                 pwmAsyncHardwareOperation(opers, 0, 38000, 1.0, "async", ir_transistor_0_pin, 512, undefined, undefined, undefined, undefined);
                 gpioHardwareOperation(opers, ir_transistor_1_pin, "output", 1);
                 delayHardwareOperation(opers, "ms", 10);
@@ -133,8 +139,10 @@ document.getElementById("startDecoding").addEventListener("click", async functio
             "change", timeout_second);
         const oper_event = constructNowEvent(opers);
         const ret = await postHardwareOperation(oper_event);
-        const signals = decodeNecSignal(ret["result"][0]);
-        
+        let signals = [];
+        if (ret !== undefined) {
+            signals = decodeNecSignal(ret["result"][0]);
+        }
         function moveBar() {
             var elem = document.getElementById("timeoutCounter");
             if (width == 0) {
@@ -151,6 +159,7 @@ document.getElementById("startDecoding").addEventListener("click", async functio
                 width-=(100 / timeout_second);
                 elem.style.width = width + "%";
                 elem.innerHTML = (width / (100 / timeout_second)) + "秒";
+                document.getElementById("rcvInfraredValue").innerHTML = "信号接收中";
             }
         }
     }
