@@ -97,14 +97,22 @@ async function getPlatformConfig() {
         if (hwver === "V-1--1") {
             hwver = "未设置";
         }
+        if (platformtime == "notset") {
+            platformtime = "未设置";
+        }
 
         document.getElementById("modeSelect").value = mode;
         document.getElementById("ssid").setAttribute("value", ssid);
         document.getElementById("password").setAttribute("value", password);
         document.getElementById("mdnsname").setAttribute("value", mdnsname);
-        document.getElementById("voltage").setAttribute("value", voltage);
         document.getElementById("platformtime").setAttribute("value", platformtime);
         document.getElementById("version").setAttribute("value", `应用版本：${version["app_ver"]}。固件版本：${fwver}。硬件版本：${hwver}。`);
+        let options = document.getElementById("voltage");
+        for (let i = 0; i < options.length; i++) {
+            if (options[i].getAttribute("value") == voltage) {
+                options[i].setAttribute("selected","");
+            }
+        }
     } else {
         addErrorMsg("无法得到平台配置信息，请重启平台。");
     }
@@ -135,7 +143,7 @@ document.getElementById("submitButton").addEventListener("click", async function
         "ssid": ssid,
         "password": password,
         "mdns": mdnsname,
-        "voltage": voltage
+        "voltage": parseInt(voltage)
     }
     const ret = await setConfig(config);
     if (ret == -1) {
