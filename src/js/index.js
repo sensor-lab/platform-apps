@@ -22,7 +22,7 @@ const main_apps_categories = [
         apps: ["relay"]
      }, {
         name: "通信", 
-        apps: []
+        apps: ["nfc"]
      }, {
         name: "自定义",
         apps: []
@@ -91,6 +91,12 @@ const main_apps_info = [
         id: "led_panel",
         name: "LED灯板",
         description: "将WS2812发光灯板与平台通过电源信号插板连接，WS2812为5V电源，3.3V信号。",
+        document: "https://www.sensor-lab.io",
+    },
+    {
+        id: "nfc",
+        name: "nfc读写卡器",
+        description: "将RC522 NFC模块和平台连接，通过SPI总线读写NFC卡。",
         document: "https://www.sensor-lab.io",
     }
 ];

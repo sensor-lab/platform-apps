@@ -3,7 +3,7 @@ import {getConfig, setConfig, getStatus, restartPlatform, setState} from './api.
 import version from '../app_version.json'
 
 var mode, ssid, password, mdnsname, voltage, fwver;
-var app_update_filepaths, fw_update_filepath, app_update_files, fw_update_file, app_version_file, fw_version_file
+var app_update_filepaths, fw_update_filepath, app_update_files, fw_update_file, app_version_file, fw_version_file, fw_version
 
 function addErrorMsg(message) {
     removeStatusMsg();
