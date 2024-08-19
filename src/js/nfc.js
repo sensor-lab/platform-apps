@@ -84,8 +84,7 @@ const TestDAC1Reg= 0x39 << 1;// defines the test value for TestDAC1
 const TestDAC2Reg= 0x3A << 1;// defines the test value for TestDAC2
 const TestADCReg= 0x3B << 1;// shows the value of ADC I and Q channels
 
-
-// PICC commands by sending over to FIFO data register
+// PICC commands by sending over to FIFO data register, refer: ISO 14443-3
 const PICC_CMD_REQA = 0x26;// REQuest command, Type A. Invites PICCs in state IDLE to go to READY and prepare for anticollision or selection. 7 bit frame.
 const PICC_CMD_WUPA = 0x52;// Wake-UP command, Type A. Invites PICCs in state IDLE and HALT to go to READY(*) and prepare for anticollision or selection. 7 bit frame.
 const PICC_CMD_CT = 0x88;// Cascade Tag. Not really a command, but used during anti collision.
@@ -109,8 +108,15 @@ const PICC_CMD_MF_TRANSFER= 0xB0;// Writes the contents of the internal data reg
 // The PICC_CMD_MF_READ and PICC_CMD_MF_WRITE can also be used for MIFARE Ultralight.
 const PICC_CMD_UL_WRITE= 0xA2;// Writes one 4 byte page to the PICC.
 
+const g_uid = [];
+
 function readRegister(opers, reg, len=1) {
-    spiHardwareOperation(opers, 0, 16, 17, 18, 19, 400, 0, 1, len, reg | 0x80);
+    transmit_data = [reg | 0x80];
+    for (i = 0; i < len - 1; i++) {
+        transmit_data.push(reg | 0x80);
+    }
+    spiHardwareOperation(opers, 0, 16, 17, 18, 19, 400, 0, 1, len, ...transmit_data);
+    
 }
 
 function writeRegister(opers, reg, ...data) {
@@ -142,22 +148,18 @@ async function resetBit(reg, val) {
     ret = await postHardwareOperation(now_event, "http://192.168.1.108");
 }
 
-async function transceiveData(transmit_data, receive_data) {
+async function transceiveData(transmit_data, receive_data, tx_last_bits=0) {
     let opers = [];
-}
-
-async function cardPresent() {
-    let card_present = false;
+    let data_received = false;
     await resetBit(CollReg, 0x80);
-    let opers = [];
     writeRegister(opers, TxModeReg, 0);
     writeRegister(opers, RxModeReg, 0);
     writeRegister(opers, ModWidthReg, 38);
     writeRegister(opers, CommandReg, IDLE);
     writeRegister(opers, ComIrqReg, 127);
     writeRegister(opers, FIFOLevelReg, 128);
-    writeRegister(opers, FIFODataReg, PICC_CMD_REQA);
-    writeRegister(opers, BitFramingReg, 7);
+    writeRegister(opers, FIFODataReg, ...transmit_data);
+    writeRegister(opers, BitFramingReg, tx_last_bits);
     writeRegister(opers, CommandReg, TRANSCEIVE);
     let now_event = constructNowEvent(opers);
     await postHardwareOperation(now_event, "http://192.168.1.108");
@@ -172,12 +174,13 @@ async function cardPresent() {
         now_event = constructNowEvent(opers);
         let ret = await postHardwareOperation(now_event, "http://192.168.1.108");
         if (ret["result"][0][0] & 0x30) {
-            card_present = true;
+            data_received = true;
             break;
         }
         i++;
     }
-    if (card_present) {
+
+    if (data_received) {
         opers = [];
         readRegister(opers, FIFOLevelReg);
         now_event = constructNowEvent(opers);
@@ -187,12 +190,200 @@ async function cardPresent() {
         readRegister(opers, FIFODataReg, fifo_level);
         now_event = constructNowEvent(opers);
         ret = await postHardwareOperation(now_event, "http://192.168.1.108");
-        console.log(`FIFO data: ${ret["result"]}`);
+        receive_data.push(...ret["result"][0]);
     }
+    return data_received
+}
+
+async function cardPresent() {
+    let card_present = false;
+    const transmit_data = [PICC_CMD_REQA];
+    let receive_data = [];
+    card_present = await transceiveData(transmit_data, receive_data,7);
     return card_present;
 }
 
-document.getElementById("getUidBtn").addEventListener("click", async function () {
+async function selectCard() {
+    let get_uid = false;
+    let ret_uid = [];
+    // start reading UID
+    await resetBit(CollReg, 0x80);
+    opers = [];
+    writeRegister(opers, BitFramingReg, 0);
+    let now_event = constructNowEvent(opers);
+    await postHardwareOperation(now_event, "http://192.168.1.108");
+    const transmit_data = [PICC_CMD_SEL_CL1, 0x20];
+    let receive_data = [];
+    if (await transceiveData(transmit_data, receive_data)) {
+        if (receive_data.length == 5) {
+            get_uid = true;
+            ret_uid = [PICC_CMD_SEL_CL1, 0x70, ...receive_data];
+        }
+    }
+
+    let get_type = false;
+    let type = 0;
+    if (get_uid) {
+        const crc = await calculateCrc(ret_uid);
+        console.log(`crc: ${crc}`);
+        if (crc.length == 2) {
+            let receive_data = [];
+            const transmit_data = [...ret_uid, crc[0], crc[1]];
+            if (await transceiveData(transmit_data, receive_data)) {
+                g_uid.push(ret_uid[2]);
+                g_uid.push(ret_uid[3]);
+                g_uid.push(ret_uid[4]);
+                g_uid.push(ret_uid[5]);
+                get_type = true;
+                type = receive_data[0] & 0x7F;
+            }
+        }
+    }
+
+    if (get_type) {
+        printCardType(type);
+    }
+}
+
+async function writeData(data) {
+    // need select then authenticate first
+    let buffer = [];
+	// Build command buffer
+	buffer[0] = PICC_CMD_MF_WRITE;
+	buffer[1] = 0;          // hardcoded block 0
+    let crc = await calculateCrc(buffer);
+    if (crc.length == 2) {
+        let rcv_data = [];
+		buffer[2] = crc[0];
+        buffer[3] = crc[1];
+        await transceiveData(buffer, rcv_data);
+        crc = await calculateCrc(data);
+        if (crc.length == 2) {
+            data.push(crc[0]);
+            data.push(crc[1]);
+            await transceiveData(data, rcv_data);
+        }
+    }
+}
+
+async function readData() {
+    // need select then authenticate first
+    let buffer = [];
+	// Build command buffer
+	buffer[0] = PICC_CMD_MF_READ;
+	buffer[1] = 0;          // hardcoded block 0
+	// Calculate CRC_A
+	crc = await calculateCrc(buffer);
+	if (crc.length == 2) {
+        let rcv_data = [];
+		buffer[2] = crc[0];
+        buffer[3] = crc[1];
+        await transceiveData(buffer, rcv_data);
+        console.log(`read data: ${rcv_data}`);
+    }
+}
+
+async function authentication() {
+	// Build command buffer
+    const MF_KEY_SIZE = 6
+	let send_data = [];
+    let receive_data = [];
+	send_data[0] = PICC_CMD_MF_AUTH_KEY_A;
+	send_data[1] = 0;        // hardcoded sector 0
+	for (let i = 0; i < MF_KEY_SIZE; i++) {	// 6 key bytes: the factory default key of 0xFFFFFFFFFFFF
+		send_data[2+i] = 0xff;
+	}
+	// Use the last uid bytes as specified in http://cache.nxp.com/documents/application_note/AN10927.pdf
+	// section 3.2.5 "MIFARE Classic Authentication".
+	// The only missed case is the MF1Sxxxx shortcut activation,
+	// but it requires cascade tag (CT) byte, that is not part of uid.
+	for (let i = 0; i < 4; i++) {				// The last 4 bytes of the UID
+		send_data[8+i] = g_uid[i + g_uid.length - 4];
+	}
+
+    await transceiveData(send_data, receive_data)
+}
+
+async function calculateCrc(data) {
+    let opers = [];
+    let result = [];
+    writeRegister(opers, CommandReg, IDLE);
+    writeRegister(opers, DivIrqReg, 0x04);  // clear CRC Irq
+    writeRegister(opers, FIFOLevelReg, 128);
+    writeRegister(opers, FIFODataReg, ...data);
+    writeRegister(opers, CommandReg, CALCULATE_CRC);
+    let now_event = constructNowEvent(opers);
+    await postHardwareOperation(now_event, "http://192.168.1.108");
+    let i = 0;
+    while (i < 5)
+    {
+        opers = [];
+        readRegister(opers, DivIrqReg);
+        now_event = constructNowEvent(opers);
+        let ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+        if (ret["result"][0][0] & 0x04) {
+            opers = [];
+            readRegister(opers, CRCResultRegL);
+            readRegister(opers, CRCResultRegH);
+            now_event = constructNowEvent(opers);
+            ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+            result.push(ret["result"][0][0], ret["result"][1][0]);
+            break;
+        }
+        i++;
+    }
+    return result;
+}
+
+function printCardType(type) {
+    document.getElementById("nfcCardUid").innerHTML = `NFC卡ID: ${g_uid}`;
+    switch(type) {
+        case 0x04: {
+            document.getElementById("nfcCardType").innerHTML = `NFC卡类型：未得到`;
+            break;	
+        }
+        case 0x09: {
+            document.getElementById("nfcCardType").innerHTML = `NFC卡类型：PICC_TYPE_MIFARE_MINI`;
+            break;
+        }
+        case 0x08: {
+            document.getElementById("nfcCardType").innerHTML = `NFC卡类型：PICC_TYPE_MIFARE_1K`;
+            break;
+        }
+        case 0x18: {
+            document.getElementById("nfcCardType").innerHTML = `NFC卡类型：PICC_TYPE_MIFARE_4K`;
+            break;
+        }
+        case 0x00: {
+            document.getElementById("nfcCardType").innerHTML = `NFC卡类型：PICC_TYPE_MIFARE_UL`;
+            break;
+        }
+        case 0x10:
+        case 0x11: {
+            document.getElementById("nfcCardType").innerHTML = `NFC卡类型：PICC_TYPE_MIFARE_PLUS`;
+            break;
+        }
+        case 0x01: {
+            document.getElementById("nfcCardType").innerHTML = `NFC卡类型：PICC_TYPE_TNP3XXX`;
+            break;
+        }
+        case 0x20: {
+            document.getElementById("nfcCardType").innerHTML = `NFC卡类型：PICC_TYPE_ISO_14443_4`;
+            break;
+        }
+        case 0x40: {
+            document.getElementById("nfcCardType").innerHTML = `NFC卡类型：PICC_TYPE_ISO_18092`;
+            break;
+        }
+        default: {
+            document.getElementById("nfcCardType").innerHTML = `NFC卡类型：未知`;
+            break;
+        }
+    }
+    document.getElementById("getUIDCard").classList.remove("d-none");
+}
+
+async function mfrc522Initialization() {
     let opers = []
     // reset the NFC module
     writeRegister(opers, CommandReg, SOFT_RESET);
@@ -210,10 +401,29 @@ document.getElementById("getUidBtn").addEventListener("click", async function ()
     let now_event = constructNowEvent(opers);
     let ret = await postHardwareOperation(now_event, "http://192.168.1.108");
     opers = [];
-    console.log(`intialize NFC module: ${ret}`)
     // turn on antenna
     await setBit(TxControlReg, 0x3);
+}
 
+document.getElementById("getUidBtn").addEventListener("click", async function () {
+    let i = 0;
+    let card_present = false;
+    await mfrc522Initialization();
+    while(i < 10) 
+    {
+        await new Promise(r => setTimeout(r, 1000));
+        card_present = await cardPresent();
+        if (card_present == true) {
+            break;
+        }
+    }
+
+    if (card_present) {
+       await selectCard();
+    }
+});
+
+document.getElementById("readCardBtn").addEventListener("click", async function() {
     let i = 0;
     let card_present = false;
     while(i < 10) 
@@ -227,10 +437,28 @@ document.getElementById("getUidBtn").addEventListener("click", async function ()
     }
 
     if (card_present) {
-        // start reading UID
-        await resetBit(CollReg, 0x80);
-        opers = [];
-        writeRegister(opers, BitFramingReg, 7);
+        await selectCard();
+        await authentication();
+        await readData();
+    }
+});
+
+document.getElementById("writeCardSection").addEventListener("click", async function() {
+    let i = 0;
+    let card_present = false;
+    while(i < 10) 
+    {
+        await new Promise(r => setTimeout(r, 1000));
+        card_present = await cardPresent();
+        if (card_present == true) {
+            addStatusMsg("监测到NFC卡！");
+            break;
+        }
     }
 
-})
+    if (card_present) {
+        await selectCard();
+        await authentication();
+        await writeData();
+    }
+});

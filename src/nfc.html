@@ -34,6 +34,13 @@
         <div class="display-6  my-1">获得NFC卡ID</div>
         <p>点击获得NFC卡ID按钮，然后将NFC发在NFC模块上面。</p>
         <p>当NFC模块收到ID后，会将ID显示在该页面上。</p>
+        <div id="getUIDCard" class="card d-none" style="width: 18rem; margin: 0 auto;">
+            <div class="card-body">
+              <h5 class="card-title">检测到NFC卡</h5>
+              <h6 id="nfcCardUid" class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+              <h6 id="nfcCardType" class="card-subtitle mb-2 text-muted">Card subtitle</h6>
+            </div>
+          </div>
         <div class="my-4 d-flex justify-content-center">
             <button id="getUidBtn" class="btn btn-primary mx-3">获得NFC卡ID</button>
         </div>
