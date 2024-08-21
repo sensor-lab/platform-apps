@@ -148,7 +148,7 @@ async function resetBit(reg, val) {
     ret = await postHardwareOperation(now_event, "http://192.168.1.108");
 }
 
-async function transceiveData(transmit_data, receive_data, tx_last_bits=0) {
+async function transceiveData(cmd, transmit_data, receive_data, tx_last_bits=0) {
     let opers = [];
     let data_received = false;
     await resetBit(CollReg, 0x80);
@@ -160,7 +160,7 @@ async function transceiveData(transmit_data, receive_data, tx_last_bits=0) {
     writeRegister(opers, FIFOLevelReg, 128);
     writeRegister(opers, FIFODataReg, ...transmit_data);
     writeRegister(opers, BitFramingReg, tx_last_bits);
-    writeRegister(opers, CommandReg, TRANSCEIVE);
+    writeRegister(opers, CommandReg, cmd);
     let now_event = constructNowEvent(opers);
     await postHardwareOperation(now_event, "http://192.168.1.108");
     opers = [];
@@ -199,7 +199,7 @@ async function cardPresent() {
     let card_present = false;
     const transmit_data = [PICC_CMD_REQA];
     let receive_data = [];
-    card_present = await transceiveData(transmit_data, receive_data,7);
+    card_present = await transceiveData(TRANSCEIVE, transmit_data, receive_data,7);
     return card_present;
 }
 
@@ -214,7 +214,7 @@ async function selectCard() {
     await postHardwareOperation(now_event, "http://192.168.1.108");
     const transmit_data = [PICC_CMD_SEL_CL1, 0x20];
     let receive_data = [];
-    if (await transceiveData(transmit_data, receive_data)) {
+    if (await transceiveData(TRANSCEIVE, transmit_data, receive_data)) {
         if (receive_data.length == 5) {
             get_uid = true;
             ret_uid = [PICC_CMD_SEL_CL1, 0x70, ...receive_data];
@@ -229,7 +229,7 @@ async function selectCard() {
         if (crc.length == 2) {
             let receive_data = [];
             const transmit_data = [...ret_uid, crc[0], crc[1]];
-            if (await transceiveData(transmit_data, receive_data)) {
+            if (await transceiveData(TRANSCEIVE, transmit_data, receive_data)) {
                 g_uid.push(ret_uid[2]);
                 g_uid.push(ret_uid[3]);
                 g_uid.push(ret_uid[4]);
@@ -245,24 +245,28 @@ async function selectCard() {
     }
 }
 
-async function writeData(data) {
+async function writeData(...data) {
     // need select then authenticate first
     let buffer = [];
 	// Build command buffer
 	buffer[0] = PICC_CMD_MF_WRITE;
-	buffer[1] = 0;          // hardcoded block 0
+	buffer[1] = 4;          // hardcoded block 4
     let crc = await calculateCrc(buffer);
     if (crc.length == 2) {
         let rcv_data = [];
-		buffer[2] = crc[0];
-        buffer[3] = crc[1];
-        await transceiveData(buffer, rcv_data);
-        crc = await calculateCrc(data);
-        if (crc.length == 2) {
-            data.push(crc[0]);
-            data.push(crc[1]);
-            await transceiveData(data, rcv_data);
-        }
+		buffer.push(crc[0]);
+        buffer.push(crc[1]);
+        await transceiveData(TRANSCEIVE, buffer, rcv_data);
+    }
+    for (let i = data.length; i < 16; i++) {
+        data.push(0x20);
+    }
+    crc = await calculateCrc(data);
+    if (crc.length == 2) {
+        let rcv_data = [];
+        data.push(crc[0]);
+        data.push(crc[1]);
+        await transceiveData(TRANSCEIVE, data, rcv_data);
     }
 }
 
@@ -271,14 +275,14 @@ async function readData() {
     let buffer = [];
 	// Build command buffer
 	buffer[0] = PICC_CMD_MF_READ;
-	buffer[1] = 0;          // hardcoded block 0
+	buffer[1] = 4;          // hardcoded block 4
 	// Calculate CRC_A
 	crc = await calculateCrc(buffer);
 	if (crc.length == 2) {
         let rcv_data = [];
 		buffer[2] = crc[0];
         buffer[3] = crc[1];
-        await transceiveData(buffer, rcv_data);
+        await transceiveData(TRANSCEIVE, buffer, rcv_data);
         console.log(`read data: ${rcv_data}`);
     }
 }
@@ -289,7 +293,7 @@ async function authentication() {
 	let send_data = [];
     let receive_data = [];
 	send_data[0] = PICC_CMD_MF_AUTH_KEY_A;
-	send_data[1] = 0;        // hardcoded sector 0
+	send_data[1] = 4;        // hardcoded sector 0
 	for (let i = 0; i < MF_KEY_SIZE; i++) {	// 6 key bytes: the factory default key of 0xFFFFFFFFFFFF
 		send_data[2+i] = 0xff;
 	}
@@ -301,7 +305,9 @@ async function authentication() {
 		send_data[8+i] = g_uid[i + g_uid.length - 4];
 	}
 
-    await transceiveData(send_data, receive_data)
+    await transceiveData(MF_AUTHENT, send_data, receive_data);
+
+    console.log(`authen rcv: ${receive_data}`);
 }
 
 async function calculateCrc(data) {
@@ -333,6 +339,25 @@ async function calculateCrc(data) {
         i++;
     }
     return result;
+}
+
+async function haltA() {
+	let buffer = [];
+	
+	// Build command buffer
+	buffer[0] = PICC_CMD_HLTA;
+	buffer[1] = 0;
+	// Calculate CRC_A
+	const ret = await calculateCrc(buffer);
+	if (ret.length == 2) {
+        buffer.push(ret[0]);
+        buffer.push(ret[1]);
+        let recv_data = [];
+        await transceiveData(TRANSCEIVE, buffer, recv_data);
+    }
+
+    // exit authentication state in the end
+    await resetBit(Status2Reg, 0x08);
 }
 
 function printCardType(type) {
@@ -415,6 +440,8 @@ document.getElementById("getUidBtn").addEventListener("click", async function ()
         card_present = await cardPresent();
         if (card_present == true) {
             break;
+        } else {
+            i ++;
         }
     }
 
@@ -426,6 +453,7 @@ document.getElementById("getUidBtn").addEventListener("click", async function ()
 document.getElementById("readCardBtn").addEventListener("click", async function() {
     let i = 0;
     let card_present = false;
+    await mfrc522Initialization();
     while(i < 10) 
     {
         await new Promise(r => setTimeout(r, 1000));
@@ -433,6 +461,8 @@ document.getElementById("readCardBtn").addEventListener("click", async function(
         if (card_present == true) {
             addStatusMsg("监测到NFC卡！");
             break;
+        } else {
+            i ++;
         }
     }
 
@@ -440,12 +470,14 @@ document.getElementById("readCardBtn").addEventListener("click", async function(
         await selectCard();
         await authentication();
         await readData();
+        await haltA();
     }
 });
 
 document.getElementById("writeCardSection").addEventListener("click", async function() {
     let i = 0;
     let card_present = false;
+    await mfrc522Initialization();
     while(i < 10) 
     {
         await new Promise(r => setTimeout(r, 1000));
@@ -453,12 +485,15 @@ document.getElementById("writeCardSection").addEventListener("click", async func
         if (card_present == true) {
             addStatusMsg("监测到NFC卡！");
             break;
+        } else {
+            i ++;
         }
     }
 
     if (card_present) {
         await selectCard();
         await authentication();
-        await writeData();
+        await writeData(41, 42, 43, 44, 45);
+        await haltA();
     }
 });
