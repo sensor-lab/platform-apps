@@ -47,14 +47,60 @@
     </div>
 
     <div id="readCardSection" class="container-sm border-bottom my-2 text-center">
+        <form>
+            <div class="form-group w-50 mx-auto">
+                <label for="readStartBlock">NFC卡开始读取的block地址</label>
+                <input type="number" class="form-control" id="readStartBlock" placeholder="0" value="0">
+                <label for="blockNumbers">读取的block的数量</label>
+                <input type="number" class="form-control" id="blockNumbers" placeholder="0" value="1">
+                <select class="form-control my-4" id="exampleFormControlSelect1">
+                    <option>UTF-8</option>
+                    <option>UTF-16</option>
+                  </select>
+            </div>
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">Block地址</th>
+                    <th scope="col">二进制数据</th>
+                    <th scope="col">utf-8/16数据</th>
+                  </tr>
+                </thead>
+                <tbody id="cardReadData">
+                </tbody>
+              </table>
+        </form>
+        <div>
+
+        </div>
         <div class="my-4 d-flex justify-content-center">
             <button id="readCardBtn" class="btn btn-primary mx-3">读取NFC卡</button>
         </div>
     </div>
 
     <div id="writeCardSection" class="container-sm border-bottom my-2 text-center">
+        <div class="form-group w-50 mx-auto">
+            <label for="writeStartBlock">NFC卡写入数据的起始block地址</label>
+            <input type="number" class="form-control" id="writeStartBlock" placeholder="0" value="1">
+            <label for="blockNumbers">写入数据的格式，选择二进制或字符串</label>
+            <select class="form-control my-4" id="exampleFormControlSelect1">
+                <option>二进制</option>
+                <option>字符串</option>
+            </select>
+            <label for="blockNumbers">写入数据</label>
+            <textarea class="form-control" id="writeDataArea" rows="3"></textarea>
+        </div>
         <div class="my-4 d-flex justify-content-center">
             <button id="writeCardBtn" class="btn btn-primary mx-3">写数据到NFC卡</button>
         </div>
     </div>
+
+    <template id="readNfcDataTemplate">
+        <tr>
+            <th scope="row">1</th>
+            <td></td>
+            <td></td>
+        </tr>
+    </template>
 </body>
+

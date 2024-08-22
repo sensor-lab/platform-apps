@@ -245,12 +245,12 @@ async function selectCard() {
     }
 }
 
-async function writeData(...data) {
+async function writeData(block_id, ...data) {
     // need select then authenticate first
     let buffer = [];
 	// Build command buffer
 	buffer[0] = PICC_CMD_MF_WRITE;
-	buffer[1] = 4;          // hardcoded block 4
+	buffer[1] = block_id;
     let crc = await calculateCrc(buffer);
     if (crc.length == 2) {
         let rcv_data = [];
@@ -270,30 +270,31 @@ async function writeData(...data) {
     }
 }
 
-async function readData() {
+async function readData(block_id) {
     // need select then authenticate first
     let buffer = [];
 	// Build command buffer
 	buffer[0] = PICC_CMD_MF_READ;
-	buffer[1] = 4;          // hardcoded block 4
+	buffer[1] = block_id;
 	// Calculate CRC_A
 	crc = await calculateCrc(buffer);
+    let rcv_data = [];
 	if (crc.length == 2) {
-        let rcv_data = [];
 		buffer[2] = crc[0];
         buffer[3] = crc[1];
         await transceiveData(TRANSCEIVE, buffer, rcv_data);
         console.log(`read data: ${rcv_data}`);
     }
+    return rcv_data
 }
 
-async function authentication() {
+async function authentication(block_id) {
 	// Build command buffer
     const MF_KEY_SIZE = 6
 	let send_data = [];
     let receive_data = [];
 	send_data[0] = PICC_CMD_MF_AUTH_KEY_A;
-	send_data[1] = 4;        // hardcoded sector 0
+	send_data[1] = block_id;
 	for (let i = 0; i < MF_KEY_SIZE; i++) {	// 6 key bytes: the factory default key of 0xFFFFFFFFFFFF
 		send_data[2+i] = 0xff;
 	}
@@ -451,15 +452,13 @@ document.getElementById("getUidBtn").addEventListener("click", async function ()
 });
 
 document.getElementById("readCardBtn").addEventListener("click", async function() {
-    let i = 0;
     let card_present = false;
     await mfrc522Initialization();
-    while(i < 10) 
+    for (let i = 0; i < 10; i++)
     {
         await new Promise(r => setTimeout(r, 1000));
         card_present = await cardPresent();
         if (card_present == true) {
-            addStatusMsg("监测到NFC卡！");
             break;
         } else {
             i ++;
@@ -468,32 +467,65 @@ document.getElementById("readCardBtn").addEventListener("click", async function(
 
     if (card_present) {
         await selectCard();
-        await authentication();
-        await readData();
+        document.getElementById("cardReadData").innerHTML = ""
+        let start_block_id = parseInt(document.getElementById("readStartBlock").value);
+        let number_of_blocks = parseInt(document.getElementById("blockNumbers").value);
+        for (let i = 0; i < number_of_blocks; i++) {
+            await authentication(start_block_id + i);
+            const read_data = await readData(start_block_id + i);
+            // reference: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template
+            let temp_node = document.querySelector("#readNfcDataTemplate").content.cloneNode(true)
+            let td = temp_node.querySelectorAll("td");
+            let th = temp_node.querySelectorAll("th");
+            th[0].textContent = (start_block_id + i).toString();
+            td[0].textContent = ""
+            for (let j = 0; j < 15; j ++) {
+                td[0].textContent += `${read_data[j]}, `
+            }
+            td[0].textContent += `${read_data[15]}`
+            td[1].textContent = ""
+            document.getElementById("cardReadData").appendChild(temp_node)        
+        }
         await haltA();
     }
 });
 
-document.getElementById("writeCardSection").addEventListener("click", async function() {
-    let i = 0;
+document.getElementById("writeCardBtn").addEventListener("click", async function() {
     let card_present = false;
     await mfrc522Initialization();
-    while(i < 10) 
+    for (let i = 0; i < 10; i++) 
     {
         await new Promise(r => setTimeout(r, 1000));
         card_present = await cardPresent();
         if (card_present == true) {
-            addStatusMsg("监测到NFC卡！");
             break;
         } else {
             i ++;
         }
     }
+    let start_block_id = parseInt(document.getElementById("writeStartBlock").value);
 
     if (card_present) {
         await selectCard();
-        await authentication();
-        await writeData(41, 42, 43, 44, 45);
+        const write_data = document.getElementById("writeDataArea").value
+        const number_blocks_to_write = Math.ceil(write_data.length / 16);
+        for (let i = 0; i < number_blocks_to_write; i++) {
+            await authentication(start_block_id + i);
+            if (i == (number_blocks_to_write - 1)) {
+                // last block
+                const block_data = write_data.slice(i * 16).split("")
+                const block_data_binary = block_data.map(char => char.charCodeAt(0));
+                for (let j = 0; j < (number_blocks_to_write * 16 - write_data.length); j++) {
+                    block_data_binary.push(0x20);
+                }
+                await writeData(start_block_id + i, ...block_data_binary);
+            } else {
+                const block_data = write_data.slice(i * 16, (i + 1) * 16).split("");
+                const block_data_binary = block_data.map(char => char.charCodeAt(0));
+                await writeData(start_block_id + i, ...block_data_binary);
+            }
+        }
         await haltA();
     }
+    
 });
