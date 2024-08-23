@@ -108,7 +108,7 @@ const PICC_CMD_MF_TRANSFER= 0xB0;// Writes the contents of the internal data reg
 // The PICC_CMD_MF_READ and PICC_CMD_MF_WRITE can also be used for MIFARE Ultralight.
 const PICC_CMD_UL_WRITE= 0xA2;// Writes one 4 byte page to the PICC.
 
-const g_uid = [];
+var g_uid = [];
 
 function readRegister(opers, reg, len=1) {
     transmit_data = [reg | 0x80];
@@ -199,7 +199,10 @@ async function cardPresent() {
     let card_present = false;
     const transmit_data = [PICC_CMD_REQA];
     let receive_data = [];
-    card_present = await transceiveData(TRANSCEIVE, transmit_data, receive_data,7);
+    card_present = await transceiveData(TRANSCEIVE, transmit_data, receive_data, 7);
+    if (card_present) {
+        addStatusMsg("检测到NFC卡");
+    }
     return card_present;
 }
 
@@ -230,6 +233,7 @@ async function selectCard() {
             let receive_data = [];
             const transmit_data = [...ret_uid, crc[0], crc[1]];
             if (await transceiveData(TRANSCEIVE, transmit_data, receive_data)) {
+                g_uid = [];
                 g_uid.push(ret_uid[2]);
                 g_uid.push(ret_uid[3]);
                 g_uid.push(ret_uid[4]);
@@ -409,6 +413,34 @@ function printCardType(type) {
     document.getElementById("getUIDCard").classList.remove("d-none");
 }
 
+function decodeData(type, data) {
+    if (type == 0) {
+        return ""
+    } else if (type == 1) {
+        // ASCII
+        let ascii_data = "";
+        let valid_data = data.slice(0, 16);
+        valid_data.map((data, index, array) => {
+            ascii_data += String.fromCharCode(data);
+        });
+        return ascii_data;
+    } else if (type == 2) {
+        // UTF16
+        let utf16_data = "";
+        let valid_data = [];
+        for (let i = 0; i < 16; i += 2) {
+            valid_data.push(data[i] + (data[i + 1] << 8));
+        }
+        valid_data.map((data, index, array) => {
+            utf16_data += String.fromCharCode(data);
+        });
+        return utf16_data;
+    } else {
+        // unknown type
+        return ""
+    }
+}
+
 async function mfrc522Initialization() {
     let opers = []
     // reset the NFC module
@@ -431,6 +463,7 @@ async function mfrc522Initialization() {
     await setBit(TxControlReg, 0x3);
 }
 
+
 document.getElementById("getUidBtn").addEventListener("click", async function () {
     let i = 0;
     let card_present = false;
@@ -449,6 +482,7 @@ document.getElementById("getUidBtn").addEventListener("click", async function ()
     if (card_present) {
        await selectCard();
     }
+    removeStatusMsg();
 });
 
 document.getElementById("readCardBtn").addEventListener("click", async function() {
@@ -470,6 +504,8 @@ document.getElementById("readCardBtn").addEventListener("click", async function(
         document.getElementById("cardReadData").innerHTML = ""
         let start_block_id = parseInt(document.getElementById("readStartBlock").value);
         let number_of_blocks = parseInt(document.getElementById("blockNumbers").value);
+        let decode_type = parseInt(document.getElementById("readDataDecodeType").value);
+        addStatusMsg("正在读取中，请稍后。");
         for (let i = 0; i < number_of_blocks; i++) {
             await authentication(start_block_id + i);
             const read_data = await readData(start_block_id + i);
@@ -478,54 +514,100 @@ document.getElementById("readCardBtn").addEventListener("click", async function(
             let td = temp_node.querySelectorAll("td");
             let th = temp_node.querySelectorAll("th");
             th[0].textContent = (start_block_id + i).toString();
-            td[0].textContent = ""
+            td[0].textContent = "";
             for (let j = 0; j < 15; j ++) {
-                td[0].textContent += `${read_data[j]}, `
+                td[0].textContent += `${read_data[j]}, `;
             }
-            td[0].textContent += `${read_data[15]}`
-            td[1].textContent = ""
+            td[0].textContent += `${read_data[15]}`;
+            td[1].textContent = decodeData(decode_type, read_data);
             document.getElementById("cardReadData").appendChild(temp_node)        
         }
         await haltA();
     }
+    removeStatusMsg();
+    addStatusMsg("读数据完成");
+    window.scrollTo(0,0);
 });
 
 document.getElementById("writeCardBtn").addEventListener("click", async function() {
     let card_present = false;
-    await mfrc522Initialization();
-    for (let i = 0; i < 10; i++) 
-    {
-        await new Promise(r => setTimeout(r, 1000));
-        card_present = await cardPresent();
-        if (card_present == true) {
-            break;
-        } else {
-            i ++;
-        }
+    let ascii_input = true;
+    let error = false;
+    let binary_data;
+    const format = parseInt(document.getElementById("writeDataFormat").value);
+    const write_data = (document.getElementById("writeDataArea").value).split("");
+    if (write_data[0].charCodeAt(0) > 256) {
+        ascii_input = false;
+    } else {
+        ascii_input = true;
     }
-    let start_block_id = parseInt(document.getElementById("writeStartBlock").value);
-
-    if (card_present) {
-        await selectCard();
-        const write_data = document.getElementById("writeDataArea").value
-        const number_blocks_to_write = Math.ceil(write_data.length / 16);
-        for (let i = 0; i < number_blocks_to_write; i++) {
-            await authentication(start_block_id + i);
-            if (i == (number_blocks_to_write - 1)) {
-                // last block
-                const block_data = write_data.slice(i * 16).split("")
-                const block_data_binary = block_data.map(char => char.charCodeAt(0));
-                for (let j = 0; j < (number_blocks_to_write * 16 - write_data.length); j++) {
-                    block_data_binary.push(0x20);
-                }
-                await writeData(start_block_id + i, ...block_data_binary);
+    if (format == 0) {
+        binary_data = write_data.flatMap(char => {
+            let code = char.charCodeAt(0);
+            if (ascii_input && code < 256) {
+                return code
+            } else if (ascii_input == false && code >= 256) {
+                return [code & 0xFF, (code >> 8) & 0xff]
             } else {
-                const block_data = write_data.slice(i * 16, (i + 1) * 16).split("");
-                const block_data_binary = block_data.map(char => char.charCodeAt(0));
-                await writeData(start_block_id + i, ...block_data_binary);
+                error = true;
+                addErrorMsg("请勿将中文字符和英文字母混用，请分开进行写入。");
+            }
+        });
+    } else {
+        binary_data = write_data.reduce((acc, item, index, arr) => {
+            if (index % 2 === 1) {
+                const number_str = arr[index - 1] + item;
+                const number_binary = parseInt(number_str, 16);
+                if (NaN == number_binary) {
+                    addErrorMsg("二进制数据错误，请检查输入。")
+                }
+                acc.push(number_binary);
+            }
+            return acc;
+          }, []);
+    }
+
+    if (error == true) {
+        window.scrollTo(0,0);
+    } else {
+        await mfrc522Initialization();
+        for (let i = 0; i < 10; i++) 
+        {
+            await new Promise(r => setTimeout(r, 1000));
+            card_present = await cardPresent();
+            if (card_present == true) {
+                break;
+            } else {
+                i ++;
             }
         }
-        await haltA();
+        let start_block_id = parseInt(document.getElementById("writeStartBlock").value);
+
+        if (card_present) {
+            await selectCard();
+            const number_blocks_to_write = Math.ceil(binary_data.length / 16);
+            addStatusMsg("正在写入中，请稍后。");
+            for (let i = 0; i < number_blocks_to_write; i++) {
+                await authentication(start_block_id + i);
+                if (i == (number_blocks_to_write - 1)) {
+                    // last block
+                    const block_data = binary_data.slice(i * 16)
+                    for (let j = 0; j < (number_blocks_to_write * 16 - binary_data.length); j++) {
+                        block_data.push(0x20);
+                    }
+                    await writeData(start_block_id + i, ...block_data);
+                } else {
+                    const block_data = binary_data.slice(i * 16, (i + 1) * 16);
+                    await writeData(start_block_id + i, ...block_data);
+                }
+            }
+            await haltA();
+        }
+        removeStatusMsg();
+        addStatusMsg("写数据完成");
+        window.scrollTo(0,0);
     }
+
+
     
 });

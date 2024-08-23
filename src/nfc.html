@@ -53,10 +53,12 @@
                 <input type="number" class="form-control" id="readStartBlock" placeholder="0" value="0">
                 <label for="blockNumbers">读取的block的数量</label>
                 <input type="number" class="form-control" id="blockNumbers" placeholder="0" value="1">
-                <select class="form-control my-4" id="exampleFormControlSelect1">
-                    <option>UTF-8</option>
-                    <option>UTF-16</option>
-                  </select>
+                <label for="readDataDecodeType">数据解析方式</label>
+                <select class="form-control" id="readDataDecodeType">
+                    <option value="0">无解析</option>
+                    <option value="1">ASCII</option>
+                    <option value="2">UTF-16</option>
+                </select>
             </div>
             <table class="table">
                 <thead>
@@ -82,10 +84,10 @@
         <div class="form-group w-50 mx-auto">
             <label for="writeStartBlock">NFC卡写入数据的起始block地址</label>
             <input type="number" class="form-control" id="writeStartBlock" placeholder="0" value="1">
-            <label for="blockNumbers">写入数据的格式，选择二进制或字符串</label>
-            <select class="form-control my-4" id="exampleFormControlSelect1">
-                <option>二进制</option>
-                <option>字符串</option>
+            <label for="blockNumbers">写入数据的格式，选择字符串或二进制</label>
+            <select class="form-control my-4" id="writeDataFormat">
+                <option value="0">字符串</option>
+                <option value="1">二进制</option>
             </select>
             <label for="blockNumbers">写入数据</label>
             <textarea class="form-control" id="writeDataArea" rows="3"></textarea>
