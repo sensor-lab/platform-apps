@@ -109,43 +109,72 @@ const PICC_CMD_MF_TRANSFER= 0xB0;// Writes the contents of the internal data reg
 const PICC_CMD_UL_WRITE= 0xA2;// Writes one 4 byte page to the PICC.
 
 var g_uid = [];
+var mosi_pin = undefined;
+var miso_pin = undefined;
+var sck_pin = undefined;
+var cs_pin = undefined;
+
+if (localStorage.getItem("mfrc522_pin")) {
+    mosi_pin = parseInt(localStorage.getItem("mfrc522_pin"));
+    miso_pin = mosi_pin + 1;
+    sck_pin = mosi_pin + 2;
+    cs_pin = mosi_pin + 3;
+    document.getElementById("mfrc522PinSelect").value = mosi_pin;
+    showPin();
+}
+
+function showPin() {
+    if (mosi_pin !== undefined) {
+        document.getElementById("moduleConnectionInfo").innerHTML = 
+        `MOSI: ${mosi_pin},MISO: ${miso_pin},SCK: ${sck_pin},CS: ${cs_pin}`
+    }
+    document.getElementById("pinCard").classList.remove("d-none");
+}
 
 function readRegister(opers, reg, len=1) {
     transmit_data = [reg | 0x80];
     for (i = 0; i < len - 1; i++) {
         transmit_data.push(reg | 0x80);
     }
-    spiHardwareOperation(opers, 0, 16, 17, 18, 19, 400, 0, 1, len, ...transmit_data);
-    
+    if (mosi_pin === undefined) {
+        addErrorMsg("请选择MFRC522模块正确的连接引脚");
+    } else {
+        spiHardwareOperation(opers, 0, mosi_pin, miso_pin, sck_pin, cs_pin, 400, 0, 1, len, ...transmit_data);
+    }
 }
 
 function writeRegister(opers, reg, ...data) {
     const write_data = [reg, ...data];
-    spiHardwareOperation(opers, 0, 16, 17, 18, 19, 400, 0, 0, 0, ...write_data);
+    if (mosi_pin === undefined) {
+        addErrorMsg("请选择MFRC522模块正确的连接引脚");
+    } else {
+        spiHardwareOperation(opers, 0, mosi_pin, miso_pin, sck_pin, cs_pin, 400, 0, 0, 0, ...write_data);
+
+    }
 }
 
 async function setBit(reg, val) {
     opers = [];
     readRegister(opers, reg);
     let now_event = constructNowEvent(opers);
-    let ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+    let ret = await postHardwareOperation(now_event);
     const write_val = ret["result"][0][0] | val;
     opers = [];
     writeRegister(opers, reg, write_val);
     now_event = constructNowEvent(opers);
-    ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+    ret = await postHardwareOperation(now_event);
 } 
 
 async function resetBit(reg, val) {
     opers = [];
     readRegister(opers, reg);
     let now_event = constructNowEvent(opers);
-    let ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+    let ret = await postHardwareOperation(now_event);
     const write_val = ret["result"][0][0] & (~val);
     opers = [];
     writeRegister(opers, reg, write_val);
     now_event = constructNowEvent(opers);
-    ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+    ret = await postHardwareOperation(now_event);
 }
 
 async function transceiveData(cmd, transmit_data, receive_data, tx_last_bits=0) {
@@ -162,7 +191,7 @@ async function transceiveData(cmd, transmit_data, receive_data, tx_last_bits=0) 
     writeRegister(opers, BitFramingReg, tx_last_bits);
     writeRegister(opers, CommandReg, cmd);
     let now_event = constructNowEvent(opers);
-    await postHardwareOperation(now_event, "http://192.168.1.108");
+    await postHardwareOperation(now_event);
     opers = [];
     await setBit(BitFramingReg, 0x80);      // start sending
 
@@ -172,7 +201,7 @@ async function transceiveData(cmd, transmit_data, receive_data, tx_last_bits=0) 
         opers = [];
         readRegister(opers, ComIrqReg);
         now_event = constructNowEvent(opers);
-        let ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+        let ret = await postHardwareOperation(now_event);
         if (ret["result"][0][0] & 0x30) {
             data_received = true;
             break;
@@ -184,12 +213,12 @@ async function transceiveData(cmd, transmit_data, receive_data, tx_last_bits=0) 
         opers = [];
         readRegister(opers, FIFOLevelReg);
         now_event = constructNowEvent(opers);
-        let ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+        let ret = await postHardwareOperation(now_event);
         const fifo_level = ret["result"][0][0];
         opers = [];
         readRegister(opers, FIFODataReg, fifo_level);
         now_event = constructNowEvent(opers);
-        ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+        ret = await postHardwareOperation(now_event);
         receive_data.push(...ret["result"][0]);
     }
     return data_received
@@ -214,7 +243,7 @@ async function selectCard() {
     opers = [];
     writeRegister(opers, BitFramingReg, 0);
     let now_event = constructNowEvent(opers);
-    await postHardwareOperation(now_event, "http://192.168.1.108");
+    await postHardwareOperation(now_event);
     const transmit_data = [PICC_CMD_SEL_CL1, 0x20];
     let receive_data = [];
     if (await transceiveData(TRANSCEIVE, transmit_data, receive_data)) {
@@ -324,20 +353,20 @@ async function calculateCrc(data) {
     writeRegister(opers, FIFODataReg, ...data);
     writeRegister(opers, CommandReg, CALCULATE_CRC);
     let now_event = constructNowEvent(opers);
-    await postHardwareOperation(now_event, "http://192.168.1.108");
+    await postHardwareOperation(now_event);
     let i = 0;
     while (i < 5)
     {
         opers = [];
         readRegister(opers, DivIrqReg);
         now_event = constructNowEvent(opers);
-        let ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+        let ret = await postHardwareOperation(now_event);
         if (ret["result"][0][0] & 0x04) {
             opers = [];
             readRegister(opers, CRCResultRegL);
             readRegister(opers, CRCResultRegH);
             now_event = constructNowEvent(opers);
-            ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+            ret = await postHardwareOperation(now_event);
             result.push(ret["result"][0][0], ret["result"][1][0]);
             break;
         }
@@ -457,7 +486,7 @@ async function mfrc522Initialization() {
     writeRegister(opers, ModGsPReg, 64)
     writeRegister(opers, ModeReg, 61);
     let now_event = constructNowEvent(opers);
-    let ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+    let ret = await postHardwareOperation(now_event);
     opers = [];
     // turn on antenna
     await setBit(TxControlReg, 0x3);
@@ -606,8 +635,14 @@ document.getElementById("writeCardBtn").addEventListener("click", async function
         removeStatusMsg();
         addStatusMsg("写数据完成");
         window.scrollTo(0,0);
-    }
+    }    
+});
 
-
-    
+document.getElementById("mfrc522PinSelect").addEventListener("change", function(event) {
+    mosi_pin = parseInt(event.target.value);
+    miso_pin = mosi_pin + 1;
+    sck_pin = mosi_pin + 2;
+    cs_pin = mosi_pin + 3;
+    localStorage.setItem("mfrc522_pin", mosi_pin);
+    showPin();
 });
