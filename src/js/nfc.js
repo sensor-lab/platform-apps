@@ -136,21 +136,13 @@ function readRegister(opers, reg, len=1) {
     for (i = 0; i < len - 1; i++) {
         transmit_data.push(reg | 0x80);
     }
-    if (mosi_pin === undefined) {
-        addErrorMsg("请选择MFRC522模块正确的连接引脚");
-    } else {
-        spiHardwareOperation(opers, 0, mosi_pin, miso_pin, sck_pin, cs_pin, 400, 0, 1, len, ...transmit_data);
-    }
+    
+    spiHardwareOperation(opers, 0, mosi_pin, miso_pin, sck_pin, cs_pin, 400, 0, 1, len, ...transmit_data);
 }
 
 function writeRegister(opers, reg, ...data) {
     const write_data = [reg, ...data];
-    if (mosi_pin === undefined) {
-        addErrorMsg("请选择MFRC522模块正确的连接引脚");
-    } else {
-        spiHardwareOperation(opers, 0, mosi_pin, miso_pin, sck_pin, cs_pin, 400, 0, 0, 0, ...write_data);
-
-    }
+    spiHardwareOperation(opers, 0, mosi_pin, miso_pin, sck_pin, cs_pin, 400, 0, 0, 0, ...write_data);
 }
 
 async function setBit(reg, val) {
@@ -244,7 +236,7 @@ async function selectCard() {
     writeRegister(opers, BitFramingReg, 0);
     let now_event = constructNowEvent(opers);
     await postHardwareOperation(now_event);
-    const transmit_data = [PICC_CMD_SEL_CL1, 0x20];
+    let transmit_data = [PICC_CMD_SEL_CL1, 0x20];
     let receive_data = [];
     if (await transceiveData(TRANSCEIVE, transmit_data, receive_data)) {
         if (receive_data.length == 5) {
@@ -253,22 +245,50 @@ async function selectCard() {
         }
     }
 
+    let is_cascade = false;
     let get_type = false;
     let type = 0;
     if (get_uid) {
         const crc = await calculateCrc(ret_uid);
-        console.log(`crc: ${crc}`);
         if (crc.length == 2) {
             let receive_data = [];
-            const transmit_data = [...ret_uid, crc[0], crc[1]];
+            transmit_data = [...ret_uid, crc[0], crc[1]];
             if (await transceiveData(TRANSCEIVE, transmit_data, receive_data)) {
                 g_uid = [];
-                g_uid.push(ret_uid[2]);
-                g_uid.push(ret_uid[3]);
-                g_uid.push(ret_uid[4]);
-                g_uid.push(ret_uid[5]);
-                get_type = true;
-                type = receive_data[0] & 0x7F;
+                if (ret_uid[2] == PICC_CMD_CT) {
+                    g_uid.push(ret_uid[3]);
+                    g_uid.push(ret_uid[4]);
+                    g_uid.push(ret_uid[5]);
+                    is_cascade = true;
+                } else {
+                    g_uid.push(ret_uid[2]);
+                    g_uid.push(ret_uid[3]);
+                    g_uid.push(ret_uid[4]);
+                    g_uid.push(ret_uid[5]);
+                    get_type = true;
+                    type = receive_data[0] & 0x7F;
+                }
+            }
+        }
+    }
+
+    if (is_cascade) {
+        transmit_data = [PICC_CMD_SEL_CL2, 0x20];
+        receive_data = [];
+        if (await transceiveData(TRANSCEIVE, transmit_data, receive_data)) {
+            ret_uid = [PICC_CMD_SEL_CL2, 0x70, ...receive_data];
+            const crc = await calculateCrc(ret_uid);
+            if (crc.length == 2) {
+                let receive_data = [];
+                transmit_data = [...ret_uid, crc[0], crc[1]];
+                if (await transceiveData(TRANSCEIVE, transmit_data, receive_data)) {
+                    g_uid.push(ret_uid[2]);
+                    g_uid.push(ret_uid[3]);
+                    g_uid.push(ret_uid[4]);
+                    g_uid.push(ret_uid[5]);
+                    get_type = true;
+                    type = receive_data[0] & 0x7F;
+                }
             }
         }
     }
@@ -496,66 +516,74 @@ async function mfrc522Initialization() {
 document.getElementById("getUidBtn").addEventListener("click", async function () {
     let i = 0;
     let card_present = false;
-    await mfrc522Initialization();
-    while(i < 10) 
-    {
-        await new Promise(r => setTimeout(r, 1000));
-        card_present = await cardPresent();
-        if (card_present == true) {
-            break;
-        } else {
-            i ++;
+    if (mosi_pin === undefined) {
+        addErrorMsg("请选择MFRC522模块正确的连接引脚");
+    } else {
+        await mfrc522Initialization();
+        while(i < 10) 
+        {
+            await new Promise(r => setTimeout(r, 1000));
+            card_present = await cardPresent();
+            if (card_present == true) {
+                break;
+            } else {
+                i ++;
+            }
         }
+    
+        if (card_present) {
+           await selectCard();
+        }
+        removeStatusMsg();
     }
-
-    if (card_present) {
-       await selectCard();
-    }
-    removeStatusMsg();
 });
 
 document.getElementById("readCardBtn").addEventListener("click", async function() {
     let card_present = false;
-    await mfrc522Initialization();
-    for (let i = 0; i < 10; i++)
-    {
-        await new Promise(r => setTimeout(r, 1000));
-        card_present = await cardPresent();
-        if (card_present == true) {
-            break;
-        } else {
-            i ++;
-        }
-    }
-
-    if (card_present) {
-        await selectCard();
-        document.getElementById("cardReadData").innerHTML = ""
-        let start_block_id = parseInt(document.getElementById("readStartBlock").value);
-        let number_of_blocks = parseInt(document.getElementById("blockNumbers").value);
-        let decode_type = parseInt(document.getElementById("readDataDecodeType").value);
-        addStatusMsg("正在读取中，请稍后。");
-        for (let i = 0; i < number_of_blocks; i++) {
-            await authentication(start_block_id + i);
-            const read_data = await readData(start_block_id + i);
-            // reference: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template
-            let temp_node = document.querySelector("#readNfcDataTemplate").content.cloneNode(true)
-            let td = temp_node.querySelectorAll("td");
-            let th = temp_node.querySelectorAll("th");
-            th[0].textContent = (start_block_id + i).toString();
-            td[0].textContent = "";
-            for (let j = 0; j < 15; j ++) {
-                td[0].textContent += `${read_data[j]}, `;
+    if (mosi_pin === undefined) {
+        addErrorMsg("请选择MFRC522模块正确的连接引脚");
+    } else {
+        await mfrc522Initialization();
+        for (let i = 0; i < 10; i++)
+        {
+            await new Promise(r => setTimeout(r, 1000));
+            card_present = await cardPresent();
+            if (card_present == true) {
+                break;
+            } else {
+                i ++;
             }
-            td[0].textContent += `${read_data[15]}`;
-            td[1].textContent = decodeData(decode_type, read_data);
-            document.getElementById("cardReadData").appendChild(temp_node)        
         }
-        await haltA();
+
+        if (card_present) {
+            await selectCard();
+            document.getElementById("cardReadData").innerHTML = ""
+            let start_block_id = parseInt(document.getElementById("readStartBlock").value);
+            let number_of_blocks = parseInt(document.getElementById("blockNumbers").value);
+            let decode_type = parseInt(document.getElementById("readDataDecodeType").value);
+            addStatusMsg("正在读取中，请稍后。");
+            for (let i = 0; i < number_of_blocks; i++) {
+                await authentication(start_block_id + i);
+                const read_data = await readData(start_block_id + i);
+                // reference: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template
+                let temp_node = document.querySelector("#readNfcDataTemplate").content.cloneNode(true)
+                let td = temp_node.querySelectorAll("td");
+                let th = temp_node.querySelectorAll("th");
+                th[0].textContent = (start_block_id + i).toString();
+                td[0].textContent = "";
+                for (let j = 0; j < 15; j ++) {
+                    td[0].textContent += `${read_data[j]}, `;
+                }
+                td[0].textContent += `${read_data[15]}`;
+                td[1].textContent = decodeData(decode_type, read_data);
+                document.getElementById("cardReadData").appendChild(temp_node)        
+            }
+            await haltA();
+        }
+        removeStatusMsg();
+        addStatusMsg("读数据完成");
+        window.scrollTo(0,0);
     }
-    removeStatusMsg();
-    addStatusMsg("读数据完成");
-    window.scrollTo(0,0);
 });
 
 document.getElementById("writeCardBtn").addEventListener("click", async function() {
@@ -596,7 +624,9 @@ document.getElementById("writeCardBtn").addEventListener("click", async function
           }, []);
     }
 
-    if (error == true) {
+    if (mosi_pin === undefined) {
+        addErrorMsg("请选择MFRC522模块正确的连接引脚");
+    } else if (error == true) {
         window.scrollTo(0,0);
     } else {
         await mfrc522Initialization();
