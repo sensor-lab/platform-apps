@@ -296,6 +296,8 @@ async function selectCard() {
     if (get_type) {
         printCardType(type);
     }
+
+    return type;
 }
 
 async function writeData(block_id, ...data) {
@@ -336,7 +338,6 @@ async function readData(block_id) {
 		buffer[2] = crc[0];
         buffer[3] = crc[1];
         await transceiveData(TRANSCEIVE, buffer, rcv_data);
-        console.log(`read data: ${rcv_data}`);
     }
     return rcv_data
 }
@@ -360,8 +361,6 @@ async function authentication(block_id) {
 	}
 
     await transceiveData(MF_AUTHENT, send_data, receive_data);
-
-    console.log(`authen rcv: ${receive_data}`);
 }
 
 async function calculateCrc(data) {
@@ -556,32 +555,38 @@ document.getElementById("readCardBtn").addEventListener("click", async function(
         }
 
         if (card_present) {
-            await selectCard();
+            const type = await selectCard();
             document.getElementById("cardReadData").innerHTML = ""
             let start_block_id = parseInt(document.getElementById("readStartBlock").value);
             let number_of_blocks = parseInt(document.getElementById("blockNumbers").value);
             let decode_type = parseInt(document.getElementById("readDataDecodeType").value);
-            addStatusMsg("正在读取中，请稍后。");
-            for (let i = 0; i < number_of_blocks; i++) {
-                await authentication(start_block_id + i);
-                const read_data = await readData(start_block_id + i);
-                // reference: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template
-                let temp_node = document.querySelector("#readNfcDataTemplate").content.cloneNode(true)
-                let td = temp_node.querySelectorAll("td");
-                let th = temp_node.querySelectorAll("th");
-                th[0].textContent = (start_block_id + i).toString();
-                td[0].textContent = "";
-                for (let j = 0; j < 15; j ++) {
-                    td[0].textContent += `${read_data[j]}, `;
+            if (type != 0x09 && type != 0x08 && type != 0x18) {
+                addErrorMsg("读数据目前只支持NFC卡类型 PICC_TYPE_MIFARE_MINI/PICC_TYPE_MIFARE_1K/PICC_TYPE_MIFARE_4K");
+            } else {
+                addStatusMsg("正在读取中，请稍后。");
+                for (let i = 0; i < number_of_blocks; i++) {
+                    await authentication(start_block_id + i);
+                    const read_data = await readData(start_block_id + i);
+                    // reference: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template
+                    let temp_node = document.querySelector("#readNfcDataTemplate").content.cloneNode(true)
+                    let td = temp_node.querySelectorAll("td");
+                    let th = temp_node.querySelectorAll("th");
+                    th[0].textContent = (start_block_id + i).toString();
+                    td[0].textContent = "";
+                    for (let j = 0; j < 15; j ++) {
+                        td[0].textContent += `${read_data[j]}, `;
+                    }
+                    td[0].textContent += `${read_data[15]}`;
+                    td[1].textContent = decodeData(decode_type, read_data);
+                    document.getElementById("cardReadData").appendChild(temp_node)        
                 }
-                td[0].textContent += `${read_data[15]}`;
-                td[1].textContent = decodeData(decode_type, read_data);
-                document.getElementById("cardReadData").appendChild(temp_node)        
+                await haltA();
+                removeStatusMsg();
+                addStatusMsg("读数据完成");        
             }
-            await haltA();
+        } else {
+            addErrorMsg("请将卡放置在读卡器上，并进行重新读取操作。");
         }
-        removeStatusMsg();
-        addStatusMsg("读数据完成");
         window.scrollTo(0,0);
     }
 });
@@ -643,29 +648,35 @@ document.getElementById("writeCardBtn").addEventListener("click", async function
         let start_block_id = parseInt(document.getElementById("writeStartBlock").value);
 
         if (card_present) {
-            await selectCard();
-            const number_blocks_to_write = Math.ceil(binary_data.length / 16);
-            addStatusMsg("正在写入中，请稍后。");
-            for (let i = 0; i < number_blocks_to_write; i++) {
-                await authentication(start_block_id + i);
-                if (i == (number_blocks_to_write - 1)) {
-                    // last block
-                    const block_data = binary_data.slice(i * 16)
-                    for (let j = 0; j < (number_blocks_to_write * 16 - binary_data.length); j++) {
-                        block_data.push(0x20);
+            const type = await selectCard();
+            if (type != 0x09 && type != 0x08 && type != 0x18) {
+                addErrorMsg("读数据目前只支持NFC卡类型 PICC_TYPE_MIFARE_MINI/PICC_TYPE_MIFARE_1K/PICC_TYPE_MIFARE_4K");
+            } else {
+                const number_blocks_to_write = Math.ceil(binary_data.length / 16);
+                addStatusMsg("正在写入中，请稍后。");
+                for (let i = 0; i < number_blocks_to_write; i++) {
+                    await authentication(start_block_id + i);
+                    if (i == (number_blocks_to_write - 1)) {
+                        // last block
+                        const block_data = binary_data.slice(i * 16)
+                        for (let j = 0; j < (number_blocks_to_write * 16 - binary_data.length); j++) {
+                            block_data.push(0x20);
+                        }
+                        await writeData(start_block_id + i, ...block_data);
+                    } else {
+                        const block_data = binary_data.slice(i * 16, (i + 1) * 16);
+                        await writeData(start_block_id + i, ...block_data);
                     }
-                    await writeData(start_block_id + i, ...block_data);
-                } else {
-                    const block_data = binary_data.slice(i * 16, (i + 1) * 16);
-                    await writeData(start_block_id + i, ...block_data);
                 }
+                await haltA();        
+                removeStatusMsg();
+                addStatusMsg("写数据完成");
+                window.scrollTo(0,0);
             }
-            await haltA();
+        } else {
+            addErrorMsg("请将卡放置在读卡器上，并进行重新写入操作。");
         }
-        removeStatusMsg();
-        addStatusMsg("写数据完成");
-        window.scrollTo(0,0);
-    }    
+    }
 });
 
 document.getElementById("mfrc522PinSelect").addEventListener("change", function(event) {
