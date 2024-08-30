@@ -620,7 +620,7 @@ document.getElementById("writeCardBtn").addEventListener("click", async function
             if (index % 2 === 1) {
                 const number_str = arr[index - 1] + item;
                 const number_binary = parseInt(number_str, 16);
-                if (NaN == number_binary) {
+                if (isNaN(number_binary)) {
                     addErrorMsg("二进制数据错误，请检查输入。")
                 }
                 acc.push(number_binary);

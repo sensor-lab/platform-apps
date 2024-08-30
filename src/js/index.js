@@ -10,7 +10,7 @@ const main_apps_categories = [
         apps: ["relay", "color_led", "score_board", "led_panel"]
     }, {
         name: "传感器",
-        apps: ["force_sensing", "temperature", "infrared_transceiver"]
+        apps: ["force_sensing", "temperature", "infrared_transceiver","camera"]
     }, {
         name: "声音类", 
         apps: ["buzzer_note_player"]
@@ -97,6 +97,12 @@ const main_apps_info = [
         id: "nfc",
         name: "nfc读写卡器",
         description: "将RC522 NFC模块和平台连接，通过SPI总线读写NFC卡。",
+        document: "https://www.sensor-lab.io",
+    },
+    {
+        id: "camera",
+        name: "远程照相机",
+        description: "使用Arducam Mini照相机，进行远程拍照。",
         document: "https://www.sensor-lab.io",
     }
 ];
