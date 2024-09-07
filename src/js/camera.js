@@ -10,6 +10,7 @@ import {
 // many hidden registers though....
 // Register table - OV2640 DSP address
 const R_BPASS_REG = 0x05;
+const QS_REG = 0x44;
 const CTRLI_REG = 0x50;
 const HSIZE_REG = 0x51;
 const VSIZE_REG = 0x52;
@@ -39,9 +40,15 @@ const REG04_REG = 0x04;
 const COM2_REG = 0x09;
 const COM3_REG = 0x0c;
 const COM4_REG = 0x0d;
+const AEC_REG = 0x10;
 const CLKRC_REG = 0x11;
 const COM7_REG = 0x12;
+const COM7_COLOR_BAR = 0x02;
 const COM8_REG = 0x13;
+const COM8_DEFAULT_VAL = 0xc0;
+const COM8_BNDF_EN = 0x20;
+const COM8_AGC_EN = 0x04;
+const COM8_AEC_EN = 0x01;
 const COM9_REG = 0x14;
 const COM10_REG = 0x15;
 const HREFST_REG = 0x17;
@@ -53,11 +60,14 @@ const AEB_REG = 0x25;
 const VV_REG = 0x26;
 const REG32_REG = 0x32;
 const ARCOM2_REG = 0x34;
+const REG45_REG = 0x45;
 const FLL_REG = 0x46;
 const BD50_REG = 0x4f;
 const BD60_REG = 0x50;
 const HISTO_LOW_REG = 0x61;
 const HISTO_HIGH_REG = 0x62;
+const BPADDR_REG = 0x7c;
+const BPDATA_REG = 0x7d;
 
 // Register table - Arducam SPI registers
 const ARDUCAM_TEST_REG = 0x00;
@@ -288,6 +298,237 @@ const ov2640_init_regs = [
   new CameraConfigReg(R_BPASS_REG, 0x00), // 使能DSP
 ];
 
+const SPECIAL_EFFECT_NORMAL_ID = 0;
+const SPECIAL_EFFECT_BLUEISH_ID = 1;
+const SPECIAL_EFFECT_REDISH_ID = 2;
+const SPECIAL_EFFECT_BLACK_WHITE_ID = 3;
+const SPECIAL_EFFECT_SEPIA_ID = 4;
+const SPECIAL_EFFECT_NEGATIVE_ID = 5;
+const SPECIAL_EFFECT_GREENISH_ID = 6;
+const SPECIAL_EFFECT_BLACK_WHITE_NEGATIVE_ID = 7;
+
+const ov2640_special_regs = [
+  [
+    // normal
+    new CameraConfigReg(RA_DLMT_REG, 0x00),
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x00),
+    new CameraConfigReg(BPADDR_REG, 0x05),
+    new CameraConfigReg(BPDATA_REG, 0x80),
+    new CameraConfigReg(BPDATA_REG, 0x80),
+  ],
+  [
+    // Blueish (cool light)
+    new CameraConfigReg(RA_DLMT_REG, 0x00),
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x18),
+    new CameraConfigReg(BPADDR_REG, 0x05),
+    new CameraConfigReg(BPDATA_REG, 0xa0),
+    new CameraConfigReg(BPDATA_REG, 0x40),
+  ],
+  [
+    // Redish (warm light)
+    new CameraConfigReg(RA_DLMT_REG, 0x00),
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x18),
+    new CameraConfigReg(BPADDR_REG, 0x05),
+    new CameraConfigReg(BPDATA_REG, 0x40),
+    new CameraConfigReg(BPDATA_REG, 0xc0),
+  ],
+  [
+    // black and white
+    new CameraConfigReg(RA_DLMT_REG, 0x00),
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x18),
+    new CameraConfigReg(BPADDR_REG, 0x05),
+    new CameraConfigReg(BPDATA_REG, 0x80),
+    new CameraConfigReg(BPDATA_REG, 0x80),
+  ],
+  [
+    // Sepia
+    new CameraConfigReg(RA_DLMT_REG, 0x00),
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x18),
+    new CameraConfigReg(BPADDR_REG, 0x05),
+    new CameraConfigReg(BPDATA_REG, 0x40),
+    new CameraConfigReg(BPDATA_REG, 0xa6),
+  ],
+  [
+    // Negative
+    new CameraConfigReg(RA_DLMT_REG, 0x00),
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x40),
+    new CameraConfigReg(BPADDR_REG, 0x05),
+    new CameraConfigReg(BPDATA_REG, 0x80),
+    new CameraConfigReg(BPDATA_REG, 0x80),
+  ],
+  [
+    // Greenish
+    new CameraConfigReg(RA_DLMT_REG, 0x00),
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x18),
+    new CameraConfigReg(BPADDR_REG, 0x05),
+    new CameraConfigReg(BPDATA_REG, 0x50),
+    new CameraConfigReg(BPDATA_REG, 0x50),
+  ],
+  [
+    // Black and white negative
+    new CameraConfigReg(RA_DLMT_REG, 0x00),
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x58),
+    new CameraConfigReg(BPADDR_REG, 0x05),
+    new CameraConfigReg(BPDATA_REG, 0x80),
+    new CameraConfigReg(BPDATA_REG, 0x80),
+  ],
+];
+
+const ov2640_contract_regs = [
+  [
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x04),
+    new CameraConfigReg(BPADDR_REG, 0x07),
+    new CameraConfigReg(BPDATA_REG, 0x20),
+    new CameraConfigReg(BPDATA_REG, 0x18),
+    new CameraConfigReg(BPDATA_REG, 0x34),
+    new CameraConfigReg(BPDATA_REG, 0x06),
+  ],
+  [
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x04),
+    new CameraConfigReg(BPADDR_REG, 0x07),
+    new CameraConfigReg(BPDATA_REG, 0x20),
+    new CameraConfigReg(BPDATA_REG, 0x1c),
+    new CameraConfigReg(BPDATA_REG, 0x2a),
+    new CameraConfigReg(BPDATA_REG, 0x06),
+  ],
+  [
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x04),
+    new CameraConfigReg(BPADDR_REG, 0x07),
+    new CameraConfigReg(BPDATA_REG, 0x20),
+    new CameraConfigReg(BPDATA_REG, 0x20),
+    new CameraConfigReg(BPDATA_REG, 0x20),
+    new CameraConfigReg(BPDATA_REG, 0x06),
+  ],
+  [
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x04),
+    new CameraConfigReg(BPADDR_REG, 0x07),
+    new CameraConfigReg(BPDATA_REG, 0x20),
+    new CameraConfigReg(BPDATA_REG, 0x24),
+    new CameraConfigReg(BPDATA_REG, 0x16),
+    new CameraConfigReg(BPDATA_REG, 0x06),
+  ],
+  [
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x04),
+    new CameraConfigReg(BPADDR_REG, 0x07),
+    new CameraConfigReg(BPDATA_REG, 0x20),
+    new CameraConfigReg(BPDATA_REG, 0x28),
+    new CameraConfigReg(BPDATA_REG, 0x0c),
+    new CameraConfigReg(BPDATA_REG, 0x06),
+  ],
+];
+
+const ov2640_brightness_regs = [
+  [
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x04),
+    new CameraConfigReg(BPADDR_REG, 0x09),
+    new CameraConfigReg(BPDATA_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x00),
+  ],
+  [
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x04),
+    new CameraConfigReg(BPADDR_REG, 0x09),
+    new CameraConfigReg(BPDATA_REG, 0x10),
+    new CameraConfigReg(BPDATA_REG, 0x00),
+  ],
+  [
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x04),
+    new CameraConfigReg(BPADDR_REG, 0x09),
+    new CameraConfigReg(BPDATA_REG, 0x20),
+    new CameraConfigReg(BPDATA_REG, 0x00),
+  ],
+  [
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x04),
+    new CameraConfigReg(BPADDR_REG, 0x09),
+    new CameraConfigReg(BPDATA_REG, 0x30),
+    new CameraConfigReg(BPDATA_REG, 0x00),
+  ],
+  [
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x04),
+    new CameraConfigReg(BPADDR_REG, 0x09),
+    new CameraConfigReg(BPDATA_REG, 0x40),
+    new CameraConfigReg(BPDATA_REG, 0x00),
+  ],
+];
+
+const ov2640_saturation_regs = [
+  [
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x02),
+    new CameraConfigReg(BPADDR_REG, 0x03),
+    new CameraConfigReg(BPDATA_REG, 0x28),
+    new CameraConfigReg(BPDATA_REG, 0x28),
+  ],
+  [
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x02),
+    new CameraConfigReg(BPADDR_REG, 0x03),
+    new CameraConfigReg(BPDATA_REG, 0x38),
+    new CameraConfigReg(BPDATA_REG, 0x38),
+  ],
+  [
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x02),
+    new CameraConfigReg(BPADDR_REG, 0x03),
+    new CameraConfigReg(BPDATA_REG, 0x48),
+    new CameraConfigReg(BPDATA_REG, 0x48),
+  ],
+  [
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x02),
+    new CameraConfigReg(BPADDR_REG, 0x03),
+    new CameraConfigReg(BPDATA_REG, 0x58),
+    new CameraConfigReg(BPDATA_REG, 0x58),
+  ],
+  [
+    new CameraConfigReg(BPADDR_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x02),
+    new CameraConfigReg(BPADDR_REG, 0x03),
+    new CameraConfigReg(BPDATA_REG, 0x68),
+    new CameraConfigReg(BPDATA_REG, 0x68),
+  ],
+];
+
+const ov2640_light_mode_regs = [
+  [
+    new CameraConfigReg(0xcc, 0x5e),
+    new CameraConfigReg(0xcd, 0x41),
+    new CameraConfigReg(0xce, 0x54),
+  ],
+  [
+    new CameraConfigReg(0xcc, 0x52),
+    new CameraConfigReg(0xcd, 0x41),
+    new CameraConfigReg(0xce, 0x66),
+  ],
+  [
+    new CameraConfigReg(0xcc, 0x65),
+    new CameraConfigReg(0xcd, 0x41),
+    new CameraConfigReg(0xce, 0x4f),
+  ],
+  [
+    new CameraConfigReg(0xcc, 0x42),
+    new CameraConfigReg(0xcd, 0x3f),
+    new CameraConfigReg(0xce, 0x71),
+  ],
+];
+
 var mosi_pin = 2;
 var miso_pin = 1;
 var sck_pin = 0;
@@ -381,6 +622,24 @@ function readOvReg(opers, reg_addr, read_len = 1) {
   );
 }
 
+function addErrorMsg(message) {
+  document.getElementById("errorMsg").innerHTML = message;
+  document.getElementById("errorMsg").classList.remove("d-none");
+}
+
+function removeErrorMsg() {
+  document.getElementById("errorMsg").classList.add("d-none");
+}
+
+function addStatusMsg(message) {
+  document.getElementById("statusMsg").innerHTML = message;
+  document.getElementById("statusMsg").classList.remove("d-none");
+}
+
+function removeStatusMsg() {
+  document.getElementById("statusMsg").classList.add("d-none");
+}
+
 async function CameraInit() {
   const batch_num = 50;
   for (let i = 0; i < ov2640_init_regs.length; i += batch_num) {
@@ -404,8 +663,8 @@ async function CameraInit() {
 }
 
 async function SetFrameSize() {
-  const frame_width = 160; //400   // 图像长度, has to module of 4
-  const frame_height = 120; //300  // 图像宽度, has to module of 4
+  const frame_width = 800; // 图像长度, has to module of 4
+  const frame_height = 600; // 图像宽度, has to module of 4
   const opers = [];
 
   writeOvReg(opers, RA_DLMT_REG, 0x00); // 选择 DSP寄存器组
@@ -504,6 +763,170 @@ async function SetJpegFormat() {
   const ret = await postHardwareOperation(now_event, "http://192.168.1.108");
 }
 
+async function SetSpecialEffect(effect_id) {
+  if (sde >= ov2640_special_regs.length) {
+    return -1;
+  } else {
+    const opers = [];
+    for (let i = 0; i < ov2640_special_regs[effect_id].length; i++) {
+      writeOvReg(
+        opers,
+        ov2640_special_regs[effect_id][i].reg,
+        ov2640_special_regs[effect_id][i].value
+      );
+    }
+    const now_event = constructNowEvent(opers);
+    const ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+    return 0;
+  }
+}
+
+async function SetExposure(exposure) {
+  writeOvReg(opers, RA_DLMT_REG, 0x00);
+  writeOvReg(opers, R_BPASS_REG, 0x01);
+  writeOvReg(opers, RA_DLMT_REG, 0x01);
+  if (exposure == 0) {
+    // auto exposure
+    writeOvReg(COM8_REG);
+    OV2640_WR_Reg(
+      COM8,
+      COM8_DEFAULT_VAL | COM8_BNDF_EN | COM8_AGC_EN | COM8_AEC_EN
+    );
+  } else if (exposure == -1) {
+    // disable auto exposure
+    writeOvReg(COM8, COM8_DEFAULT_VAL);
+  } else {
+    // set exposure related registers
+    writeOvReg(opers, COM8_REG, COM8_DEFAULT_VAL | 0x0);
+    writeOvReg(opers, REG45_REG, (exposure >> 10) & 0x3f);
+    writeOvReg(opers, AEC_REG, (exposure >> 2) & 0xff);
+    writeOvReg(opers, REG04_REG, exposure & 0x3);
+  }
+  writeOvReg(opers, RA_DLMT_REG, 0x00);
+  writeOvReg(opers, R_BPASS_REG, 0x00);
+  return;
+}
+
+async function GetExposure() {
+  let exp = 0;
+  const opers = [];
+  writeOvReg(opers, RA_DLMT_REG, 0x00);
+  writeOvReg(opers, R_BPASS_REG, 0x01);
+  writeOvReg(opers, RA_DLMT_REG, 0x01);
+  // read exposure related registers
+  readOvReg(opers, REG45_REG);
+  readOvReg(opers, AEC_REG);
+  readOvReg(opers, REG04_REG);
+  writeOvReg(opers, RA_DLMT_REG, 0x00);
+  writeOvReg(opers, R_BPASS_REG, 0x00);
+  const now_event = constructNowEvent(opers);
+  const ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+  console.log(`GetExposure: ${JSON.stringify(ret)}`);
+  return;
+}
+
+async function SetContrast(contrast_level) {
+  if (contrast_level >= ov2640_contract_regs.length) {
+    addErrorMsg("");
+  } else {
+    const opers = [];
+    for (let i = 0; i < ov2640_contract_regs[contrast_level].length; i++) {
+      writeOvReg(
+        opers,
+        ov2640_contract_regs[contrast_level][i].reg,
+        ov2640_contract_regs[contrast_level][i].value
+      );
+    }
+  }
+  return;
+}
+
+async function SetBrightness(brightness_level) {
+  if (brightness_level >= ov2640_brightness_regs.length) {
+    addErrorMsg("");
+  } else {
+    const opers = [];
+    for (let i = 0; i < ov2640_brightness_regs[brightness_level].length; i++) {
+      writeOvReg(
+        opers,
+        ov2640_contract_regs[brightness_level][i].reg,
+        ov2640_contract_regs[brightness_level][i].value
+      );
+    }
+  }
+  return;
+}
+
+async function SetSaturation(saturation_level) {
+  if (saturation_level > ov2640_saturation_regs.length) {
+    addErrorMsg("");
+  } else {
+    const opers = [];
+    for (let i = 0; i < ov2640_saturation_regs[saturation_level].length; i++) {
+      writeOvReg(
+        opers,
+        ov2640_contract_regs[saturation_level][i].reg,
+        ov2640_contract_regs[saturation_level][i].value
+      );
+    }
+  }
+  return;
+}
+
+async function SetQuality(quality) {
+  if (quality > 60 || quality < 2) {
+    return -1;
+  } else {
+    const opers = [];
+    writeOvReg(opers, RA_DLMT_REG, 0x0);
+    writeOvReg(opers, QS_REG, quality);
+  }
+  return;
+}
+
+async function SetColorbar(enable) {
+  const opers = [];
+
+  writeOvReg(opers, RA_DLMT_REG, 0x0);
+  readOvReg(opers, COM7_REG);
+
+  if (enable) {
+    // TODO, add COM7_REG read value
+    writeOvReg(oeprs, COM7_REG, COM7_COLOR_BAR);
+  } else {
+    writeOvReg(oeprs, COM7_REG, ~COM7_COLOR_BAR);
+  }
+  return;
+}
+
+async function SetLightmode(mode) {
+  const opers = [];
+  writeOvReg(opers, RA_DLMT_REG, 0x00);
+  if (mode == 0) {
+    writeOvReg(opers, 0xc7, 0x00);
+  } else {
+    writeOvReg(opers, 0xc7, 0x40);
+  }
+  return;
+}
+
+async function SetNightMode(enable) {
+  const opers = [];
+  writeOvReg(opers, RA_DLMT_REG, 0x0);
+  writeOvReg(opers, R_BPASS_REG, 0x01);
+  writeOvReg(opers, RA_DLMT_REG, 0x1);
+  if (enable) {
+    writeOvReg(opers, CLKRC_REG, 0);
+  } else {
+    writeOvReg(opers, CLKRC_REG, 0x80);
+  }
+  writeOvReg(opers, RA_DLMT_REG, 0x0);
+  writeOvReg(opers, R_BPASS_REG, 0x0);
+  delayHardwareOperation(opers, "ms", 30);
+
+  return;
+}
+
 document
   .getElementById("cameraOneshot")
   .addEventListener("click", async function () {
@@ -522,15 +945,10 @@ document
     await CaptureFrame();
     const image_data = await ReadFiFO();
 
-    console.log(`image_data: ${image_data.length}`);
-    console.log(`image_data[0]: ${image_data[0]}`);
-    console.log(`image_data[1]: ${image_data[1]}`);
-    var blob = new Blob([image_data], { type: "image/jpeg" });
-    console.log(blob);
-    var imageUrl = URL.createObjectURL(blob);
-    var imgsrc =
-      "data:image/jpeg;base64," +
-      btoa(String.fromCharCode.apply(null, new Uint8Array(image_data)));
+    var y = new Uint8Array(image_data);
+    console.log(`uint8array: ${y}`);
+    var x = String.fromCharCode(...y);
+    var imgsrc = "data:image/jpeg;base64," + btoa(x);
     var image = document.querySelector("#photo");
     image.src = imgsrc;
   });
