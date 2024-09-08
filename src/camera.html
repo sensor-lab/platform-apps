@@ -21,7 +21,7 @@
       </div>
     </nav>
 
-    <div class="container-sm text-center my-4">
+    <div class="container-sm text-center my-4"> 
       <p>
         将Arducam Mini
         OV2640照相机和平台连接，选择连接的SPI引脚和I2C引脚，点击初始化相机按钮来测试相机的基本连接。
@@ -34,7 +34,7 @@
             >模块连接引脚</label
           >
           <select
-            id="pinSelect"
+            id="spiPinSelect"
             class="form-select my-2"
             aria-label="Default select example"
           >
@@ -47,7 +47,7 @@
           </select>
 
           <select
-            id="pinSelect"
+            id="i2cPinSelect"
             class="form-select my-2"
             aria-label="Default select example"
           >
@@ -114,10 +114,16 @@
             >照片质量(2-60)</label
           >
           <input class="form-control" type="number" value="40" />
+          <div class="my-2">
+            <input class="form-check-input" type="checkbox" value="" id="nightModeEnable">
+            <label class="form-check-label" for="nightModeEnable">
+              启动夜间模式
+            </label>
+          </div>
         </div>
       </form>
-      <button class="btn btn-info mx-auto">初始化相机</button>
-      <button class="btn btn-secondary mx-auto">设置照相机参数</button>
+      <button id="cameraInit" class="btn btn-info mx-auto">初始化相机</button>
+      <button id="cameraSetting" class="btn btn-secondary mx-auto">设置照相机参数</button>
       <button id="cameraOneshot" class="btn btn-primary mx-auto">拍照</button>
       <div class="my-4">
         <img id="photo" class="mx-auto" />

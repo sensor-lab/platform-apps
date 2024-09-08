@@ -4,91 +4,93 @@ import {
   i2cWriteHardwareOperation,
   delayHardwareOperation,
   constructNowEvent,
-  postHardwareOperation,
-} from "./api";
+  postHardwareOperation
+} from './api'
 
 // many hidden registers though....
 // Register table - OV2640 DSP address
-const R_BPASS_REG = 0x05;
-const QS_REG = 0x44;
-const CTRLI_REG = 0x50;
-const HSIZE_REG = 0x51;
-const VSIZE_REG = 0x52;
-const XOFFL_REG = 0x53;
-const YOFFL_REG = 0x54;
-const VHYX_REG = 0x55;
-const TEST_REG = 0x57;
-const ZMOW_REG = 0x5a;
-const ZMOH_REG = 0x5b;
-const ZMHH_REG = 0x5c;
-const CTRL2_REG = 0x86;
-const CTRL3_REG = 0x87;
-const SIZEL_REG = 0x8c;
-const HSIZE8_REG = 0xc0;
-const VSIZE8_REG = 0xc1;
-const CTRL0_REG = 0xc2;
-const CTRL1_REG = 0xc3;
-const R_DVP_SP_REG = 0xd3;
-const IMAGE_MODE_REG = 0xda;
-const RESET_REG = 0xe0;
-const MC_BIST_REG = 0xf9;
-const RA_DLMT_REG = 0xff;
+const R_BPASS_REG = 0x05
+const QS_REG = 0x44
+const CTRLI_REG = 0x50
+const HSIZE_REG = 0x51
+const VSIZE_REG = 0x52
+const XOFFL_REG = 0x53
+const YOFFL_REG = 0x54
+const VHYX_REG = 0x55
+const TEST_REG = 0x57
+const ZMOW_REG = 0x5a
+const ZMOH_REG = 0x5b
+const ZMHH_REG = 0x5c
+const CTRL2_REG = 0x86
+const CTRL3_REG = 0x87
+const SIZEL_REG = 0x8c
+const HSIZE8_REG = 0xc0
+const VSIZE8_REG = 0xc1
+const CTRL0_REG = 0xc2
+const CTRL1_REG = 0xc3
+const R_DVP_SP_REG = 0xd3
+const IMAGE_MODE_REG = 0xda
+const RESET_REG = 0xe0
+const MC_BIST_REG = 0xf9
+const RA_DLMT_REG = 0xff
 
 // Register table - OV2640 Sensor address
-const COM1_REG = 0x03;
-const REG04_REG = 0x04;
-const COM2_REG = 0x09;
-const COM3_REG = 0x0c;
-const COM4_REG = 0x0d;
-const AEC_REG = 0x10;
-const CLKRC_REG = 0x11;
-const COM7_REG = 0x12;
-const COM7_COLOR_BAR = 0x02;
-const COM8_REG = 0x13;
-const COM8_DEFAULT_VAL = 0xc0;
-const COM8_BNDF_EN = 0x20;
-const COM8_AGC_EN = 0x04;
-const COM8_AEC_EN = 0x01;
-const COM9_REG = 0x14;
-const COM10_REG = 0x15;
-const HREFST_REG = 0x17;
-const HREFEND_REG = 0x18;
-const VSTRT_REG = 0x19;
-const VEND_REG = 0x1a;
-const AEW_REG = 0x24;
-const AEB_REG = 0x25;
-const VV_REG = 0x26;
-const REG32_REG = 0x32;
-const ARCOM2_REG = 0x34;
-const REG45_REG = 0x45;
-const FLL_REG = 0x46;
-const BD50_REG = 0x4f;
-const BD60_REG = 0x50;
-const HISTO_LOW_REG = 0x61;
-const HISTO_HIGH_REG = 0x62;
-const BPADDR_REG = 0x7c;
-const BPDATA_REG = 0x7d;
+const COM1_REG = 0x03
+const REG04_REG = 0x04
+const COM2_REG = 0x09
+const PIDH_REG = 0x0a
+const PIDL_REG = 0x0b
+const COM3_REG = 0x0c
+const COM4_REG = 0x0d
+const AEC_REG = 0x10
+const CLKRC_REG = 0x11
+const COM7_REG = 0x12
+const COM7_COLOR_BAR = 0x02
+const COM8_REG = 0x13
+const COM8_DEFAULT_VAL = 0xc0
+const COM8_BNDF_EN = 0x20
+const COM8_AGC_EN = 0x04
+const COM8_AEC_EN = 0x01
+const COM9_REG = 0x14
+const COM10_REG = 0x15
+const HREFST_REG = 0x17
+const HREFEND_REG = 0x18
+const VSTRT_REG = 0x19
+const VEND_REG = 0x1a
+const AEW_REG = 0x24
+const AEB_REG = 0x25
+const VV_REG = 0x26
+const REG32_REG = 0x32
+const ARCOM2_REG = 0x34
+const REG45_REG = 0x45
+const FLL_REG = 0x46
+const BD50_REG = 0x4f
+const BD60_REG = 0x50
+const HISTO_LOW_REG = 0x61
+const HISTO_HIGH_REG = 0x62
+const BPADDR_REG = 0x7c
+const BPDATA_REG = 0x7d
 
 // Register table - Arducam SPI registers
-const ARDUCAM_TEST_REG = 0x00;
-const ARDUCAM_CAPTURE_CTR_REG = 0x01;
-const ARDUCAM_SENSOR_INTERFACE_TIMING_REG = 0x03;
-const ARDUCAM_FIFO_CTR_REG = 0x04;
-const ARDUCAM_GPIO_DIR_REG = 0x05;
-const ARDUCAM_GPIO_WR_REG = 0x06;
-const ARDUCAM_BURST_FIFO_READ_REG = 0x3c;
-const ARDUCAM_SINGLE_FIFO_READ_REG = 0x3d;
-const ARDUCAM_CHIP_VER_REG = 0x40;
-const ARDUCAM_FIFO_DONE_REG = 0x41;
-const ARDUCAM_WRITE_FIFO_SIZE1_REG = 0x42;
-const ARDUCAM_WRITE_FIFO_SIZE2_REG = 0x43;
-const ARDUCAM_WRITE_FIFO_SIZE3_REG = 0x44;
-const ARDUCAM_GPIO_RD_REG = 0x45;
+const ARDUCAM_TEST_REG = 0x00
+const ARDUCAM_CAPTURE_CTR_REG = 0x01
+const ARDUCAM_SENSOR_INTERFACE_TIMING_REG = 0x03
+const ARDUCAM_FIFO_CTR_REG = 0x04
+const ARDUCAM_GPIO_DIR_REG = 0x05
+const ARDUCAM_GPIO_WR_REG = 0x06
+const ARDUCAM_BURST_FIFO_READ_REG = 0x3c
+const ARDUCAM_SINGLE_FIFO_READ_REG = 0x3d
+const ARDUCAM_CHIP_VER_REG = 0x40
+const ARDUCAM_FIFO_DONE_REG = 0x41
+const ARDUCAM_WRITE_FIFO_SIZE1_REG = 0x42
+const ARDUCAM_WRITE_FIFO_SIZE2_REG = 0x43
+const ARDUCAM_WRITE_FIFO_SIZE3_REG = 0x44
+const ARDUCAM_GPIO_RD_REG = 0x45
 
 class CameraConfigReg {
-  constructor(reg, value) {
-    this.reg = reg;
-    this.value = value;
+  constructor (reg, value) {
+    this.reg = reg
+    this.value = value
   }
 }
 
@@ -295,17 +297,17 @@ const ov2640_init_regs = [
   new CameraConfigReg(0xdd, 0x7f),
 
   new CameraConfigReg(RESET_REG, 0x00), // RESET,可选择复位 控制器、SCCB单元、JPEG单元、DVP接口单元等
-  new CameraConfigReg(R_BPASS_REG, 0x00), // 使能DSP
-];
+  new CameraConfigReg(R_BPASS_REG, 0x00) // 使能DSP
+]
 
-const SPECIAL_EFFECT_NORMAL_ID = 0;
-const SPECIAL_EFFECT_BLUEISH_ID = 1;
-const SPECIAL_EFFECT_REDISH_ID = 2;
-const SPECIAL_EFFECT_BLACK_WHITE_ID = 3;
-const SPECIAL_EFFECT_SEPIA_ID = 4;
-const SPECIAL_EFFECT_NEGATIVE_ID = 5;
-const SPECIAL_EFFECT_GREENISH_ID = 6;
-const SPECIAL_EFFECT_BLACK_WHITE_NEGATIVE_ID = 7;
+const SPECIAL_EFFECT_NORMAL_ID = 0
+const SPECIAL_EFFECT_BLUEISH_ID = 1
+const SPECIAL_EFFECT_REDISH_ID = 2
+const SPECIAL_EFFECT_BLACK_WHITE_ID = 3
+const SPECIAL_EFFECT_SEPIA_ID = 4
+const SPECIAL_EFFECT_NEGATIVE_ID = 5
+const SPECIAL_EFFECT_GREENISH_ID = 6
+const SPECIAL_EFFECT_BLACK_WHITE_NEGATIVE_ID = 7
 
 const ov2640_special_regs = [
   [
@@ -315,7 +317,7 @@ const ov2640_special_regs = [
     new CameraConfigReg(BPDATA_REG, 0x00),
     new CameraConfigReg(BPADDR_REG, 0x05),
     new CameraConfigReg(BPDATA_REG, 0x80),
-    new CameraConfigReg(BPDATA_REG, 0x80),
+    new CameraConfigReg(BPDATA_REG, 0x80)
   ],
   [
     // Blueish (cool light)
@@ -324,7 +326,7 @@ const ov2640_special_regs = [
     new CameraConfigReg(BPDATA_REG, 0x18),
     new CameraConfigReg(BPADDR_REG, 0x05),
     new CameraConfigReg(BPDATA_REG, 0xa0),
-    new CameraConfigReg(BPDATA_REG, 0x40),
+    new CameraConfigReg(BPDATA_REG, 0x40)
   ],
   [
     // Redish (warm light)
@@ -333,7 +335,7 @@ const ov2640_special_regs = [
     new CameraConfigReg(BPDATA_REG, 0x18),
     new CameraConfigReg(BPADDR_REG, 0x05),
     new CameraConfigReg(BPDATA_REG, 0x40),
-    new CameraConfigReg(BPDATA_REG, 0xc0),
+    new CameraConfigReg(BPDATA_REG, 0xc0)
   ],
   [
     // black and white
@@ -342,7 +344,7 @@ const ov2640_special_regs = [
     new CameraConfigReg(BPDATA_REG, 0x18),
     new CameraConfigReg(BPADDR_REG, 0x05),
     new CameraConfigReg(BPDATA_REG, 0x80),
-    new CameraConfigReg(BPDATA_REG, 0x80),
+    new CameraConfigReg(BPDATA_REG, 0x80)
   ],
   [
     // Sepia
@@ -351,7 +353,7 @@ const ov2640_special_regs = [
     new CameraConfigReg(BPDATA_REG, 0x18),
     new CameraConfigReg(BPADDR_REG, 0x05),
     new CameraConfigReg(BPDATA_REG, 0x40),
-    new CameraConfigReg(BPDATA_REG, 0xa6),
+    new CameraConfigReg(BPDATA_REG, 0xa6)
   ],
   [
     // Negative
@@ -360,7 +362,7 @@ const ov2640_special_regs = [
     new CameraConfigReg(BPDATA_REG, 0x40),
     new CameraConfigReg(BPADDR_REG, 0x05),
     new CameraConfigReg(BPDATA_REG, 0x80),
-    new CameraConfigReg(BPDATA_REG, 0x80),
+    new CameraConfigReg(BPDATA_REG, 0x80)
   ],
   [
     // Greenish
@@ -369,7 +371,7 @@ const ov2640_special_regs = [
     new CameraConfigReg(BPDATA_REG, 0x18),
     new CameraConfigReg(BPADDR_REG, 0x05),
     new CameraConfigReg(BPDATA_REG, 0x50),
-    new CameraConfigReg(BPDATA_REG, 0x50),
+    new CameraConfigReg(BPDATA_REG, 0x50)
   ],
   [
     // Black and white negative
@@ -378,9 +380,9 @@ const ov2640_special_regs = [
     new CameraConfigReg(BPDATA_REG, 0x58),
     new CameraConfigReg(BPADDR_REG, 0x05),
     new CameraConfigReg(BPDATA_REG, 0x80),
-    new CameraConfigReg(BPDATA_REG, 0x80),
-  ],
-];
+    new CameraConfigReg(BPDATA_REG, 0x80)
+  ]
+]
 
 const ov2640_contract_regs = [
   [
@@ -390,7 +392,7 @@ const ov2640_contract_regs = [
     new CameraConfigReg(BPDATA_REG, 0x20),
     new CameraConfigReg(BPDATA_REG, 0x18),
     new CameraConfigReg(BPDATA_REG, 0x34),
-    new CameraConfigReg(BPDATA_REG, 0x06),
+    new CameraConfigReg(BPDATA_REG, 0x06)
   ],
   [
     new CameraConfigReg(BPADDR_REG, 0x00),
@@ -399,7 +401,7 @@ const ov2640_contract_regs = [
     new CameraConfigReg(BPDATA_REG, 0x20),
     new CameraConfigReg(BPDATA_REG, 0x1c),
     new CameraConfigReg(BPDATA_REG, 0x2a),
-    new CameraConfigReg(BPDATA_REG, 0x06),
+    new CameraConfigReg(BPDATA_REG, 0x06)
   ],
   [
     new CameraConfigReg(BPADDR_REG, 0x00),
@@ -408,7 +410,7 @@ const ov2640_contract_regs = [
     new CameraConfigReg(BPDATA_REG, 0x20),
     new CameraConfigReg(BPDATA_REG, 0x20),
     new CameraConfigReg(BPDATA_REG, 0x20),
-    new CameraConfigReg(BPDATA_REG, 0x06),
+    new CameraConfigReg(BPDATA_REG, 0x06)
   ],
   [
     new CameraConfigReg(BPADDR_REG, 0x00),
@@ -417,7 +419,7 @@ const ov2640_contract_regs = [
     new CameraConfigReg(BPDATA_REG, 0x20),
     new CameraConfigReg(BPDATA_REG, 0x24),
     new CameraConfigReg(BPDATA_REG, 0x16),
-    new CameraConfigReg(BPDATA_REG, 0x06),
+    new CameraConfigReg(BPDATA_REG, 0x06)
   ],
   [
     new CameraConfigReg(BPADDR_REG, 0x00),
@@ -426,9 +428,9 @@ const ov2640_contract_regs = [
     new CameraConfigReg(BPDATA_REG, 0x20),
     new CameraConfigReg(BPDATA_REG, 0x28),
     new CameraConfigReg(BPDATA_REG, 0x0c),
-    new CameraConfigReg(BPDATA_REG, 0x06),
-  ],
-];
+    new CameraConfigReg(BPDATA_REG, 0x06)
+  ]
+]
 
 const ov2640_brightness_regs = [
   [
@@ -436,37 +438,37 @@ const ov2640_brightness_regs = [
     new CameraConfigReg(BPDATA_REG, 0x04),
     new CameraConfigReg(BPADDR_REG, 0x09),
     new CameraConfigReg(BPDATA_REG, 0x00),
-    new CameraConfigReg(BPDATA_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x00)
   ],
   [
     new CameraConfigReg(BPADDR_REG, 0x00),
     new CameraConfigReg(BPDATA_REG, 0x04),
     new CameraConfigReg(BPADDR_REG, 0x09),
     new CameraConfigReg(BPDATA_REG, 0x10),
-    new CameraConfigReg(BPDATA_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x00)
   ],
   [
     new CameraConfigReg(BPADDR_REG, 0x00),
     new CameraConfigReg(BPDATA_REG, 0x04),
     new CameraConfigReg(BPADDR_REG, 0x09),
     new CameraConfigReg(BPDATA_REG, 0x20),
-    new CameraConfigReg(BPDATA_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x00)
   ],
   [
     new CameraConfigReg(BPADDR_REG, 0x00),
     new CameraConfigReg(BPDATA_REG, 0x04),
     new CameraConfigReg(BPADDR_REG, 0x09),
     new CameraConfigReg(BPDATA_REG, 0x30),
-    new CameraConfigReg(BPDATA_REG, 0x00),
+    new CameraConfigReg(BPDATA_REG, 0x00)
   ],
   [
     new CameraConfigReg(BPADDR_REG, 0x00),
     new CameraConfigReg(BPDATA_REG, 0x04),
     new CameraConfigReg(BPADDR_REG, 0x09),
     new CameraConfigReg(BPDATA_REG, 0x40),
-    new CameraConfigReg(BPDATA_REG, 0x00),
-  ],
-];
+    new CameraConfigReg(BPDATA_REG, 0x00)
+  ]
+]
 
 const ov2640_saturation_regs = [
   [
@@ -474,72 +476,87 @@ const ov2640_saturation_regs = [
     new CameraConfigReg(BPDATA_REG, 0x02),
     new CameraConfigReg(BPADDR_REG, 0x03),
     new CameraConfigReg(BPDATA_REG, 0x28),
-    new CameraConfigReg(BPDATA_REG, 0x28),
+    new CameraConfigReg(BPDATA_REG, 0x28)
   ],
   [
     new CameraConfigReg(BPADDR_REG, 0x00),
     new CameraConfigReg(BPDATA_REG, 0x02),
     new CameraConfigReg(BPADDR_REG, 0x03),
     new CameraConfigReg(BPDATA_REG, 0x38),
-    new CameraConfigReg(BPDATA_REG, 0x38),
+    new CameraConfigReg(BPDATA_REG, 0x38)
   ],
   [
     new CameraConfigReg(BPADDR_REG, 0x00),
     new CameraConfigReg(BPDATA_REG, 0x02),
     new CameraConfigReg(BPADDR_REG, 0x03),
     new CameraConfigReg(BPDATA_REG, 0x48),
-    new CameraConfigReg(BPDATA_REG, 0x48),
+    new CameraConfigReg(BPDATA_REG, 0x48)
   ],
   [
     new CameraConfigReg(BPADDR_REG, 0x00),
     new CameraConfigReg(BPDATA_REG, 0x02),
     new CameraConfigReg(BPADDR_REG, 0x03),
     new CameraConfigReg(BPDATA_REG, 0x58),
-    new CameraConfigReg(BPDATA_REG, 0x58),
+    new CameraConfigReg(BPDATA_REG, 0x58)
   ],
   [
     new CameraConfigReg(BPADDR_REG, 0x00),
     new CameraConfigReg(BPDATA_REG, 0x02),
     new CameraConfigReg(BPADDR_REG, 0x03),
     new CameraConfigReg(BPDATA_REG, 0x68),
-    new CameraConfigReg(BPDATA_REG, 0x68),
-  ],
-];
+    new CameraConfigReg(BPDATA_REG, 0x68)
+  ]
+]
 
 const ov2640_light_mode_regs = [
   [
     new CameraConfigReg(0xcc, 0x5e),
     new CameraConfigReg(0xcd, 0x41),
-    new CameraConfigReg(0xce, 0x54),
+    new CameraConfigReg(0xce, 0x54)
   ],
   [
     new CameraConfigReg(0xcc, 0x52),
     new CameraConfigReg(0xcd, 0x41),
-    new CameraConfigReg(0xce, 0x66),
+    new CameraConfigReg(0xce, 0x66)
   ],
   [
     new CameraConfigReg(0xcc, 0x65),
     new CameraConfigReg(0xcd, 0x41),
-    new CameraConfigReg(0xce, 0x4f),
+    new CameraConfigReg(0xce, 0x4f)
   ],
   [
     new CameraConfigReg(0xcc, 0x42),
     new CameraConfigReg(0xcd, 0x3f),
-    new CameraConfigReg(0xce, 0x71),
-  ],
-];
+    new CameraConfigReg(0xce, 0x71)
+  ]
+]
 
-var mosi_pin = 2;
-var miso_pin = 1;
-var sck_pin = 0;
-var cs_pin = 3;
-var sda_pin = 16;
-var scl_pin = 17;
+var mosi_pin = undefined
+var miso_pin = undefined
+var sck_pin = undefined
+var cs_pin = undefined
+var sda_pin = undefined
+var scl_pin = undefined
+var camera_initialized = false
 
-const DEVICE_I2C_ADDR = 0x60 >> 1;
+const DEVICE_I2C_ADDR = 0x60 >> 1
 
-function writeArducamReg(opers, reg_addr, ...data) {
-  const transmit_data = [reg_addr | 0x80, ...data];
+if (localStorage.getItem('camera_spi_pin')) {
+  sck_pin = parseInt(localStorage.getItem('camera_spi_pin'))
+  miso_pin = sck_pin + 1
+  mosi_pin = sck_pin + 2
+  cs_pin = sck_pin + 3
+  document.getElementById('spiPinSelect').value = sck_pin
+}
+
+if (localStorage.getItem('camera_i2c_pin')) {
+  sda_pin = parseInt(localStorage.getItem('camera_i2c_pin'))
+  scl_pin = sda_pin + 1
+  document.getElementById('i2cPinSelect').value = sda_pin
+}
+
+function writeArducamReg (opers, reg_addr, ...data) {
+  const transmit_data = [reg_addr | 0x80, ...data]
   spiHardwareOperation(
     opers,
     0,
@@ -552,10 +569,10 @@ function writeArducamReg(opers, reg_addr, ...data) {
     0,
     0,
     ...transmit_data
-  );
+  )
 }
 
-function readArducamReg(opers, reg_addr, len = 1) {
+function readArducamReg (opers, reg_addr, len = 1) {
   spiHardwareOperation(
     opers,
     0,
@@ -568,10 +585,10 @@ function readArducamReg(opers, reg_addr, len = 1) {
     1,
     len,
     reg_addr
-  );
+  )
 }
 
-function burstReadArducam(opers, len = 1) {
+function burstReadArducam (opers, len = 1) {
   spiHardwareOperation(
     opers,
     0,
@@ -584,10 +601,10 @@ function burstReadArducam(opers, len = 1) {
     1,
     len,
     ARDUCAM_BURST_FIFO_READ_REG
-  );
+  )
 }
 
-function writeOvReg(opers, reg_addr, ...data) {
+function writeOvReg (opers, reg_addr, ...data) {
   i2cWriteHardwareOperation(
     opers,
     sda_pin,
@@ -597,10 +614,10 @@ function writeOvReg(opers, reg_addr, ...data) {
     reg_addr,
     -1,
     ...data
-  );
+  )
 }
 
-function readOvReg(opers, reg_addr, read_len = 1) {
+function readOvReg (opers, reg_addr, read_len = 1) {
   i2cWriteHardwareOperation(
     opers,
     sda_pin,
@@ -609,7 +626,7 @@ function readOvReg(opers, reg_addr, read_len = 1) {
     DEVICE_I2C_ADDR,
     reg_addr,
     -1
-  );
+  )
   i2cReadHardwareOperation(
     opers,
     sda_pin,
@@ -619,336 +636,414 @@ function readOvReg(opers, reg_addr, read_len = 1) {
     -1,
     -1,
     read_len
-  );
+  )
 }
 
-function addErrorMsg(message) {
-  document.getElementById("errorMsg").innerHTML = message;
-  document.getElementById("errorMsg").classList.remove("d-none");
+function addErrorMsg (message) {
+  document.getElementById('errorMsg').innerHTML = message
+  document.getElementById('errorMsg').classList.remove('d-none')
 }
 
-function removeErrorMsg() {
-  document.getElementById("errorMsg").classList.add("d-none");
+function removeErrorMsg () {
+  document.getElementById('errorMsg').classList.add('d-none')
 }
 
-function addStatusMsg(message) {
-  document.getElementById("statusMsg").innerHTML = message;
-  document.getElementById("statusMsg").classList.remove("d-none");
+function addStatusMsg (message) {
+  document.getElementById('statusMsg').innerHTML = message
+  document.getElementById('statusMsg').classList.remove('d-none')
 }
 
-function removeStatusMsg() {
-  document.getElementById("statusMsg").classList.add("d-none");
+function removeStatusMsg () {
+  document.getElementById('statusMsg').classList.add('d-none')
 }
 
-async function CameraInit() {
-  const batch_num = 50;
+async function CameraInit () {
+  const batch_num = 50
   for (let i = 0; i < ov2640_init_regs.length; i += batch_num) {
-    let num_regs_write = 0;
-    const opers = [];
+    let num_regs_write = 0
+    const opers = []
     if (ov2640_init_regs.length - i > batch_num) {
-      num_regs_write = batch_num;
+      num_regs_write = batch_num
     } else {
-      num_regs_write = ov2640_init_regs.length - i;
+      num_regs_write = ov2640_init_regs.length - i
     }
     for (let j = 0; j < num_regs_write; j++) {
       writeOvReg(
         opers,
         ov2640_init_regs[i + j].reg,
         ov2640_init_regs[i + j].value
-      );
+      )
     }
-    const now_event = constructNowEvent(opers);
-    const ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+    const now_event = constructNowEvent(opers)
+    const ret = await postHardwareOperation(now_event)
   }
 }
 
-async function SetFrameSize() {
-  const frame_width = 800; // 图像长度, has to module of 4
-  const frame_height = 600; // 图像宽度, has to module of 4
-  const opers = [];
+async function SetFrameSize () {
+  const frame_width = 800 // 图像长度, has to module of 4
+  const frame_height = 600 // 图像宽度, has to module of 4
+  const opers = []
 
-  writeOvReg(opers, RA_DLMT_REG, 0x00); // 选择 DSP寄存器组
+  writeOvReg(opers, RA_DLMT_REG, 0x00) // 选择 DSP寄存器组
 
-  writeOvReg(opers, ZMOW_REG, (frame_width / 4) & 0xff); // 实际图像输出的宽度（OUTW），7~0 bit，寄存器的值等于实际值/4
-  writeOvReg(opers, ZMOH_REG, (frame_height / 4) & 0xff); // 实际图像输出的高度（OUTH），7~0 bit，寄存器的值等于实际值/4
+  writeOvReg(opers, ZMOW_REG, (frame_width / 4) & 0xff) // 实际图像输出的宽度（OUTW），7~0 bit，寄存器的值等于实际值/4
+  writeOvReg(opers, ZMOH_REG, (frame_height / 4) & 0xff) // 实际图像输出的高度（OUTH），7~0 bit，寄存器的值等于实际值/4
   writeOvReg(
     opers,
     ZMHH_REG,
     (((frame_width / 4) >> 8) & 0x03) | (((frame_height / 4) >> 6) & 0x04)
-  ); // 设置ZMHH的Bit[2:0]，也就是OUTH 的第 8 bit，OUTW 的第 9~8 bit，
-  const now_event = constructNowEvent(opers);
-  const ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+  ) // 设置ZMHH的Bit[2:0]，也就是OUTH 的第 8 bit，OUTW 的第 9~8 bit，
+  const now_event = constructNowEvent(opers)
+  const ret = await postHardwareOperation(now_event)
 }
 
-async function CaptureFrame() {
-  const opers = [];
+async function CaptureFrame () {
+  const opers = []
 
   // flash and clear fifo flag
-  writeArducamReg(opers, ARDUCAM_FIFO_CTR_REG, 0x01);
+  writeArducamReg(opers, ARDUCAM_FIFO_CTR_REG, 0x01)
 
   // start capture
-  writeArducamReg(opers, ARDUCAM_FIFO_CTR_REG, 0x02);
+  writeArducamReg(opers, ARDUCAM_FIFO_CTR_REG, 0x02)
 
   // delay
-  delayHardwareOperation(opers, "ms", 100);
+  delayHardwareOperation(opers, 'ms', 100)
 
   // wait capture complete
-  readArducamReg(opers, ARDUCAM_FIFO_DONE_REG, 1);
+  readArducamReg(opers, ARDUCAM_FIFO_DONE_REG, 1)
 
   // get fifo len
-  readArducamReg(opers, ARDUCAM_WRITE_FIFO_SIZE1_REG, 1);
-  readArducamReg(opers, ARDUCAM_WRITE_FIFO_SIZE2_REG, 1);
-  readArducamReg(opers, ARDUCAM_WRITE_FIFO_SIZE3_REG, 1);
+  readArducamReg(opers, ARDUCAM_WRITE_FIFO_SIZE1_REG, 1)
+  readArducamReg(opers, ARDUCAM_WRITE_FIFO_SIZE2_REG, 1)
+  readArducamReg(opers, ARDUCAM_WRITE_FIFO_SIZE3_REG, 1)
 
-  const now_event = constructNowEvent(opers);
-  const ret = await postHardwareOperation(now_event, "http://192.168.1.108");
-  console.log(`ret2: ${JSON.stringify(ret)}`);
+  const now_event = constructNowEvent(opers)
+  const ret = await postHardwareOperation(now_event)
+  console.log(`ret2: ${JSON.stringify(ret)}`)
   const frame_size =
-    ret["result"][4] |
-    (ret["result"][5] << 8) |
-    ((ret["result"][6] & 0x7f) << 16);
-  console.log(`frame size1: ${frame_size}`);
+    ret['result'][4] |
+    (ret['result'][5] << 8) |
+    ((ret['result'][6] & 0x7f) << 16)
+  console.log(`frame size1: ${frame_size}`)
 }
 
-async function ReadFiFO() {
+async function ReadFiFO () {
   // reading FIFO
-  const burst_read_num = 500;
-  const fifo_size = await GetFiFoSize();
-  const image_data = [];
+  const burst_read_num = 500
+  const fifo_size = await GetFiFoSize()
+  const image_data = []
   for (let i = 0; i < fifo_size; i += burst_read_num) {
-    let read_len = 0;
-    const opers = [];
+    let read_len = 0
+    const opers = []
     if (fifo_size - i > burst_read_num) {
-      read_len = burst_read_num;
+      read_len = burst_read_num
     } else {
-      read_len = fifo_size - i;
+      read_len = fifo_size - i
     }
 
-    burstReadArducam(opers, read_len);
-    const now_event = constructNowEvent(opers);
-    const ret = await postHardwareOperation(now_event, "http://192.168.1.108");
-    image_data.push(...ret["result"][0]);
+    burstReadArducam(opers, read_len)
+    const now_event = constructNowEvent(opers)
+    const ret = await postHardwareOperation(now_event)
+    image_data.push(...ret['result'][0])
   }
-  return image_data;
+  return image_data
 }
 
-async function GetFiFoSize() {
-  const opers = [];
+async function GetFiFoSize () {
+  const opers = []
 
   // get fifo len
-  readArducamReg(opers, ARDUCAM_WRITE_FIFO_SIZE1_REG, 1);
-  readArducamReg(opers, ARDUCAM_WRITE_FIFO_SIZE2_REG, 1);
-  readArducamReg(opers, ARDUCAM_WRITE_FIFO_SIZE3_REG, 1);
+  readArducamReg(opers, ARDUCAM_WRITE_FIFO_SIZE1_REG, 1)
+  readArducamReg(opers, ARDUCAM_WRITE_FIFO_SIZE2_REG, 1)
+  readArducamReg(opers, ARDUCAM_WRITE_FIFO_SIZE3_REG, 1)
 
-  const now_event = constructNowEvent(opers);
-  const ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+  const now_event = constructNowEvent(opers)
+  const ret = await postHardwareOperation(now_event)
 
   const frame_size =
-    ret["result"][0] |
-    (ret["result"][1] << 8) |
-    ((ret["result"][2] & 0x7f) << 16);
-  return frame_size;
+    ret['result'][0] |
+    (ret['result'][1] << 8) |
+    ((ret['result'][2] & 0x7f) << 16)
+  return frame_size
 }
 
-async function SetJpegFormat() {
-  const opers = [];
-  writeOvReg(opers, RA_DLMT_REG, 0x00); // 选择 DSP寄存器组
-  writeOvReg(opers, RESET_REG, 0x04); // reset DVP
-  writeOvReg(opers, IMAGE_MODE_REG, 0x10 | 0x08); //  IMAGE_MODE_JPEG_EN + IMAGE_MODE_RGB565
-  writeOvReg(opers, 0xd7, 0x03);
-  writeOvReg(opers, 0xe1, 0x77);
-  writeOvReg(opers, RESET_REG, 0x00);
+async function SetJpegFormat () {
+  const opers = []
+  writeOvReg(opers, RA_DLMT_REG, 0x00) // 选择 DSP寄存器组
+  writeOvReg(opers, RESET_REG, 0x04) // reset DVP
+  writeOvReg(opers, IMAGE_MODE_REG, 0x10 | 0x08) //  IMAGE_MODE_JPEG_EN + IMAGE_MODE_RGB565
+  writeOvReg(opers, 0xd7, 0x03)
+  writeOvReg(opers, 0xe1, 0x77)
+  writeOvReg(opers, RESET_REG, 0x00)
 
-  const now_event = constructNowEvent(opers);
-  const ret = await postHardwareOperation(now_event, "http://192.168.1.108");
+  const now_event = constructNowEvent(opers)
+  const ret = await postHardwareOperation(now_event)
 }
 
-async function SetSpecialEffect(effect_id) {
+async function SetSpecialEffect (effect_id) {
   if (sde >= ov2640_special_regs.length) {
-    return -1;
+    return -1
   } else {
-    const opers = [];
+    const opers = []
     for (let i = 0; i < ov2640_special_regs[effect_id].length; i++) {
       writeOvReg(
         opers,
         ov2640_special_regs[effect_id][i].reg,
         ov2640_special_regs[effect_id][i].value
-      );
+      )
     }
-    const now_event = constructNowEvent(opers);
-    const ret = await postHardwareOperation(now_event, "http://192.168.1.108");
-    return 0;
+    const now_event = constructNowEvent(opers)
+    const ret = await postHardwareOperation(now_event)
+    return 0
   }
 }
 
-async function SetExposure(exposure) {
-  writeOvReg(opers, RA_DLMT_REG, 0x00);
-  writeOvReg(opers, R_BPASS_REG, 0x01);
-  writeOvReg(opers, RA_DLMT_REG, 0x01);
+async function SetExposure (exposure) {
+  const opers = []
+  writeOvReg(opers, RA_DLMT_REG, 0x00)
+  writeOvReg(opers, R_BPASS_REG, 0x01)
+  writeOvReg(opers, RA_DLMT_REG, 0x01)
   if (exposure == 0) {
     // auto exposure
-    writeOvReg(COM8_REG);
-    OV2640_WR_Reg(
-      COM8,
+    writeOvReg(
+      opers,
+      COM8_REG,
       COM8_DEFAULT_VAL | COM8_BNDF_EN | COM8_AGC_EN | COM8_AEC_EN
-    );
+    )
   } else if (exposure == -1) {
     // disable auto exposure
-    writeOvReg(COM8, COM8_DEFAULT_VAL);
+    writeOvReg(opers, COM8_REG, COM8_DEFAULT_VAL)
   } else {
     // set exposure related registers
-    writeOvReg(opers, COM8_REG, COM8_DEFAULT_VAL | 0x0);
-    writeOvReg(opers, REG45_REG, (exposure >> 10) & 0x3f);
-    writeOvReg(opers, AEC_REG, (exposure >> 2) & 0xff);
-    writeOvReg(opers, REG04_REG, exposure & 0x3);
+    writeOvReg(opers, COM8_REG, COM8_DEFAULT_VAL | 0x0)
+    writeOvReg(opers, REG45_REG, (exposure >> 10) & 0x3f)
+    writeOvReg(opers, AEC_REG, (exposure >> 2) & 0xff)
+    writeOvReg(opers, REG04_REG, exposure & 0x3)
   }
-  writeOvReg(opers, RA_DLMT_REG, 0x00);
-  writeOvReg(opers, R_BPASS_REG, 0x00);
-  return;
+  writeOvReg(opers, RA_DLMT_REG, 0x00)
+  writeOvReg(opers, R_BPASS_REG, 0x00)
+  const now_event = constructNowEvent(opers)
+  const ret = await postHardwareOperation(now_event)
 }
 
-async function GetExposure() {
-  let exp = 0;
-  const opers = [];
-  writeOvReg(opers, RA_DLMT_REG, 0x00);
-  writeOvReg(opers, R_BPASS_REG, 0x01);
-  writeOvReg(opers, RA_DLMT_REG, 0x01);
+async function GetExposure () {
+  let exp = 0
+  const opers = []
+  writeOvReg(opers, RA_DLMT_REG, 0x00)
+  writeOvReg(opers, R_BPASS_REG, 0x01)
+  writeOvReg(opers, RA_DLMT_REG, 0x01)
   // read exposure related registers
-  readOvReg(opers, REG45_REG);
-  readOvReg(opers, AEC_REG);
-  readOvReg(opers, REG04_REG);
-  writeOvReg(opers, RA_DLMT_REG, 0x00);
-  writeOvReg(opers, R_BPASS_REG, 0x00);
-  const now_event = constructNowEvent(opers);
-  const ret = await postHardwareOperation(now_event, "http://192.168.1.108");
-  console.log(`GetExposure: ${JSON.stringify(ret)}`);
-  return;
+  readOvReg(opers, REG45_REG)
+  readOvReg(opers, AEC_REG)
+  readOvReg(opers, REG04_REG)
+  writeOvReg(opers, RA_DLMT_REG, 0x00)
+  writeOvReg(opers, R_BPASS_REG, 0x00)
+  const now_event = constructNowEvent(opers)
+  const ret = await postHardwareOperation(now_event)
+  console.log(`GetExposure: ${JSON.stringify(ret)}`)
 }
 
-async function SetContrast(contrast_level) {
+async function SetContrast (contrast_level) {
   if (contrast_level >= ov2640_contract_regs.length) {
-    addErrorMsg("");
+    addErrorMsg('')
   } else {
-    const opers = [];
+    const opers = []
     for (let i = 0; i < ov2640_contract_regs[contrast_level].length; i++) {
       writeOvReg(
         opers,
         ov2640_contract_regs[contrast_level][i].reg,
         ov2640_contract_regs[contrast_level][i].value
-      );
+      )
     }
   }
-  return;
+  return
 }
 
-async function SetBrightness(brightness_level) {
+async function SetBrightness (brightness_level) {
   if (brightness_level >= ov2640_brightness_regs.length) {
-    addErrorMsg("");
+    addErrorMsg('')
   } else {
-    const opers = [];
+    const opers = []
     for (let i = 0; i < ov2640_brightness_regs[brightness_level].length; i++) {
       writeOvReg(
         opers,
         ov2640_contract_regs[brightness_level][i].reg,
         ov2640_contract_regs[brightness_level][i].value
-      );
+      )
     }
+    const now_event = constructNowEvent(opers)
+    const ret = await postHardwareOperation(now_event)
   }
-  return;
 }
 
-async function SetSaturation(saturation_level) {
+async function SetSaturation (saturation_level) {
   if (saturation_level > ov2640_saturation_regs.length) {
-    addErrorMsg("");
+    addErrorMsg('')
   } else {
-    const opers = [];
+    const opers = []
     for (let i = 0; i < ov2640_saturation_regs[saturation_level].length; i++) {
       writeOvReg(
         opers,
         ov2640_contract_regs[saturation_level][i].reg,
         ov2640_contract_regs[saturation_level][i].value
-      );
+      )
     }
   }
-  return;
+  return
 }
 
-async function SetQuality(quality) {
+async function SetQuality (quality) {
   if (quality > 60 || quality < 2) {
-    return -1;
+    return -1
   } else {
-    const opers = [];
-    writeOvReg(opers, RA_DLMT_REG, 0x0);
-    writeOvReg(opers, QS_REG, quality);
+    const opers = []
+    writeOvReg(opers, RA_DLMT_REG, 0x0)
+    writeOvReg(opers, QS_REG, quality)
   }
-  return;
+  return
 }
 
-async function SetColorbar(enable) {
-  const opers = [];
+async function SetColorbar (enable) {
+  const opers = []
 
-  writeOvReg(opers, RA_DLMT_REG, 0x0);
-  readOvReg(opers, COM7_REG);
+  writeOvReg(opers, RA_DLMT_REG, 0x0)
+  readOvReg(opers, COM7_REG)
 
   if (enable) {
     // TODO, add COM7_REG read value
-    writeOvReg(oeprs, COM7_REG, COM7_COLOR_BAR);
+    writeOvReg(oeprs, COM7_REG, COM7_COLOR_BAR)
   } else {
-    writeOvReg(oeprs, COM7_REG, ~COM7_COLOR_BAR);
+    writeOvReg(oeprs, COM7_REG, ~COM7_COLOR_BAR)
   }
-  return;
+  return
 }
 
-async function SetLightmode(mode) {
-  const opers = [];
-  writeOvReg(opers, RA_DLMT_REG, 0x00);
+async function SetLightmode (mode) {
+  const opers = []
+  writeOvReg(opers, RA_DLMT_REG, 0x00)
   if (mode == 0) {
-    writeOvReg(opers, 0xc7, 0x00);
+    writeOvReg(opers, 0xc7, 0x00)
   } else {
-    writeOvReg(opers, 0xc7, 0x40);
+    writeOvReg(opers, 0xc7, 0x40)
   }
-  return;
+  const now_event = constructNowEvent(opers)
+  const ret = await postHardwareOperation(now_event)
+  console.log(`light mode: ${JSON.stringify(ret)}`)
 }
 
-async function SetNightMode(enable) {
-  const opers = [];
-  writeOvReg(opers, RA_DLMT_REG, 0x0);
-  writeOvReg(opers, R_BPASS_REG, 0x01);
-  writeOvReg(opers, RA_DLMT_REG, 0x1);
+async function SetNightMode (enable) {
+  const opers = []
+  writeOvReg(opers, RA_DLMT_REG, 0x0)
+  writeOvReg(opers, R_BPASS_REG, 0x01)
+  writeOvReg(opers, RA_DLMT_REG, 0x1)
   if (enable) {
-    writeOvReg(opers, CLKRC_REG, 0);
+    writeOvReg(opers, CLKRC_REG, 0)
   } else {
-    writeOvReg(opers, CLKRC_REG, 0x80);
+    writeOvReg(opers, CLKRC_REG, 0x80)
   }
-  writeOvReg(opers, RA_DLMT_REG, 0x0);
-  writeOvReg(opers, R_BPASS_REG, 0x0);
-  delayHardwareOperation(opers, "ms", 30);
+  writeOvReg(opers, RA_DLMT_REG, 0x0)
+  writeOvReg(opers, R_BPASS_REG, 0x0)
+  delayHardwareOperation(opers, 'ms', 30)
 
-  return;
+  const now_event = constructNowEvent(opers)
+  const ret = await postHardwareOperation(now_event)
+  console.log(`night mode: ${JSON.stringify(ret)}`)
 }
 
 document
-  .getElementById("cameraOneshot")
-  .addEventListener("click", async function () {
-    const opers = [];
-    writeArducamReg(opers, 0, 55);
-    readArducamReg(opers, 0);
-    writeOvReg(opers, 255, 1);
-    readOvReg(opers, 10);
-    const now_event = constructNowEvent(opers);
-    const ret = await postHardwareOperation(now_event, "http://192.168.1.108");
-    console.log(`ret1: ${JSON.stringify(ret)}`);
+  .getElementById('cameraInit')
+  .addEventListener('click', async function () {
+    if (sck_pin == undefined || sda_pin == undefined) {
+      addErrorMsg('请在引脚列表中选择正确的SPI,I2C连接引脚')
+      window.scrollTo(0, 0)
+    } else {
+      const opers = []
+      const arducam_test_val = 55
+      // test arducam SPI interface
+      writeArducamReg(opers, 0, arducam_test_val)
+      readArducamReg(opers, 0)
+      writeOvReg(opers, RA_DLMT_REG, 0x1)
+      readOvReg(opers, PIDH_REG)
+      readOvReg(opers, PIDL_REG)
+      const now_event = constructNowEvent(opers)
+      const ret = await postHardwareOperation(now_event)
 
-    await CameraInit();
-    await SetFrameSize();
-    await SetJpegFormat();
-    await CaptureFrame();
-    const image_data = await ReadFiFO();
+      window.scrollTo(0, 0)
+      if (
+        ret['result'][1] == arducam_test_val &&
+        ret['result'][4] == 0x26 &&
+        (ret['result'][6] == 0x41 || ret['result'][6] == 0x42)
+      ) {
+        addStatusMsg('成功监测到Arducam OV2640照相机')
 
-    var y = new Uint8Array(image_data);
-    console.log(`uint8array: ${y}`);
-    var x = String.fromCharCode(...y);
-    var imgsrc = "data:image/jpeg;base64," + btoa(x);
-    var image = document.querySelector("#photo");
-    image.src = imgsrc;
-  });
+        await CameraInit()
+        await SetFrameSize()
+        await SetJpegFormat()
+        addStatusMsg('成功初始化照相机')
+        camera_initialized = true
+      } else {
+        addErrorMsg('未检测到Arducam OV2640照相机，请检查连接')
+      }
+    }
+  })
+
+document
+  .getElementById('cameraSetting')
+  .addEventListener('click', async function () {
+    if (camera_initialized) {
+      addErrorMsg('功能还未实现')
+      window.scrollTo(0, 0)
+    } else {
+      window.scrollTo(0, 0)
+      addErrorMsg('照相机还未进行初始化，请初始化照相机')
+    }
+  })
+
+document
+  .getElementById('cameraOneshot')
+  .addEventListener('click', async function () {
+    if (camera_initialized) {
+      await CaptureFrame()
+      const image_data = await ReadFiFO()
+      var image_data_base64 =
+        'data:image/jpeg;base64,' +
+        btoa(
+          image_data.reduce(function (data, byte) {
+            return data + String.fromCharCode(byte)
+          }, '')
+        )
+      var image = document.querySelector('#photo')
+      image.src = image_data_base64
+    } else {
+      window.scrollTo(0, 0)
+      addErrorMsg('照相机还未进行初始化，请初始化照相机')
+    }
+  })
+
+document.getElementById('spiPinSelect').addEventListener('click', function () {
+  var ele = document.querySelector('#spiPinSelect')
+  if (ele.options[ele.selectedIndex].value == -1) {
+    addErrorMsg('请在列表中选择正确的连接引脚。')
+  } else {
+    sck_pin = parseInt(ele.options[ele.selectedIndex].value)
+    miso_pin = sck_pin + 1
+    mosi_pin = sck_pin + 2
+    cs_pin = sck_pin + 3
+    localStorage.setItem('camera_spi_pin', sck_pin)
+    removeErrorMsg()
+    console.log(`sck: ${sck_pin}`)
+  }
+})
+
+document.getElementById('i2cPinSelect').addEventListener('click', function () {
+  var ele = document.querySelector('#i2cPinSelect')
+  if (ele.options[ele.selectedIndex].value == -1) {
+    addErrorMsg('请在列表中选择正确的连接引脚。')
+  } else {
+    sda_pin = parseInt(ele.options[ele.selectedIndex].value)
+    scl_pin = sda_pin + 1
+    localStorage.setItem('camera_i2c_pin', sda_pin)
+    removeErrorMsg()
+    console.log(`i2c: ${sda_pin}`)
+  }
+})
