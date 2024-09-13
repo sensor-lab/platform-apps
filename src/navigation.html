@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+    />
+    <title>模块化传感器平台</title>
+    <link rel="stylesheet" href="scss/styles.scss" />
+    <script type="module" src="js/navigation.js"></script>
+  </head>
+
+  <body>
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+    <div id="statusMsg" class="alert alert-primary d-none" role="alert"></div>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+      <div class="mx-auto order-0">
+        <a class="navbar-brand mx-auto" href="#">导航模块</a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <label for="pinSelect" class="my-2"
+        >选择导航模块TX引脚和平台的连接的平台引脚</label
+      >
+      <select
+        id="pinSelect"
+        class="form-select my-2"
+        aria-label="Default select example"
+      >
+        <option value="-1">选择引脚</option>
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+      </select>
+
+      <div
+        id="pinDisplay"
+        class="card mb-2 mx-auto"
+        style="background-color: antiquewhite; display: none"
+      >
+        <div class="card-body">
+          <h5>导航模块TX和平台的引脚<span id="txpin">0</span>连接</h5>
+          <h5>导航模块TX和平台的引脚<span id="rxpin">1</span>连接</h5>
+        </div>
+      </div>
+
+      <div
+        id="positionDisplay"
+        class="card mb-2 mx-auto"
+        style="background-color: azure; display: none"
+      >
+        <div class="card-body">
+          <h5>状态：<span id="statusVal"></span></h5>
+        </div>
+
+        <div id="positionDetails" class="card-body" style="display: none">
+          <h5>时间(UTC)：<span id="utcTimeVal"></span></h5>
+          <h5>纬度：<span id="latitudeVal"></span></h5>
+          <h5>经度：<span id="longitudeVal"></span></h5>
+          <h5>速度：<span id="speedVal"></span></h5>
+        </div>
+      </div>
+
+      <button id="singleReadNmeaData" class="btn btn-primary mx-auto my-2">
+        单次读取导航模块数据
+      </button>
+      <button id="countinuousReadNmeaData" class="btn btn-success mx-auto my-2">
+        连续读取导航模块数据（每五秒更新数据）
+      </button>
+    </div>
+  </body>
+</html>
