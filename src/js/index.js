@@ -15,7 +15,13 @@ const main_apps_categories = [
   },
   {
     name: "传感器",
-    apps: ["force_sensing", "temperature", "infrared_transceiver", "camera"],
+    apps: [
+      "force_sensing",
+      "temperature",
+      "infrared_transceiver",
+      "camera",
+      "navigation",
+    ],
   },
   {
     name: "声音类",
@@ -130,6 +136,13 @@ const main_apps_info = [
     name: "LORA通信模块",
     description:
       "需要有两个平台，每个平台各插上一个Lora通信模块，一个作为发射端，一个作为接收端。发射端即可发送信息到接收端。",
+    document: "https://www.sensor-lab.io",
+  },
+  {
+    id: "navigation",
+    name: "导航模块",
+    description:
+      "将导航模块和平台连接，通过该应用得到当前的时间，位置和速度信息。",
     document: "https://www.sensor-lab.io",
   },
 ];

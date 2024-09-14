@@ -108,9 +108,9 @@ function rmcProtocolParser(data) {
     const course_over_ground = rmc_data[8];
     const utc_date = rmc_data[9];
     if (status === "A") {
-      console.log(
-        `utc_time: ${utc_time}, status: ${status}, latitude: ${latitude}, n_s_indicator: ${n_s_indicator}, longitude: ${longitude},e_w_indicator: ${e_w_indicator}, speed_over_ground: ${speed_over_ground}, course_over_ground: ${course_over_ground}, utc_date: ${utc_date}`
-      );
+      //   console.log(
+      //     `utc_time: ${utc_time}, status: ${status}, latitude: ${latitude}, n_s_indicator: ${n_s_indicator}, longitude: ${longitude},e_w_indicator: ${e_w_indicator}, speed_over_ground: ${speed_over_ground}, course_over_ground: ${course_over_ground}, utc_date: ${utc_date}`
+      //   );
       document.getElementById("statusVal").innerHTML = "正常";
       document.getElementById("positionDetails").style.display = "block";
       document.getElementById("positionDisplay").style.display = "block";
@@ -187,7 +187,7 @@ async function fetchNavigationInfo() {
     EXPECT_NUM_BYTES_RCV
   );
   const event = constructNowEvent(opers);
-  const ret = await postHardwareOperation(event, "http://192.168.1.93");
+  const ret = await postHardwareOperation(event);
   const nmea_array = ret["result"][0];
   if (nmea_array.length == 2 && nmea_array[0] === "failed") {
     addErrorMsg("未收到导航模块信息，请检查连接！");
@@ -202,7 +202,7 @@ async function fetchNavigationInfo() {
 
 document
   .getElementById("pinSelect")
-  .addEventListener("click", function (element) {
+  .addEventListener("change", function (element) {
     tx_pin = parseInt(
       element.target.options[element.target.selectedIndex].value
     );
@@ -223,4 +223,12 @@ document
   .getElementById("singleReadNmeaData")
   .addEventListener("click", async function () {
     await fetchNavigationInfo();
+  });
+
+document
+  .getElementById("countinuousReadNmeaData")
+  .addEventListener("click", async function () {
+    setInterval(async function () {
+      await fetchNavigationInfo();
+    }, 5000);
   });
