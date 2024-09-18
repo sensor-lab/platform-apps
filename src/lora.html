@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+    />
+    <title>模块化传感器平台</title>
+    <link rel="stylesheet" href="scss/styles.scss" />
+    <script type="module" src="js/lora.js"></script>
+  </head>
+
+  <body>
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+    <div id="statusMsg" class="alert alert-primary d-none" role="alert"></div>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+      <div class="mx-auto order-0">
+        <a class="navbar-brand mx-auto" href="#">LORA通信模块</a>
+      </div>
+    </nav>
+
+    <div style="display: flex">
+      <div
+        class="container-left"
+        style="
+          width: 50%;
+          box-sizing: border-box;
+          border-right: solid;
+          border-width: 3px;
+          border-color: grey;
+          text-align: center;
+          height: 100vh;
+        "
+      >
+        <h1 class="display-6" style="margin: 20px 0 20px 0">发送端</h1>
+        <button id="sendData" class="btn btn-primary mx-auto">发送数据</button>
+      </div>
+
+      <div class="container-right" style="width: 50%; text-align: center">
+        <h1 class="display-6" style="margin: 20px 0 20px 0">接收端</h1>
+        <button id="receiveData" class="btn btn-primary mx-auto">
+          接收数据
+        </button>
+      </div>
+    </div>
+  </body>
+</html>
