@@ -85,16 +85,23 @@ const RX_SINGLE_STATE = 2;
 const RX_CONTINUOUS_STATE = 3;
 const MODULE_STANDBY_STATE = 4;
 
-var mosi_pin = 0;
-var miso_pin = 1;
-var sck_pin = 2;
-var cs_pin = 3;
+var mosi_pin = undefined;
+var miso_pin = undefined;
+var sck_pin = undefined;
+var cs_pin = undefined;
 var state = undefined;
-var initialized = false;
 var receiver_timer = undefined;
 var transmitter_timer = undefined;
 
 const SPI_SPEED = 1000; //kHz
+
+if (localStorage.getItem("lora_mosi_pin")) {
+  mosi_pin = parseInt(localStorage.getItem("lora_mosi_pin"));
+  miso_pin = mosi_pin + 1;
+  sck_pin = mosi_pin + 2;
+  cs_pin = mosi_pin + 3;
+  document.getElementById("pinSelect").value = mosi_pin;
+}
 
 async function registerRead(opers, reg, read_len = 1) {
   spiHardwareOperation(
@@ -303,7 +310,12 @@ async function setModuleState(state) {
 }
 
 async function resetModuleState() {
-  if (state == undefined) {
+  if (mosi_pin == undefined) {
+    window.scrollTo(0, 0);
+    addErrorMsg("请选择正确的连接引脚");
+    await new Promise((r) => setTimeout(r, 1000));
+    state = undefined;
+  } else if (state == undefined) {
     if (true == (await moduleInit())) {
       state = MODULE_STANDBY_STATE;
     }
@@ -453,5 +465,20 @@ document
     if (state == MODULE_STANDBY_STATE) {
       state = RX_CONTINUOUS_STATE;
       await receiveData(true);
+    }
+  });
+
+document
+  .getElementById("pinSelect")
+  .addEventListener("change", function (event) {
+    var ele = document.getElementById("pinSelect");
+    if (ele.options[ele.selectedIndex].value == -1) {
+      addErrorMsg("请选择正确的连接引脚");
+    } else {
+      mosi_pin = parseInt(ele.options[ele.selectedIndex].value);
+      miso_pin = mosi_pin + 1;
+      sck_pin = mosi_pin + 2;
+      cs_pin = mosi_pin + 3;
+      localStorage.setItem("lora_mosi_pin", mosi_pin);
     }
   });
