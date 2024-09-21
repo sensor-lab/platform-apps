@@ -35,13 +35,67 @@
         "
       >
         <h1 class="display-6" style="margin: 20px 0 20px 0">发送端</h1>
-        <button id="sendData" class="btn btn-primary mx-auto">发送数据</button>
+        <div style="margin: 40 auto 40 auto; width: 50%">
+          <select id="txPinSelect" class="form-select my-2">
+            <option selected value="-1">选择LORA模块和平台的连接引脚</option>
+            <option value="0">0</option>
+            <option value="4">4</option>
+            <option value="8">8</option>
+            <option value="12">12</option>
+            <option value="16">16</option>
+          </select>
+        </div>
+
+        <label for="sendDataArea">发送数据</label>
+        <textarea
+          class="form-control"
+          id="sendDataArea"
+          style="width: 60%; margin: 10 auto 10 auto"
+          rows="3"
+        ></textarea>
+        <div class="card mx-auto mb-3" style="width: 70%">
+          <div class="card-body">
+            <h5>发送时间</h5>
+            <h6 id="txTimestamp" class="mb-2 text-muted">未发送</h6>
+          </div>
+        </div>
+        <button id="sendDataSingle" class="btn btn-primary mx-auto">
+          发送数据
+        </button>
+        <button id="sendDataContinuous" class="btn btn-secondary mx-auto">
+          连续发送
+        </button>
       </div>
 
       <div class="container-right" style="width: 50%; text-align: center">
         <h1 class="display-6" style="margin: 20px 0 20px 0">接收端</h1>
-        <button id="receiveData" class="btn btn-primary mx-auto">
+        <div style="margin: 40 auto 40 auto; width: 50%">
+          <select id="rxPinSelect" class="form-select my-2">
+            <option selected value="-1">选择LORA模块和平台的连接引脚</option>
+            <option value="0">0</option>
+            <option value="4">4</option>
+            <option value="8">8</option>
+            <option value="12">12</option>
+            <option value="16">16</option>
+          </select>
+        </div>
+        <div
+          id="rcvCard"
+          class="card mx-auto mb-3"
+          style="width: 18rem; display: none"
+        >
+          <div class="card-body">
+            <h5>接收时间</h5>
+            <h6 id="rcvTimestamp" class="mb-2 text-muted">未收到</h6>
+            <h5>接收数据</h5>
+            <h6 id="rcvContent" class="mb-2 text-muted">1,2,3,4,</h6>
+          </div>
+        </div>
+        <button id="receiveDataSingle" class="btn btn-primary mx-auto">
           接收数据
+        </button>
+        <button id="receiveDataContinuous" class="btn btn-secondary mx-auto">
+          自动接收
         </button>
       </div>
     </div>

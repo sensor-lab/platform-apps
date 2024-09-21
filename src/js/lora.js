@@ -3,7 +3,26 @@ import {
   delayHardwareOperation,
   constructNowEvent,
   postHardwareOperation,
+  setTime,
 } from "./api";
+
+function addErrorMsg(message) {
+  document.getElementById("errorMsg").innerHTML = message;
+  document.getElementById("errorMsg").classList.remove("d-none");
+}
+
+function removeErrorMsg() {
+  document.getElementById("errorMsg").classList.add("d-none");
+}
+
+function addStatusMsg(message) {
+  document.getElementById("statusMsg").innerHTML = message;
+  document.getElementById("statusMsg").classList.remove("d-none");
+}
+
+function removeStatusMsg() {
+  document.getElementById("statusMsg").classList.add("d-none");
+}
 
 const BASE_REG_FIFO = 0x0;
 const BASE_REG_OP_MODE = 0x1;
@@ -59,10 +78,21 @@ const LORA_REG_HOP_PERIOD = 0x24;
 const LORA_REG_FIFO_RX_BYTE_ADDR = 0x25;
 const LORA_REG_MODULATION_CFG3 = 0x26;
 
+// Global state
+const TX_SINGLE_STATE = 0;
+const TX_CONTINUOUS_STATE = 1;
+const RX_SINGLE_STATE = 2;
+const RX_CONTINUOUS_STATE = 3;
+const MODULE_STANDBY_STATE = 4;
+
 var mosi_pin = 0;
 var miso_pin = 1;
 var sck_pin = 2;
 var cs_pin = 3;
+var state = undefined;
+var initialized = false;
+var receiver_timer = undefined;
+var transmitter_timer = undefined;
 
 const SPI_SPEED = 1000; //kHz
 
@@ -104,7 +134,7 @@ async function checkVersion() {
   const opers = [];
   registerRead(opers, BASE_REG_VERSION);
   const event = constructNowEvent(opers);
-  const ret = await postHardwareOperation(event, "http://192.168.1.93");
+  const ret = await postHardwareOperation(event);
   if (parseInt(ret["result"][0]) === 0x12) {
     pass = true;
   }
@@ -128,7 +158,7 @@ async function getFrequency() {
   const opers = [];
   registerRead(opers, BASE_REG_FREQ_MSB, 3);
   const event = constructNowEvent(opers);
-  const ret = await postHardwareOperation(event, "http://192.168.1.93");
+  const ret = await postHardwareOperation(event);
   const freq =
     ((BigInt(ret["result"][0][0] << 16) +
       BigInt(ret["result"][0][1] << 8) +
@@ -143,7 +173,7 @@ async function getLna() {
   const opers = [];
   registerRead(opers, BASE_REG_LNA_SET, 1);
   const event = constructNowEvent(opers);
-  const ret = await postHardwareOperation(event, "http://192.168.1.93");
+  const ret = await postHardwareOperation(event);
   const lna = ret["result"][0];
   return lna;
 }
@@ -153,7 +183,7 @@ async function hasPendingRxPacket() {
   let opers = [];
   registerRead(opers, LORA_REG_IRQ_FLAGS);
   let event = constructNowEvent(opers);
-  let ret = await postHardwareOperation(event, "http://192.168.1.93");
+  let ret = await postHardwareOperation(event);
   console.log(`IRQ: ${JSON.stringify(ret)}`);
   if ((parseInt(ret["result"][0]) & LORA_REG_IRQ_RX_DONE_MASK) !== 0) {
     opers = [];
@@ -168,7 +198,7 @@ async function hasPendingRxPacket() {
     }
     registerRead(opers, LORA_REG_NUM_RX_BYTES);
     event = constructNowEvent(opers);
-    ret = await postHardwareOperation(event, "http://192.168.1.93");
+    ret = await postHardwareOperation(event);
     rx_packet_len = parseInt(ret["result"][1]);
     console.log(`packet len: ${JSON.stringify(ret)}`);
   }
@@ -179,7 +209,7 @@ async function readPacket(packet_len) {
   const opers = [];
   registerRead(opers, BASE_REG_FIFO, packet_len);
   let event = constructNowEvent(opers);
-  let ret = await postHardwareOperation(event, "http://192.168.1.93");
+  let ret = await postHardwareOperation(event);
   return ret["result"][0];
 }
 
@@ -193,7 +223,7 @@ async function begin() {
   registerWrite(opers, LORA_REG_FIFO_TX_BASE_ADDR, 0x0);
   registerWrite(opers, LORA_REG_FIFO_RX_BASE_ADDR, 0x0);
   let event = constructNowEvent(opers);
-  await postHardwareOperation(event, "http://192.168.1.93");
+  await postHardwareOperation(event);
   const freq = await getFrequency();
   if (freq != FREQUENCY) {
     console.log(`Warning! Frequency does not match: ${freq}`);
@@ -205,13 +235,9 @@ async function begin() {
   registerWrite(opers, BASE_REG_PA_DAC, 0x84);
   //   registerWrite(opers, BASE_REG_OVER_CURRENT_PROTECTION, 100); need double check
   registerWrite(opers, BASE_REG_PA_POWER_CONFIG, 0x8f);
-  registerWrite(
-    opers,
-    BASE_REG_OP_MODE,
-    OP_MODE_LORA_MODE | OP_MODE_STANDBY_MODE
-  );
   event = constructNowEvent(opers);
-  await postHardwareOperation(event, "http://192.168.1.93");
+  await postHardwareOperation(event);
+  await setModuleState(OP_MODE_STANDBY_MODE);
 }
 
 async function transmitData(...data) {
@@ -219,7 +245,7 @@ async function transmitData(...data) {
   // start packet
   registerRead(opers, LORA_REG_MODULATION_CFG1);
   let event = constructNowEvent(opers);
-  let ret = await postHardwareOperation(event, "http://192.168.1.93");
+  let ret = await postHardwareOperation(event);
   opers = [];
   registerWrite(opers, LORA_REG_MODULATION_CFG1, ret["result"][0] & 0xfe);
   registerWrite(opers, LORA_REG_FIFO_ADDR_PTR, 0);
@@ -229,98 +255,203 @@ async function transmitData(...data) {
   opers = [];
   registerWrite(opers, BASE_REG_FIFO, ...data);
   registerWrite(opers, LORA_REG_PAYLOAD_LENGTH, data.length);
-  registerWrite(
-    opers,
-    BASE_REG_OP_MODE,
-    OP_MODE_LORA_MODE | OP_MODE_TRANSMITTER_MODE
-  );
   event = constructNowEvent(opers);
-  await postHardwareOperation(event, "http://192.168.1.93");
+  await postHardwareOperation(event);
+  await setModuleState(OP_MODE_TRANSMITTER_MODE);
 
   // wait for data transmission completes.
   while (1) {
     opers = [];
     registerRead(opers, LORA_REG_IRQ_FLAGS);
     event = constructNowEvent(opers);
-    ret = await postHardwareOperation(event, "http://192.168.1.93");
+    ret = await postHardwareOperation(event);
     if ((ret["result"][0] & LORA_REG_IRQ_TX_DONE_MASK) != 0) {
-      console.log(`tx completed!`);
       break;
     }
   }
   opers = [];
   registerWrite(opers, LORA_REG_IRQ_FLAGS, LORA_REG_IRQ_TX_DONE_MASK);
   event = constructNowEvent(opers);
-  ret = await postHardwareOperation(event, "http://192.168.1.93");
+  ret = await postHardwareOperation(event);
 }
 
-async function receiveData() {
+async function transmitDataWrapper(...data) {
+  addStatusMsg("数据发送中");
+  window.scrollTo(0, 0);
+  await transmitData(...data);
+  document.getElementById("txTimestamp").innerHTML = new Date(
+    Date.now()
+  ).toLocaleTimeString();
+  removeErrorMsg();
+  addStatusMsg("数据发送完成");
+}
+
+async function moduleInit() {
+  const pass = await checkVersion();
+  if (pass) {
+    await begin();
+  }
+  return pass;
+}
+
+async function setModuleState(state) {
+  const opers = [];
+  registerWrite(opers, BASE_REG_OP_MODE, OP_MODE_LORA_MODE | state);
+  registerWrite(opers, LORA_REG_FIFO_ADDR_PTR, 0);
+  const event = constructNowEvent(opers);
+  await postHardwareOperation(event);
+}
+
+async function resetModuleState() {
+  if (state == undefined) {
+    if (true == (await moduleInit())) {
+      state = MODULE_STANDBY_STATE;
+    }
+  } else if (state == TX_SINGLE_STATE) {
+    addErrorMsg("模块正在发送数据，请稍候");
+  } else if (state == TX_CONTINUOUS_STATE) {
+    clearTimeout(transmitter_timer);
+    transmitter_timer = undefined;
+    await setModuleState(OP_MODE_STANDBY_MODE);
+    state = MODULE_STANDBY_STATE;
+  } else if (state == RX_SINGLE_STATE) {
+    clearTimeout(receiver_timer);
+    receiver_timer = undefined;
+    await setModuleState(OP_MODE_STANDBY_MODE);
+    state = MODULE_STANDBY_STATE;
+  } else if (state == RX_CONTINUOUS_STATE) {
+    clearTimeout(receiver_timer);
+    await setModuleState(OP_MODE_STANDBY_MODE);
+    state = MODULE_STANDBY_STATE;
+  }
+}
+
+async function loopTransmitData(...u8array) {
+  await transmitDataWrapper(...u8array);
+  transmitter_timer = setTimeout(async function () {
+    console.log("loop transmit!");
+    await loopTransmitData(...u8array);
+  }, 1000);
+}
+
+async function loopReiveData(continuous) {
+  addStatusMsg("数据等待中");
+  const packet_len = await hasPendingRxPacket();
+  if (packet_len > 0) {
+    addStatusMsg("数据接收中");
+    const read_data = await readPacket(packet_len);
+    let utf8decoder = new TextDecoder();
+    let u8arr = new Uint8Array(read_data);
+    const rcv_data = utf8decoder.decode(u8arr);
+    const cur_time = new Date(Date.now()).toLocaleTimeString();
+    document.getElementById("rcvTimestamp").innerHTML = cur_time;
+    document.getElementById("rcvContent").innerHTML = rcv_data;
+    document.getElementById("rcvCard").style.display = "block";
+    if (continuous) {
+      // continuous mode, set back to receiver mode
+      await setModuleState(OP_MODE_RECEIVER_MODE);
+      receiver_timer = setTimeout(async function () {
+        await loopReiveData(continuous);
+      }, 1000);
+    }
+  } else {
+    receiver_timer = setTimeout(async function () {
+      await loopReiveData(continuous);
+    }, 1000);
+  }
+}
+
+async function receiveData(continuous = false) {
   let opers = [];
   // set explicit header
   registerRead(opers, LORA_REG_MODULATION_CFG1);
   let event = constructNowEvent(opers);
-  let ret = await postHardwareOperation(event, "http://192.168.1.93");
+  let ret = await postHardwareOperation(event);
   opers = [];
   registerWrite(opers, LORA_REG_MODULATION_CFG1, ret["result"][0] & 0xfe);
   registerRead(opers, BASE_REG_OP_MODE);
   event = constructNowEvent(opers);
-  ret = await postHardwareOperation(event, "http://192.168.1.93");
+  ret = await postHardwareOperation(event);
 
   if (
     parseInt(ret["result"][1]) !==
     (OP_MODE_LORA_MODE | OP_MODE_RECEIVER_MODE)
   ) {
-    opers = [];
-    registerWrite(
-      opers,
-      BASE_REG_OP_MODE,
-      OP_MODE_LORA_MODE | OP_MODE_RECEIVER_MODE
-    );
-    registerWrite(opers, LORA_REG_FIFO_ADDR_PTR, 0);
-    event = constructNowEvent(opers);
-    await postHardwareOperation(event, "http://192.168.1.93");
+    await setModuleState(OP_MODE_RECEIVER_MODE);
   }
 
-  let i = 0;
-  while (i < 50) {
-    const packet_len = await hasPendingRxPacket();
-    if (packet_len > 0) {
-      console.log("detected pending packet");
-      const read_data = await readPacket(packet_len);
-      console.log(`read_data: ${JSON.stringify(read_data)}`);
-    }
-    await new Promise((r) => setTimeout(r, 1000));
-    i++;
-  }
+  await loopReiveData(continuous);
 }
 
-var initialized = false;
-
 document
-  .getElementById("sendData")
+  .getElementById("sendDataSingle")
   .addEventListener("click", async function () {
-    const pass = await checkVersion();
-    console.log(`pass: ${pass}`);
-    if (pass) {
-      if (!initialized) {
-        await begin();
-        initialized = true;
-      }
+    removeErrorMsg();
+    removeStatusMsg();
+    const text_input = document.getElementById("sendDataArea").value;
+    if (text_input.length > 0) {
+      await resetModuleState();
 
-      await transmitData(30, 31, 32, 33, 34, 35, 36, 37, 38, 39);
+      if (state == MODULE_STANDBY_STATE) {
+        const encoder = new TextEncoder();
+        const u8array = new Uint8Array(text_input.length * 3);
+        encoder.encodeInto(text_input, u8array);
+        state = TX_SINGLE_STATE;
+        await transmitDataWrapper(...u8array);
+        state = MODULE_STANDBY_STATE;
+      } else {
+        addErrorMsg("请检查模块连接");
+      }
+    } else {
+      addErrorMsg("请输入正确的发送内容。");
     }
   });
 
 document
-  .getElementById("receiveData")
+  .getElementById("sendDataContinuous")
   .addEventListener("click", async function () {
-    const pass = await checkVersion();
-    console.log(`pass: ${pass}`);
-    if (pass) {
-      if (!initialized) {
-        await begin();
-        initialized = true;
+    removeErrorMsg();
+    removeStatusMsg();
+    const text_input = document.getElementById("sendDataArea").value;
+    if (text_input.length > 0) {
+      await resetModuleState();
+
+      if (state == MODULE_STANDBY_STATE) {
+        const encoder = new TextEncoder();
+        const u8array = new Uint8Array(text_input.length * 3);
+        encoder.encodeInto(text_input, u8array);
+        await loopTransmitData(...u8array);
+        state = TX_CONTINUOUS_STATE;
+      } else {
+        addErrorMsg("请检查模块连接");
       }
+    } else {
+      addErrorMsg("请输入正确的发送内容。");
+    }
+  });
+
+document
+  .getElementById("receiveDataSingle")
+  .addEventListener("click", async function () {
+    removeErrorMsg();
+    removeStatusMsg();
+
+    await resetModuleState();
+    if (state == MODULE_STANDBY_STATE) {
+      state = RX_SINGLE_STATE;
       await receiveData();
+    }
+  });
+
+document
+  .getElementById("receiveDataContinuous")
+  .addEventListener("click", async function () {
+    removeErrorMsg();
+    removeStatusMsg();
+
+    await resetModuleState();
+    if (state == MODULE_STANDBY_STATE) {
+      state = RX_CONTINUOUS_STATE;
+      await receiveData(true);
     }
   });
