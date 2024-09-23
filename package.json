@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "parcel serve src/*.html --public-url / --dist-dir dist",
-    "build": "parcel src/*.html",
+    "start": "parcel serve src/*.html --public-url / --dist-dir dist --no-hmr",
+    "build": "parcel src/*.html --no-hmr",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
