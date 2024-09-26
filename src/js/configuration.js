@@ -420,7 +420,6 @@ document
           const reader = new FileReader();
           reader.addEventListener("load", async () => {
             const cal_crc = calculateCrc32Le(new Uint8Array(reader.result));
-            console.log(`crc calculated: ${cal_crc}, crc from server: ${server_crc}`);
             if (cal_crc[0] == server_crc[0] && cal_crc[1] == server_crc[1] && cal_crc[2] == server_crc[2] && cal_crc[3] == server_crc[3]) {
               addAppSkipUpdateList(event.target.files[i], app_skip_list);
             } else {
