@@ -155,8 +155,8 @@ export async function getTime() {
   }
 }
 
-export async function getSha(fn, external_url = undefined) {
-  let request = `/hardware/getsha?fn=${fn}`;
+export async function getCrc32(fn, external_url = undefined) {
+  let request = `/hardware/getcrc32?fn=${fn}`;
   if (external_url !== undefined) {
     request = external_url + request;
   }
