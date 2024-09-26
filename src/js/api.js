@@ -155,6 +155,29 @@ export async function getTime() {
   }
 }
 
+export async function getSha(fn, external_url = undefined) {
+  let request = `/hardware/getsha?fn=${fn}`;
+  if (external_url !== undefined) {
+    request = external_url + request;
+  }
+  try {
+    const response = await fetch(request, {
+      method: "get",
+    });
+    if (response.status === 404) {
+      return -1;
+    } else if (response.status === 200) {
+      return await response.json();
+    } else {
+      // could be status code 400
+      return -2;
+    }
+  } catch (error) {
+    console.log("Error call API:", error);
+  }
+  return -3;
+}
+
 export async function gpio(pin_id, mode, level) {
   let request = "/hardware/operation";
   var body;
