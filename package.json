@@ -20,6 +20,7 @@
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
-    "chart.js": "^4.4.2"
+    "chart.js": "^4.4.2",
+    "parcel-plugin-clean-dist": "^0.0.6"
   }
 }
