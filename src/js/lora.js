@@ -239,7 +239,7 @@ async function begin() {
   opers = [];
   registerWrite(opers, BASE_REG_LNA_SET, lna | 0x3);
   registerWrite(opers, LORA_REG_MODULATION_CFG3, 0x4);
-  registerWrite(opers, BASE_REG_PA_DAC, 0x84);
+  registerWrite(opers, BASE_REG_PA_DAC, 0x87);    // set to 0x87 for high tx power +20dbm
   //   registerWrite(opers, BASE_REG_OVER_CURRENT_PROTECTION, 100); need double check
   registerWrite(opers, BASE_REG_PA_POWER_CONFIG, 0x8f);
   event = constructNowEvent(opers);
