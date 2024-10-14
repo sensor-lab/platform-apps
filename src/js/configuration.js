@@ -264,7 +264,9 @@ document
   .getElementById("setTimeButton")
   .addEventListener("click", async function (event) {
     const cur_time = new Date();
+    const timezone_offset = cur_time.getTimezoneOffset() / 60;    // integer as hour
     const config = {
+      tmzoneoffset: timezone_offset,
       timedate:
         cur_time.getFullYear() +
         "-" +
@@ -278,6 +280,7 @@ document
         ":" +
         cur_time.getSeconds(),
     };
+
     const ret = await setConfig(config);
     if (ret == -1) {
       addErrorMsg("时间设置失败，请重试。");
