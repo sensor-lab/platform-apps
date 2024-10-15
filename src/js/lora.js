@@ -239,7 +239,8 @@ async function begin() {
   opers = [];
   registerWrite(opers, BASE_REG_LNA_SET, lna | 0x3);
   registerWrite(opers, LORA_REG_MODULATION_CFG3, 0x4);
-  registerWrite(opers, BASE_REG_PA_DAC, 0x87);    // set to 0x87 for high tx power +20dbm
+  registerWrite(opers, BASE_REG_PA_DAC, 0x87);    // 0x87 for tx high power
+  registerWrite(opers, LORA_REG_MODULATION_CFG2, 0xa0);     // set spread factor to 10
   //   registerWrite(opers, BASE_REG_OVER_CURRENT_PROTECTION, 100); need double check
   registerWrite(opers, BASE_REG_PA_POWER_CONFIG, 0x8f);
   event = constructNowEvent(opers);
@@ -254,7 +255,7 @@ async function transmitData(...data) {
   let event = constructNowEvent(opers);
   let ret = await postHardwareOperation(event);
   opers = [];
-  registerWrite(opers, LORA_REG_MODULATION_CFG1, ret["result"][0] & 0xfe);
+  registerWrite(opers, LORA_REG_MODULATION_CFG1, ret["result"][0] & 0xfe & 0x0f);   // use 7.8khz bandwidth with explicit header mode
   registerWrite(opers, LORA_REG_FIFO_ADDR_PTR, 0);
   registerWrite(opers, LORA_REG_PAYLOAD_LENGTH, 0);
 
@@ -380,7 +381,7 @@ async function receiveData(continuous = false) {
   let event = constructNowEvent(opers);
   let ret = await postHardwareOperation(event);
   opers = [];
-  registerWrite(opers, LORA_REG_MODULATION_CFG1, ret["result"][0] & 0xfe);
+  registerWrite(opers, LORA_REG_MODULATION_CFG1, ret["result"][0] & 0xfe & 0x0f); // use 7.8khz bandwidth with explicit header mode
   registerRead(opers, BASE_REG_OP_MODE);
   event = constructNowEvent(opers);
   ret = await postHardwareOperation(event);

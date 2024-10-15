@@ -2,10 +2,9 @@
   "name": "platform-apps",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "start": "parcel serve src/*.html --public-url / --dist-dir dist --no-hmr",
-    "build": "parcel src/*.html --no-hmr",
+    "build": "parcel build src/*.html",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,10 +15,12 @@
     "parcel": "^2.12.0"
   },
   "dependencies": {
+    "@fullhuman/postcss-purgecss": "^6.0.0",
     "@parcel/reporter-bundle-analyzer": "^2.12.0",
     "@popperjs/core": "^2.11.8",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
-    "chart.js": "^4.4.2"
+    "chart.js": "^4.4.2",
+    "parcel-plugin-clean-dist": "^0.0.6"
   }
 }
