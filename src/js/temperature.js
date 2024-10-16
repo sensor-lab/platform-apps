@@ -1,8 +1,5 @@
 import { i2cReadHardwareOperation, i2cWriteHardwareOperation, constructNowEvent, postHardwareOperation } from "./api";
 
-// TODO1: add logic to detect i2c failure, platform should return that information
-// TODO2: add logic to save ambient data capture and able to download
-
 const I2C_HIGH_SPEED_KHZ = 100
 const I2C_MID_SPEED_KHZ = 50
 const I2C_LOW_SPEED_KHZ = 10
@@ -22,6 +19,7 @@ if (localStorage.getItem("ambient_module_pin")) {
     sda_pin = parseInt(localStorage.getItem("ambient_module_pin"));
     document.getElementById("connectedPin").value = sda_pin;
     if (sda_pin !== -1) {
+        // TODO, remove +1 once new ambient board is ready!
         scl_pin = sda_pin + 1;
         startCapture();
     }
@@ -51,7 +49,7 @@ document.getElementById("connectedPin").addEventListener("change", async functio
     await stopCapture();
     if (event.target.value != -1) {
         if (sda_pin !== parseInt(event.target.value)) {
-            sda_pin = parseInt(event.target.value);
+            sda_pin = parseInt(event.target.value) + 1;
             scl_pin = sda_pin + 1;
             await startCapture();
             localStorage.setItem("ambient_module_pin", sda_pin);
@@ -62,10 +60,7 @@ document.getElementById("connectedPin").addEventListener("change", async functio
 });
 
 function refreshTime() {
-    var date = new Date();
-    var time = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate()
-        + ' ' + date.getHours() + ':' + date.getMinutes() + ":" + date.getSeconds();
-    document.getElementById("currentDate").innerHTML = `环境监测 ${time}`;
+    document.getElementById("currentDate").innerHTML = `环境监测应用，已经捕捉到${captured_data.length}条数据。`;
 }
 
 async function startSht30SingleShot() {
@@ -78,7 +73,10 @@ async function startSht30SingleShot() {
     if (response === undefined) {
         addErrorMsg("和平台通信失败，请重启平台");
         status = 1;
-    }
+    } else if (response.errorcode !== 0) {
+        addErrorMsg("和环境模块通信失败，请检查连接和引脚号");
+        status = 1;
+    } 
     return status;
 }
 
@@ -90,10 +88,10 @@ async function readSht30SingleShot() {
     const now_event = constructNowEvent(opers);
     const response = await postHardwareOperation(now_event);
     if (response !== undefined) {
-        // if (response.errorcode !== 0) {
-        //     // TODO
-        // } else 
-        {
+        if (response.errorcode !== 0) {
+            addErrorMsg("和环境模块通信失败，请检查连接和引脚号");
+            status = 1;
+        } else {
             const temperature = -45.0 + 175.0 * (((response["result"][0][0] << 8) + response["result"][0][1]) / 65535);
             humidity = 100.0 * (((response["result"][0][3] << 8) + response["result"][0][4]) / 65535);
             document.getElementById('humidity_value').innerHTML = humidity.toFixed(2);
@@ -115,8 +113,11 @@ async function readMts01Temperature() {
     if (response === undefined) {
         addErrorMsg("和平台通信失败，请重启平台");
         status = 1;
+    } else if (response.errorcode !== 0) {
+        addErrorMsg("和环境模块通信失败，请检查连接和引脚号");
+        status = 1;
     } else {
-        temp_val = (response["result"][1][0] << 8) + response["result"][1][1]
+        let temp_val = (response["result"][1][0] << 8) + response["result"][1][1]
         if ((temp_val & (1 << 15)) != 0) {
             temp_val = temp_val - (1 << 16)
         }
@@ -138,6 +139,9 @@ async function readAgs02ma() {
     if (response === undefined) {
         status = 1;
         addErrorMsg("和平台通信失败，请重启平台");
+    } else if (response.errorcode !== 0) {
+        addErrorMsg("和环境模块通信失败，请检查连接和引脚号");
+        status = 1;
     } else {
         air_pollute_val = (response["result"][1][0] << 24) + (response["result"][1][1] << 16) + (response["result"][1][2] << 8) + (response["result"][1][3])
         document.getElementById('air_condition_val').innerHTML = air_pollute_val.toFixed(2);
