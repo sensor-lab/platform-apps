@@ -560,14 +560,14 @@ export function captureRegularHardwareOperation(
   if (opers.constructor !== Array) {
     ret = -1;
   } else if (pin_id == undefined || pin_id < 0 || pin_id >= 20) {
-    re = -1;
+    ret = -1;
   } else if (max_data_bytes <= 0) {
     ret = -1;
   } else if (time_unit !== "ms" && time_unit !== "us") {
     ret = -1;
   } else if (
-    capture_condition !== "rising" &&
-    capture_condition !== "falling" &&
+    capture_condition !== "positive" &&
+    capture_condition !== "negative" &&
     capture_condition !== "change"
   ) {
     ret = -1;

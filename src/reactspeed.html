@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+    />
+    <title>反应速度测试</title>
+    <link rel="stylesheet" href="scss/styles.scss" />
+    <script type="module" src="js/reactspeed.js"></script>
+  </head>
+
+  <body>
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+    <div id="statusMsg" class="alert alert-primary d-none" role="alert"></div>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+      <div class="mx-auto order-0">
+        <a class="navbar-brand mx-auto" href="#">反应速度测试</a>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="row align-items-start my-3">
+        <div id="leftSpeedTest" class="col text-center d-none">
+          <h2>测试左手反应速度</h2>
+          <p>
+            在网页上点击“开始测试”按钮后，当看到平台的绿灯点亮后按下右按钮，平台会记录从绿灯点亮到按下按钮的时间，一共将进行10次。
+          </p>
+          <button id="startLeftTest" class="btn btn-primary m-2">
+            开始测试
+          </button>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">反应时间(毫秒)</th>
+              </tr>
+            </thead>
+            <tbody id="leftResult"></tbody>
+          </table>
+        </div>
+        <div id="rightSpeedTest" class="col text-center">
+          <h2>测试右手反应速度</h2>
+          <p>
+            在网页上点击“开始测试”按钮后，当看到平台的绿灯点亮后按下左按钮，平台会记录从绿灯点亮到按下按钮的时间。一共将进行10次。
+          </p>
+          <button id="startRightTest" class="btn btn-primary m-2">
+            开始测试
+          </button>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">反应时间(毫秒)</th>
+              </tr>
+            </thead>
+            <tbody id="rightResult"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="testResult" class="card mx-auto d-none" style="width: 18rem">
+        <div class="card-body">
+          <h5 class="card-title">测试结果</h5>
+          <p id="testResultData" class="card-text"></p>
+          <a id="retestBtn" class="btn btn-primary">重新测试</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
