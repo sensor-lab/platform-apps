@@ -19,7 +19,7 @@ const LedState = {
 };
 
 const INITIAL_DELAY_RANGE_MILLIS = [2000, 6000];
-const TEST_COUNTER_MAX = 4;
+const TEST_COUNTER_MAX = 10;
 const COMPLETE_INDICATE_DURATION_SEC = 2;
 
 var game_state = State.START;
@@ -211,7 +211,7 @@ async function runStateMachine() {
 
 async function indicateTestComplete() {
   const opers = [];
-  for (i = 0; i < COMPLETE_INDICATE_DURATION_SEC; i++) {
+  for (let i = 0; i < COMPLETE_INDICATE_DURATION_SEC; i++) {
     gpioHardwareOperation(opers, "led", "output", LedState.ON);
     delayHardwareOperation(opers, "ms", 250);
     gpioHardwareOperation(opers, "led", "output", LedState.OFF);
