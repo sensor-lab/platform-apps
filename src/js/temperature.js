@@ -1,9 +1,14 @@
+const bootstrap = require("bootstrap");
 import {
+  delayHardwareOperation,
   i2cReadHardwareOperation,
   i2cWriteHardwareOperation,
+  addReturnInformation,
   constructNowEvent,
+  constructScheduleEvent,
   postHardwareOperation,
 } from "./api";
+import Chart from "chart.js/auto";
 
 const I2C_HIGH_SPEED_KHZ = 100;
 const I2C_MID_SPEED_KHZ = 50;
@@ -11,14 +16,13 @@ const I2C_LOW_SPEED_KHZ = 10;
 const SHT30_I2C_ADDR = 68;
 const MTS01_I2C_ADDR = 69;
 const AGS02MA_I2C_ADDR = 26;
+// update environment data every 15 seconds
+const ENVIRONMENT_UPDATE_SEC = 15;
 
+var loaded_env_data = [];
 var sda_pin = undefined;
 var scl_pin = undefined;
 var timer_id = undefined;
-var captured_data = [];
-
-refreshTime();
-setInterval(refreshTime, 1000);
 
 if (localStorage.getItem("ambient_module_pin")) {
   sda_pin = parseInt(localStorage.getItem("ambient_module_pin"));
@@ -49,28 +53,6 @@ function removeStatusMsg() {
   document.getElementById("statusMsg").classList.add("d-none");
 }
 
-document
-  .getElementById("connectedPin")
-  .addEventListener("change", async function (event) {
-    await stopCapture();
-    if (event.target.value != -1) {
-      if (sda_pin !== parseInt(event.target.value)) {
-        sda_pin = parseInt(event.target.value);
-        scl_pin = sda_pin + 1;
-        await startCapture();
-        localStorage.setItem("ambient_module_pin", sda_pin);
-      }
-    } else {
-      localStorage.setItem("ambient_module_pin", event.target.value);
-    }
-  });
-
-function refreshTime() {
-  document.getElementById(
-    "currentDate"
-  ).innerHTML = `环境监测应用，已经捕捉到${captured_data.length}条数据。`;
-}
-
 async function startSht30SingleShot() {
   let status = 0;
   const opers = [];
@@ -79,7 +61,7 @@ async function startSht30SingleShot() {
     sda_pin,
     scl_pin,
     I2C_HIGH_SPEED_KHZ,
-    68,
+    SHT30_I2C_ADDR,
     36,
     11
   );
@@ -170,7 +152,6 @@ async function readMts01Temperature() {
       temp_val = temp_val - (1 << 16);
     }
     temperature = 40 + temp_val / 256;
-    console.log(temperature);
     document.getElementById("temp_value").innerHTML = temperature.toFixed(2);
   }
   return [status, temperature];
@@ -234,7 +215,8 @@ function convertArrayToCSV(array) {
   const csvRows = array.map((obj) =>
     headers.map((header) => obj[header]).join(",")
   );
-  return [headers.join(","), ...csvRows].join("\n");
+  const headers_translated = ["时间", "温度", "湿度", "空气质量"];
+  return [headers_translated.join(","), ...csvRows].join("\n");
 }
 
 function downloadBlob(content, filename, contentType) {
@@ -249,15 +231,6 @@ function downloadBlob(content, filename, contentType) {
   pom.click();
 }
 
-document.getElementById("downloadData").addEventListener("click", function () {
-  if (captured_data.length == 0) {
-    addErrorMsg("尚未捕捉到有效的数据");
-  } else {
-    const data_str = convertArrayToCSV(captured_data);
-    downloadBlob(data_str, "环境数据.csv", "text/csv;charset=utf-8;");
-  }
-});
-
 async function getAllSensors() {
   const sht30_write_status = await startSht30SingleShot();
   const [sht30_read_status, humidity] = await readSht30SingleShot();
@@ -266,32 +239,12 @@ async function getAllSensors() {
   if (sht30_read_status | sht30_write_status | mts01_status | ags02ma_status) {
     window.scrollTo(0, 0);
     stopCapture();
-  } else {
-    let date = new Date();
-    let time =
-      date.getFullYear() +
-      "-" +
-      (date.getMonth() + 1) +
-      "-" +
-      date.getDate() +
-      "T" +
-      date.getHours() +
-      ":" +
-      date.getMinutes() +
-      ":" +
-      date.getSeconds();
-    captured_data.push({
-      time: time,
-      temperature: temperature,
-      humidity: humidity,
-      air_condition: air_condition,
-    });
   }
 }
 
 async function startCapture() {
   await getAllSensors();
-  timer_id = setInterval(getAllSensors, 2000);
+  timer_id = setInterval(getAllSensors, ENVIRONMENT_UPDATE_SEC * 1000);
 }
 
 async function stopCapture() {
@@ -300,3 +253,199 @@ async function stopCapture() {
     timer_id = undefined;
   }
 }
+
+async function plotEnvironmentData(env_data) {
+  new Chart(document.getElementById("environmentPlot"), {
+    type: "line",
+    data: {
+      labels: env_data.map((row) => row.time),
+      datasets: [
+        {
+          label: "温度",
+          borderColor: "rgb(192, 0, 0)",
+          data: env_data.map((row) => row.temperature),
+        },
+        {
+          label: "湿度",
+          borderColor: "rgb(75, 192, 192)",
+          data: env_data.map((row) => row.humidity),
+        },
+        {
+          label: "空气质量",
+          borderColor: "rgb(0, 0, 192)",
+          data: env_data.map((row) => row.aircondition),
+        },
+      ],
+    },
+  });
+}
+
+document
+  .getElementById("connectedPin")
+  .addEventListener("change", async function (event) {
+    await stopCapture();
+    if (event.target.value != -1) {
+      if (sda_pin !== parseInt(event.target.value)) {
+        sda_pin = parseInt(event.target.value);
+        scl_pin = sda_pin + 1;
+        await startCapture();
+        localStorage.setItem("ambient_module_pin", sda_pin);
+      }
+    } else {
+      localStorage.setItem("ambient_module_pin", event.target.value);
+    }
+  });
+
+document
+  .getElementById("startTimerBtn")
+  .addEventListener("click", async function (event) {
+    const opers = [];
+    // temperature: mts01 sensor
+    i2cWriteHardwareOperation(
+      opers,
+      sda_pin,
+      scl_pin,
+      I2C_MID_SPEED_KHZ,
+      MTS01_I2C_ADDR,
+      204,
+      68
+    );
+    i2cReadHardwareOperation(
+      opers,
+      sda_pin,
+      scl_pin,
+      I2C_MID_SPEED_KHZ,
+      MTS01_I2C_ADDR,
+      -1,
+      -1,
+      3
+    );
+    delayHardwareOperation(opers, "ms", 50);
+    // humidity: sht30
+    i2cWriteHardwareOperation(
+      opers,
+      sda_pin,
+      scl_pin,
+      I2C_HIGH_SPEED_KHZ,
+      SHT30_I2C_ADDR,
+      36,
+      11
+    );
+    i2cReadHardwareOperation(
+      opers,
+      sda_pin,
+      scl_pin,
+      I2C_HIGH_SPEED_KHZ,
+      SHT30_I2C_ADDR,
+      -1,
+      -1,
+      6
+    );
+    delayHardwareOperation(opers, "ms", 50);
+
+    // air condition: ags02
+    i2cWriteHardwareOperation(
+      opers,
+      sda_pin,
+      scl_pin,
+      I2C_LOW_SPEED_KHZ,
+      AGS02MA_I2C_ADDR,
+      0
+    );
+    i2cReadHardwareOperation(
+      opers,
+      sda_pin,
+      scl_pin,
+      I2C_LOW_SPEED_KHZ,
+      AGS02MA_I2C_ADDR,
+      -1,
+      -1,
+      5
+    );
+    delayHardwareOperation(opers, "ms", 50);
+
+    const interval = document.getElementById("timerIntervalSelect").value;
+    const sch_event = constructScheduleEvent(opers, interval);
+    const sch_ret_event = addReturnInformation(sch_event, ["file", "data.bin"]);
+
+    console.log(`sch event: ${JSON.stringify(sch_ret_event)}`);
+
+    const ret = await postHardwareOperation(sch_event);
+    if (ret !== undefined) {
+      addErrorMsg("定时功能开启失败，请重启平台并重新打开该应用");
+    } else {
+      addStatusMsg("定时功能开启成功，请关闭该窗口");
+    }
+  });
+
+document
+  .getElementById("fileSelect")
+  .addEventListener("change", async function (event) {
+    var input = event.target;
+    var reader = new FileReader();
+    removeErrorMsg();
+    reader.onload = async function () {
+      const lines = reader.result.split(/[\r\n]+/g);
+      loaded_env_data = [];
+      lines.forEach((line) => {
+        let line_json;
+        try {
+          line_json = JSON.parse(line);
+          if (line_json.data.errorcode === 0) {
+            // calculate temperature value
+            let temperature;
+            let humidity;
+            let aircondition;
+            let temp_val =
+              (line_json["data"]["result"][1][0] << 8) +
+              line_json["data"]["result"][1][1];
+            if ((temp_val & (1 << 15)) != 0) {
+              temp_val = temp_val - (1 << 16);
+            }
+            temperature = 40 + temp_val / 256;
+            temperature = temperature.toFixed(2);
+
+            // calculate humidity value
+            humidity =
+              100.0 *
+              (
+                ((line_json["data"]["result"][4][3] << 8) +
+                  line_json["data"]["result"][4][4]) /
+                65535
+              ).toFixed(2);
+
+            // calculate aircondition value
+            aircondition =
+              (line_json["data"]["result"][7][0] << 24) +
+              (line_json["data"]["result"][7][1] << 16) +
+              (line_json["data"]["result"][7][2] << 8) +
+              line_json["data"]["result"][7][3];
+
+            loaded_env_data.push({
+              time: line_json["time"],
+              temperature: temperature,
+              humidity: humidity,
+              aircondition: aircondition,
+            });
+          }
+        } catch (error) {
+          console.log(`Failed to parse line to JSON: ${line}`);
+        }
+      });
+      if (loaded_env_data.length > 0) {
+        await plotEnvironmentData(loaded_env_data);
+      }
+    };
+    reader.readAsText(input.files[0]);
+  });
+
+document
+  .getElementById("downloadEnvData")
+  .addEventListener("click", function () {
+    if (loaded_env_data.length == 0) {
+      addErrorMsg("请先加载环境数据");
+    } else {
+      const data_str = convertArrayToCSV(loaded_env_data);
+      downloadBlob(data_str, "环境数据.csv", "text/csv;charset=utf-8;");
+    }
+  });

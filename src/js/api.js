@@ -805,6 +805,66 @@ export function constructNowEvent(opers, cycle = undefined) {
   return now_event;
 }
 
+export function constructScheduleEvent(
+  opers,
+  interval = undefined,
+  cycle = undefined,
+  start = undefined,
+  repeat = undefined
+) {
+  let schedule_event = undefined;
+  let pass = true;
+  if (cycle === undefined) {
+    schedule_event = {
+      event: "schedule",
+      actions: opers,
+    };
+  } else if (typeof cycle === "number") {
+    schedule_event = {
+      event: "schedule",
+      actions: opers,
+      cycle: cycle,
+    };
+  } else {
+    console.log(`Bad cycle keyword ${cycle}`);
+    pass = false;
+  }
+
+  if (pass && interval !== undefined) {
+    if (typeof interval === "string") {
+      schedule_event.interval = interval;
+    } else {
+      console.log(`Bad interval keyword ${interval}`);
+      pass = false;
+    }
+  }
+
+  if (pass && start !== undefined) {
+    if (typeof start === "string") {
+      schedule_event.start = start;
+    } else {
+      console.log(`Bad start keyword ${start}`);
+      pass = false;
+    }
+  }
+
+  if (!pass) {
+    schedule_event = null;
+  }
+
+  return schedule_event;
+}
+
+export function addReturnInformation(event, return_info) {
+  if (return_info.constructor === Array) {
+    event.return = return_info;
+  } else {
+    console.log(`Bad repeat keyword ${repeat}`);
+  }
+
+  return event;
+}
+
 export async function postHardwareOperation(event, external_url = undefined) {
   if (external_url == undefined) {
     let request = "/hardware/operation";
@@ -828,6 +888,35 @@ export async function postHardwareOperation(event, external_url = undefined) {
         },
         mode: "no-cors",
         body: JSON.stringify(event),
+      });
+      return await response.json();
+    } catch (error) {
+      console.log("Error call API:", error);
+    }
+  }
+}
+
+export async function getHardwareOperation(external_url = undefined) {
+  if (external_url == undefined) {
+    let request = "/hardware/operation";
+    try {
+      const response = await fetch(request, {
+        method: "get",
+      });
+      return await response.json();
+    } catch (error) {
+      console.log("Error call API:", error);
+    }
+  } else {
+    // used in the testing mode
+    let request = external_url + "/hardware/operation";
+    try {
+      const response = await fetch(request, {
+        method: "get",
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+        },
+        mode: "no-cors",
       });
       return await response.json();
     } catch (error) {
