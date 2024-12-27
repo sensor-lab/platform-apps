@@ -321,7 +321,6 @@ document
         -1,
         3
       )
-      delayHardwareOperation(opers, 'ms', 50)
       // humidity: sht30
       i2cWriteHardwareOperation(
         opers,
@@ -332,6 +331,7 @@ document
         36,
         11
       )
+      delayHardwareOperation(opers, 'ms', 50) // give 50ms for data ready
       i2cReadHardwareOperation(
         opers,
         sda_pin,
