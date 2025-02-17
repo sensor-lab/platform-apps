@@ -19,7 +19,7 @@ const predefinedScripts = [
                     "}"
     },
     {
-        "name": "按下有按钮关闭平台的LED灯",
+        "name": "按下右按钮关闭平台的LED灯",
         "content": "{\r\n" +
         "\"event\":\"pinstate\",\r\n" +
         "\"pin\": \"right\",\r\n" + 
