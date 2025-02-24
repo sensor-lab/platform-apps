@@ -37,11 +37,10 @@ export async function restartPlatform() {
   return -1;
 }
 
-export async function sendRequest(payload) {
-  let request = "/hardware/operation";
+export async function sendRequest(api, method, payload, ipaddr="") {
   try {
-    const response = await fetch(request, {
-      method: "post",
+    const response = await fetch(ipaddr+api, {
+      method: method,
       body: payload,
     });
     const ret = await response.json();
