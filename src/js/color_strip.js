@@ -4,7 +4,7 @@ const LEDS_PER_METER = 60
 
 var data_pin = -1
 var color_strip_type = -1
-var color_strip_length = -1
+var color_strip_led_num = -1
 var color_scheme = -1
 
 // Color theme selector
@@ -48,8 +48,8 @@ function checkAllRequiredFields (setup) {
     error = 1
   }
 
-  if (color_strip_length == -1) {
-    addErrorMsg('请在列表中选择正确的灯带长度。')
+  if (color_strip_led_num == -1) {
+    addErrorMsg('请在列表中选择正确的LED数量。')
     error = 1
   }
 
@@ -75,7 +75,7 @@ document
       var colorCodes = colorMap.get(color_scheme)
       var colorData = []
       var cycle = parseInt(
-        (LEDS_PER_METER * color_strip_length) / colorCodes.length
+        color_strip_led_num / colorCodes.length
       )
       if (color_strip_type == 0) {
         // WS2811
@@ -106,7 +106,7 @@ document
   .getElementById('shutdownBut')
   .addEventListener('click', async function (event) {
     if (checkAllRequiredFields(false) == 0) {
-      timing = ledStripMap.get(color_strip_type)
+      var timing = ledStripMap.get(color_strip_type)
       await setupAdvanceOutput(
         data_pin,
         timing[0],
@@ -117,12 +117,12 @@ document
       if (color_strip_type == 0) {
         // WS2811
         var colorData = [0, 0, 0]
-        var cycle = LEDS_PER_METER * color_strip_length
+        var cycle = LEDS_PER_METER * color_strip_led_num
         await startAdvanceOutput(data_pin, cycle, colorData)
       } else {
         // WS2812
         var colorData = [0, 0, 0]
-        var cycle = LEDS_PER_METER * color_strip_length
+        var cycle = LEDS_PER_METER * color_strip_led_num
         colorData = makeRepeated(colorData, cycle)
         await startAdvanceOutput(data_pin, 0, colorData)
       }
@@ -130,8 +130,8 @@ document
   })
 
 function addStripMsg () {
-  if (color_strip_type != -1 && color_strip_length != -1) {
-    let msg = `选择的灯带为${color_strip_length}米 ${color_strip_type} 灯带`
+  if (color_strip_type != -1 && color_strip_led_num != -1) {
+    let msg = `选择的灯带为${color_strip_led_num}个LED的${color_strip_type}灯带`
     document.getElementById(
       'setupMessage'
     ).children[0].children[0].children[0].innerHTML = msg
@@ -177,13 +177,13 @@ document
   })
 
 document
-  .getElementById('colorStripLength')
+  .getElementById('colorStripNum')
   .addEventListener('change', function (event) {
-    var ele = document.getElementById('colorStripLength')
+    var ele = document.getElementById('colorStripNum')
     if (ele.options[ele.selectedIndex].value == -1) {
-      addErrorMsg('请在列表中选择正确的灯带长度。')
+      addErrorMsg('请在列表中选择正确的LED数量。')
     } else {
-      color_strip_length = parseInt(ele.options[ele.selectedIndex].value)
+      color_strip_led_num = parseInt(ele.options[ele.selectedIndex].value)
       document.getElementById('errorMsg').classList.add('d-none')
       addStripMsg()
     }
