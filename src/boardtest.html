@@ -13,7 +13,6 @@
     <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
     <div id="statusMsg" class="alert alert-primary d-none" role="alert"></div>
 
-
     <nav class="navbar navbar-expand-lg bg-dark">
         <div class="container d-flex justify-content-between">
             <div class="container-fluid">
@@ -22,14 +21,42 @@
         </div>
     </nav>
 
-    <div class="container-fluid w-50 mt-4" style="border:1px solid #cecece; border-radius: 8px;">
+    <div class="container mt-4" style="border:1px solid #cecece; border-radius: 8px;">
+        <div class="text-center mt-4">
+            <label>选择测试的API</label>
+        </div>
+        <select id="apiSelect" class="form-select mt-2" aria-label="Default select example">
+            <option value="0" selected>执行硬件操作API</option>
+            <option value="1">获取硬件操作API</option>
+            <option value="2">删除硬件操作API</option>
+            <option value="3">系统状态API</option>
+            <option value="4">读取系统配置API</option>
+            <option value="5">修改系统配置API</option>
+            <option value="6">系统重启API</option>
+        </select>
+
+        <div id="paraminput" class="text-center mt-4" hidden>
+            <div class="my-4">
+                <input id="paraminputText" type="text" class="form-control" placeholder="URL参数" aria-label="URL参数" aria-describedby="basic-addon1">
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <div class="card mx-auto" style="width: 18rem; background-color: bisque;">
+                <div class="card-body">
+                  <h5 id="apiInfo" class="card-title">API</h5>
+                </div>
+            </div>
+        </div>
+
         <div class="text-center mt-4">
             <div class="my-4">
-                <label for="userinput" class="form-label">根据文档，输入JSON请求测试平台功能。</label>
+                <label for="userinput" class="form-label">JSON请求体</label>
                 <textarea id="userinput" class="form-control my-2" rows="7" spellcheck="false"></textarea>
                 <input id="filename" type="text" class="form-control my-2" placeholder="保存文件名称">
             </div>
         </div>
+
         <div class="my-3">
             <button id="submitButton" type="button" class="btn btn-primary">发送</button>
             <button id="saveButton" type="button" class="btn btn-secondary">保存</button>

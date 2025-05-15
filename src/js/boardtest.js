@@ -6,10 +6,12 @@ const deleteLogo = new URL('../images/trash-solid.svg', import.meta.url);
 const predefinedScripts = [
     {
         "name": "闪烁平台的LED灯",
+        "api": 0,
         "content": "{\r\n\"event\":\"now\",\r\n\"actions\": [[\"gpio\", \"led\", \"output\", 2]]\r\n}",
     },
     {
         "name": "按下左按钮打开平台的LED灯",
+        "api": 0,
         "content": "{\r\n" +
                     "\"event\":\"pinstate\",\r\n" +
                     "\"pin\": \"left\",\r\n" + 
@@ -19,7 +21,8 @@ const predefinedScripts = [
                     "}"
     },
     {
-        "name": "按下有按钮关闭平台的LED灯",
+        "name": "按下右按钮关闭平台的LED灯",
+        "api": 0,
         "content": "{\r\n" +
         "\"event\":\"pinstate\",\r\n" +
         "\"pin\": \"right\",\r\n" + 
@@ -30,6 +33,26 @@ const predefinedScripts = [
     },
 ];
 var savedFiles = [];
+var gApiIndex = 0;
+
+class ApiInfo {
+    constructor(uri, method, body, param) {
+        this.uri = uri;
+        this.method = method;
+        this.body = body;
+        this.param = param;
+    }
+}
+
+const apiTable = [
+    new ApiInfo("/hardware/operation","POST",true, false),
+    new ApiInfo("/hardware/operation","GET",false, false),
+    new ApiInfo("/hardware/operation","DELETE",false, true),
+    new ApiInfo("/hardware/status","GET",false, false),
+    new ApiInfo("/hardware/config","GET",false, false),
+    new ApiInfo("/hardware/config","POST",true, false),
+    new ApiInfo("/hardware/restart","POST",false, false),
+]
 
 document.getElementById("userinput").innerHTML = localStorage.getItem("userinputstore");
 if (localStorage.getItem("savedfiles")) {
@@ -37,11 +60,24 @@ if (localStorage.getItem("savedfiles")) {
 }
 
 document.getElementById("submitButton").addEventListener("click", async function() {
-    const payload = document.getElementById("userinput").value;
+    let payload;
+    if (document.getElementById("userinput").hasAttribute("disabled")) {
+        payload = null;
+    } else {
+        payload = document.getElementById("userinput").value;
+    }
+    let api = apiTable[gApiIndex];
+    let uri = api.uri;
+    if (document.getElementById("paraminput").hasAttribute("hidden") == false) {
+        uri += "?" + document.getElementById("paraminputText").value;
+    }
+
     try {
         removeErrorMsg();
-        JSON.parse(payload);
-        const response = await sendRequest(payload);
+        if (payload != null) {
+            JSON.parse(payload);
+        }
+        const response = await sendRequest(uri, api.method, payload);
         document.getElementById("platform-response").innerHTML = JSON.stringify(response);
     } catch (err) {
         addErrorMsg("请检查输入，输入不符合JSON格式。")
@@ -55,6 +91,7 @@ document.getElementById("saveButton").addEventListener("click", function() {
     } else {
         savedFiles.push({
             "name": filename,
+            "api": gApiIndex,
             "content": document.getElementById("userinput").value
         });
         localStorage.setItem("savedfiles", JSON.stringify(savedFiles));
@@ -73,6 +110,22 @@ function addErrorMsg(message) {
 
 function removeErrorMsg() {
     document.getElementById("errorMsg").classList.add("d-none");
+}
+
+function updateInputContent(apiIndex, input) {
+    document.getElementById("userinput").value = input;
+    
+    document.getElementById("apiSelect").value = apiIndex;
+    gApiIndex = apiIndex;
+    if ((apiTable[apiIndex].uri == "/hardware/operation" && apiTable[apiIndex].method == "POST") || 
+        (apiTable[apiIndex].uri == "/hardware/config" && apiTable[apiIndex].method == "POST")){
+        document.getElementById("userinput").removeAttribute("disabled");
+    } else {
+        document.getElementById("userinput").setAttribute("disabled", true);
+    }
+    document.getElementById("apiInfo").innerHTML = `URL: ${apiTable[gApiIndex].method} ${apiTable[gApiIndex].uri}`
+    localStorage.setItem("userinputstore", input);
+    window.scrollTo(0,0);
 }
 
 function updateSaveFilesTable() {
@@ -95,7 +148,7 @@ function updateSaveFilesTable() {
         document.getElementById("savedfiles").append(eleTr);
 
         eleTd1.addEventListener("click", function() {
-            updateInputContent(savedFiles[i]["content"]);
+            updateInputContent(savedFiles[i]["api"], savedFiles[i]["content"]);
         });
 
         eleTd2.addEventListener("click", function() {
@@ -104,12 +157,6 @@ function updateSaveFilesTable() {
             updateSaveFilesTable();
         });
     }
-}
-
-function updateInputContent(input) {
-    document.getElementById("userinput").innerHTML = input;
-    localStorage.setItem("userinputstore", input);
-    window.scrollTo(0,0);
 }
 
 function setupPredefinedScripts() {
@@ -125,12 +172,35 @@ function setupPredefinedScripts() {
         eleTh.innerHTML = predefinedScripts[i]["name"];
         eleTd.appendChild(eleImage);
         eleTd.addEventListener("click", function() {
-            updateInputContent(predefinedScripts[i]["content"]);
+            updateInputContent(predefinedScripts[i]["api"], predefinedScripts[i]["content"]);
         });
         eleTr.append(eleTh, eleTd);
         predefinedEle.append(eleTr);
     }
 }
+
+document.getElementById("apiSelect").addEventListener("change", function(event) {
+    gApiIndex = event.target.value;
+    if (apiTable[gApiIndex].body == false) {
+        document.getElementById("userinput").value = "";
+        document.getElementById("userinput").setAttribute("disabled", true);
+    } else {
+        document.getElementById("userinput").removeAttribute("disabled");
+    }
+
+    if (apiTable[gApiIndex].param == false) {
+        document.getElementById("paraminput").setAttribute("hidden", true);
+    } else {
+        document.getElementById("paraminput").removeAttribute("hidden");
+    }
+
+    document.getElementById("apiInfo").innerHTML = `URL: ${apiTable[gApiIndex].method} ${apiTable[gApiIndex].uri}`
+});
+document.getElementById("apiInfo").innerHTML = `URL: ${apiTable[gApiIndex].method} ${apiTable[gApiIndex].uri}`
+
+document.getElementById("paraminputText").addEventListener("input", function(event) {
+    document.getElementById("apiInfo").innerHTML = `URL: ${apiTable[gApiIndex].method} ${apiTable[gApiIndex].uri}?${event.target.value}`
+});
 
 setupPredefinedScripts();
 updateSaveFilesTable();
