@@ -14,6 +14,7 @@ const main_apps_categories = [
       "infrared_transceiver",
       "camera",
       "navigation",
+      "temperature_onewire",
     ],
   },
   {
@@ -68,6 +69,13 @@ const main_apps_info = [
       "将环境检测插板和平台连接，页面每秒进行更新并显示当前的温度，湿度和控制质量信息。点击下面的按钮开始使用。",
     document: "https://www.sensor-lab.io",
   },
+  {
+    id: "temperature_onewire",
+    name: "温度探针",
+    description: "使用DS18B20温度探针，获得当前的温度数据。",
+    document: "https://www.sensor-lab.io",
+  },
+
   {
     id: "stepper_motor",
     name: "步进电机控制",
