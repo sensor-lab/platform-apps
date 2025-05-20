@@ -1,4 +1,3 @@
-const bootstrap = require('bootstrap')
 import {
   delayHardwareOperation,
   i2cReadHardwareOperation,
