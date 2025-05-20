@@ -4,7 +4,7 @@ import {
   gpioHardwareOperation,
   constructNowEvent,
   postHardwareOperation,
-} from "./api";
+} from 'sensorsparks.api';
 
 const State = {
   START: "start",

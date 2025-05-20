@@ -3,7 +3,7 @@ import {
   spiHardwareOperation,
   constructNowEvent,
   postHardwareOperation,
-} from "./api";
+} from 'sensorsparks.api';
 
 var home_ser_pin = undefined;
 var home_srclk_pin = undefined;

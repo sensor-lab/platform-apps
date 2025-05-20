@@ -7,7 +7,7 @@ import {
   constructNowEvent,
   constructScheduleEvent,
   postHardwareOperation
-} from './api'
+} from 'sensorsparks.api'
 import Chart from 'chart.js/auto'
 
 const I2C_HIGH_SPEED_KHZ = 100

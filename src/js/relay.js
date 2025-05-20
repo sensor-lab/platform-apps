@@ -1,4 +1,4 @@
-import {gpio, gpio_output_schedule, setTime, getTime} from './api'
+import {gpio, gpioOutputSchedule, setTime, getTime} from 'sensorsparks.api'
 
 var pin = localStorage.getItem("pin");
 var mode = document.getElementById("mode")
@@ -177,7 +177,7 @@ document.getElementById("scheduleSetButton").addEventListener("click", function(
                 var on_time = new Date();
                 var off_time = new Date(on_time.getTime() + duration * 1000 * 60);
                 gpio(parseInt(parseInt(pin)), "output", 1);
-                gpio_output_schedule(parseInt(pin), 0, off_time, null, 0);
+                gpioOutputSchedule(parseInt(pin), 0, off_time, null, 0);
                 addStatusMsg("定时设置成功");
                 updatePinStatus(pin, 1);
                 setTimeout(function() {
@@ -191,8 +191,8 @@ document.getElementById("scheduleSetButton").addEventListener("click", function(
             } else {
                 var on_time = new Date(start_date + "T" + start_time);
                 var off_time = new Date(on_time.getTime() + duration * 1000 * 60);
-                gpio_output_schedule(parseInt(pin), 1, on_time, null, 0);
-                gpio_output_schedule(parseInt(pin), 0, off_time, null, 0);
+                gpioOutputSchedule(parseInt(pin), 1, on_time, null, 0);
+                gpioOutputSchedule(parseInt(pin), 0, off_time, null, 0);
                 addStatusMsg("定时设置成功");
                 setTimeout(function() {
                     removeStatusMsg();

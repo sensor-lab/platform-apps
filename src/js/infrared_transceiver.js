@@ -3,7 +3,7 @@ import * as bootstrap from 'bootstrap';
 import {captureRegularHardwareOperation, constructNowEvent, postHardwareOperation,
     pwmAsyncHardwareOperation, gpioHardwareOperation,delayHardwareOperation, 
     advanceOutputSetupHardwareOperation, advanceOutputStartHardwareOperation
-} from "./api.js"
+} from 'sensorsparks.api'
 
 var ir_transistor_0_pin = undefined;
 var ir_transistor_1_pin = undefined;

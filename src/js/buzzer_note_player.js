@@ -1,5 +1,5 @@
 const bootstrap =  require("bootstrap");
-import {syncPwmReq} from './api'
+import {syncPwmReq} from 'sensorsparks.api'
 
 var pin = undefined;
 var buzzer_notes;
