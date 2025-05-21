@@ -1,4 +1,3 @@
-const bootstrap = require("bootstrap");
 import {
   getConfig,
   setConfig,
@@ -6,7 +5,7 @@ import {
   restartPlatform,
   setState,
   getCrc32,
-} from "./api.js";
+} from 'sensorsparks.api';
 import version from "../app_version.json";
 
 var mode, ssid, password, mdnsname, voltage, fwver;

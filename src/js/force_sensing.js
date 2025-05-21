@@ -1,4 +1,4 @@
-import {readAdc} from './api'
+import {readAdc} from 'sensorsparks.api'
 
 var state = "config";      //"config", "capture", "display"
 var labels = [];

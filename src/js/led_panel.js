@@ -1,6 +1,6 @@
 import {advanceOutputSetupHardwareOperation, advanceOutputStartHardwareOperation,
     constructNowEvent, postHardwareOperation
-} from "./api.js"
+} from 'sensorsparks.api'
 
 var board_width = undefined;
 var board_height = undefined;

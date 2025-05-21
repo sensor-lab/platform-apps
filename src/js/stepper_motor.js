@@ -3,7 +3,7 @@ import {
   delayHardwareOperation,
   constructNowEvent,
   postHardwareOperation,
-} from "./api";
+} from 'sensorsparks.api';
 
 var phase1_pin = -1;
 var phase2_pin = -1;
