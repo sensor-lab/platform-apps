@@ -5,7 +5,7 @@ import {
   delayHardwareOperation,
   constructNowEvent,
   postHardwareOperation
-} from './api'
+} from 'sensorsparks.api'
 
 // many hidden registers though....
 // Register table - OV2640 DSP address

@@ -1,4 +1,4 @@
-import { setupAdvanceOutput, startAdvanceOutput } from './api'
+import { setupAdvanceOutput, startAdvanceOutput } from 'sensorsparks.api'
 
 const LEDS_PER_METER = 60
 
