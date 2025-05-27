@@ -9,12 +9,13 @@ const main_apps_categories = [
   {
     name: "传感器",
     apps: [
-      "force_sensing",
       "temperature",
+      "temperature_onewire",
       "infrared_transceiver",
+      "accelerometer",
+      "force_sensing",
       "camera",
       "navigation",
-      "temperature_onewire",
     ],
   },
   {
@@ -75,7 +76,12 @@ const main_apps_info = [
     description: "使用DS18B20温度探针，获得当前的温度数据。",
     document: "https://www.sensor-lab.io",
   },
-
+  {
+    id: "accelerometer",
+    name: "加速度传感器",
+    description: "使用mpu6050加速度传感器捕捉x,y,z轴加速度和角速度变化",
+    document: "https://www.sensor-lab.io",
+  },
   {
     id: "stepper_motor",
     name: "步进电机控制",
