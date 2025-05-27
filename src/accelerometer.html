@@ -11,8 +11,12 @@
 </head>
 
 <body>
-    <div id="wrongselection" class="alert alert-danger" role="alert">
-        请在列表中选择正确的连接引脚，并点击开始按钮。
+    <div id="wrongselection" class="alert alert-danger d-none" role="alert">
+        请在列表中选择正确的连接引脚和量程，并点击开始按钮。
+    </div>
+
+    <div id="failInit" class="alert alert-danger d-none" role="alert">
+        MPU6050初始化失败，请检查连接。
     </div>
 
     <nav class="navbar navbar-expand-md navbar-dark bg-dark">
@@ -22,17 +26,6 @@
     </nav>
 
     <div class="container">
-        <div class="row">
-            <div class="col text-center">
-                <button id="startButton" type="button" class="btn btn-primary mt-4">开始</button>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col text-center">
-                <button id="stopButton" type="button" class="btn btn-secondary mt-4 d-none">停止</button>
-            </div>
-        </div>
 
         <div id="configform">
             <select id="pinSelect" class="form-select mt-4" aria-label="Default select example">
@@ -58,6 +51,42 @@
                 <option value="18">18</option>
                 <option value="19">19</option>
             </select>
+        </div>
+        
+        <select class="form-control mt-4" id="rangeSelect">
+            <option selected value="-1">量程选择</option>
+            <option value="0">2g</option>
+            <option value="1">4g</option>
+            <option value="2">8g</option>
+            <option value="3">16g</option>
+        </select>
+
+        <div id="displayPins" class="row mt-4 d-none">
+            <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+                <div class="card-body">
+                    <p>SDA引脚</p>
+                    <h5>平台引脚0</h5>
+                </div>
+            </div>
+
+            <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+                <div class="card-body">
+                    <p>SCL引脚</p>
+                    <h5>平台引脚0</h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col text-center">
+                <button id="startButton" type="button" class="btn btn-primary mt-4">开始</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col text-center">
+                <button id="stopButton" type="button" class="btn btn-secondary mt-4 d-none">停止</button>
+            </div>
         </div>
         
         <canvas id="acceleromterChart" class="mt-4"></canvas>
