@@ -230,7 +230,7 @@ async function initMpu6050(range) {
     1
   );
   const now_event = constructNowEvent(opers);
-  const response = await postHardwareOperation(now_event, "http://192.168.4.1");
+  const response = await postHardwareOperation(now_event);
   if (response["errorcode"] === 0) {
     if (response["result"][4][0] === 104) {
       init = true;
@@ -263,7 +263,7 @@ async function startSensorCapture() {
     14
   );
   const now_event = constructNowEvent(opers);
-  const response = await postHardwareOperation(now_event, "http://192.168.4.1");
+  const response = await postHardwareOperation(now_event);
   if (response["errorcode"] === 0) {
     let acce_x = (response["result"][1][0] << 8) + response["result"][1][1];
     let acce_y = (response["result"][1][2] << 8) + response["result"][1][3];
