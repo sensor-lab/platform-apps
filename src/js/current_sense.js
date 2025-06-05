@@ -10,11 +10,24 @@ import zoomPlugin from "chartjs-plugin-zoom";
 
 Chart.register(zoomPlugin);
 
+// general variables
+var start_time = null;
+var refresh_timer = null;
+var calibrated = false;
+
+const I2C_SPEED_KHZ = 100;
+const INA219_I2C_ADDR = 0x40;
+const REFRESHING_INTERVAL_MS = 500;
+
 // ASC719 related:
 var adc_pin = -1;
 var measure_range = -1;
+var calibrate_adc_val = -1;
+
+// INA219 related
+var sda_pin = -1;
+var scl_pin = -1;
 var shunt_resistor = -1;
-var calibrated = false;
 
 const CONFIG_REGISTER = 0
 const SHUNT_VOLT_REGISTER = 1
@@ -22,18 +35,6 @@ const BUS_VOLT_REGISTER = 2
 const POWER_REGISTER = 3
 const CURRENT_REGISTER = 4
 const CALIBRATION_REGISTER = 5
-
-// INA219 related
-var sda_pin = -1;
-var scl_pin = -1;
-
-// general variables
-var start_time = null;
-var refresh_timer = null;
-
-const I2C_SPEED_KHZ = 100;
-const INA219_I2C_ADDR = 0x40;
-const REFRESHING_INTERVAL_MS = 500;
 
 const currentChart = new Chart(
   document.getElementById("currentChart"),
@@ -120,7 +121,7 @@ async function ina219Capture() {
     2
   );
   const now_event = constructNowEvent(opers);
-  const response = await postHardwareOperation(now_event, "http://192.168.1.197");
+  const response = await postHardwareOperation(now_event);
   if (response["errorcode"] === 0) {
     const current_val = ((response["result"][1][0] << 8) + response["result"][1][1]) * (measure_range / Math.pow(2,15));
     currentChart.data.labels.push((Date.now() - start_time) / 1000);
@@ -128,7 +129,6 @@ async function ina219Capture() {
     currentChart.update();
 
     const register_val = (response["result"][1][0] << 8) + response["result"][1][1];
-    console.log(`register: ${register_val}`);
   }
 }
 
@@ -147,11 +147,10 @@ async function ina219Calibrate() {
     calibration_register & 0xff
   );
   const now_event = constructNowEvent(opers);
-  const response = await postHardwareOperation(now_event, "http://192.168.1.197");
+  const response = await postHardwareOperation(now_event);
   if (response["errorcode"] === 0) {
     calibrated = true;
   }
-  console.log(`debug: ${calibration_register}`);
 }
 
 async function asc712Capture() {
@@ -159,24 +158,46 @@ async function asc712Capture() {
   const opers = [];
   adcHardwareOperation(opers, adc_pin, "3.1v");
   const now_event = constructNowEvent(opers);
-  const response = await postHardwareOperation(now_event, "http://192.168.1.197");
+  const response = await postHardwareOperation(now_event);
   if (response["errorcode"] === 0) {
     const adc_val = response["result"][0][0];
     /* the circuitary uses the following 10K / 20K divider
     5V Signal ---+
                 |
-                [R1] (6kΩ)
+                [R1] (480Ω)
                 |
-                +--- To adc measure pin (0-3.1v)
+                +--- To adc measure pin (0-2.5v)
                 |
-                [R2] (10kΩ)
+                [R2] (480Ω)
                 |
     GND ---------+
     */
-    const current_val = (measure_range * 2) * (adc_val / 4096) - measure_range;
+    const current_val = measure_range * (((adc_val - calibrate_adc_val) / 4096) * 2); // multiply by 2 since using two 480ohm resistor divider
     currentChart.data.labels.push((Date.now() - start_time) / 1000);
     currentChart.data.datasets[0].data.push(current_val);
     currentChart.update();
+  }
+}
+
+async function asc712Calibrate() {
+  const CALIBRATE_NUM_LOOP = 10
+  const opers = [];
+  let i = 0;
+  for (i = 0; i < CALIBRATE_NUM_LOOP; i++) {
+    adcHardwareOperation(opers, adc_pin, "3.1v");
+  }
+  const now_event = constructNowEvent(opers);
+  const response = await postHardwareOperation(now_event);
+  let total_adc_count = 0;
+  for (i = 0; i < CALIBRATE_NUM_LOOP; i++) {
+    if (response["result"][i][0] == 0) {
+      break;
+    }
+    total_adc_count += response["result"][i][0];
+  }
+  if (i === CALIBRATE_NUM_LOOP) {
+    calibrate_adc_val = Math.floor(total_adc_count / CALIBRATE_NUM_LOOP);
+    calibrated = true;
   }
 }
 
@@ -245,12 +266,21 @@ document
         currentChart.data.labels = [];
         currentChart.data.datasets[0].data = [];
         currentChart.update();
-        refresh_timer = setInterval(async function () {
-          await asc712Capture();
-        }, REFRESHING_INTERVAL_MS);
 
-        document.getElementById("startButton").classList.add("d-none");
-        document.getElementById("stopButton").classList.remove("d-none");
+        if (calibrated === false) {
+          await asc712Calibrate();
+        }
+
+        if (calibrated === true) {
+          refresh_timer = setInterval(async function () {
+            await asc712Capture();
+          }, REFRESHING_INTERVAL_MS);
+
+          document.getElementById("startButton").classList.add("d-none");
+          document.getElementById("stopButton").classList.remove("d-none");
+        } else {
+          document.getElementById("failCalibrate").classList.remove("d-none");
+        }
       }
     } else {
       // INA219
