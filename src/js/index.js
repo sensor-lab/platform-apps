@@ -13,6 +13,7 @@ const main_apps_categories = [
       "temperature_onewire",
       "infrared_transceiver",
       "accelerometer",
+      "current_sense",
       "force_sensing",
       "camera",
       "navigation",
@@ -162,6 +163,12 @@ const main_apps_info = [
     description: "想知道您的反应速度有多快吗？快来试试这个应用。",
     document: "https://www.sensor-lab.io",
   },
+  {
+    id: "current_sense",
+    name: "电流监控应用",
+    description: "监控模块的电流消耗状态。",
+    document: "https://www.sensor-lab.io",
+  }
 ];
 
 var selected_apps = [];

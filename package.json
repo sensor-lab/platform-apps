@@ -22,7 +22,6 @@
     "bootstrap-icons": "^1.11.3",
     "chart.js": "^4.4.2",
     "chartjs-plugin-zoom": "^2.2.0",
-    "parcel-plugin-clean-dist": "^0.0.6",
-    "sensorsparks.api": "^0.1.0"
+    "parcel-plugin-clean-dist": "^0.0.6"
   }
 }

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>电流监控应用</title>
+    <link rel="stylesheet" href="scss/styles.scss">
+    <script type="module" src="js/current_sense.js"></script>
+</head>
+
+<body>
+    <div id="asc712ErrorMessage" class="alert alert-danger d-none" role="alert">
+        请在列表中选择正确的连接引脚和量程，并点击开始按钮。
+    </div>
+
+    <div id="ina219ErrorMessage" class="alert alert-danger d-none" role="alert">
+        请在列表中选择正确的连接引脚，量程和分流电阻值，并点击开始按钮。
+    </div>
+
+    <div id="failCalibrate" class="alert alert-danger d-none" role="alert">
+        INA219初始化失败，请检查连接。
+    </div>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="mx-auto order-0">
+            <a class="navbar-brand mx-auto" href="#">电流监控应用</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <select id="moduleSelect" class="form-select mt-4">
+          <option selected value="-1">请选择电流监控应用</option>
+          <option value="0">ASC712(霍尔原理)</option>
+          <option value="1">INA219(分流电阻)</option>
+        </select>
+      
+        <select id="pinSelect" class="form-select mt-4" aria-label="Default select example">
+            <option selected value="-1">请选择电流传感器和平台连接的引脚</option>
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13">13</option>
+            <option value="14">14</option>
+            <option value="15">15</option>
+            <option value="16">16</option>
+            <option value="17">17</option>
+            <option value="18">18</option>
+            <option value="19">19</option>
+        </select>
+        
+        <div id="asc712Setting" class="d-none">
+          <select class="form-control mt-4" id="asc712RangeSelect">
+              <option selected value="-1">量程选择</option>
+              <option value="5">5A</option>
+              <option value="20">20A</option>
+              <option value="30">30A</option>
+          </select>
+
+          <div id="asc712DisplayPins" class="row mt-4 d-none">
+              <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+                  <div class="card-body">
+                      <p>ADC引脚</p>
+                      <h5>平台引脚0</h5>
+                  </div>
+              </div>
+          </div>
+        </div>
+
+        <div id="ina219Setting" class="d-none">
+            <select class="form-control mt-4" id="ina219RangeSelect">
+              <option selected value="-1">量程选择</option>
+              <option value="0.5">500mA</option>
+              <option value="5">5A</option>
+              <option value="10">10A</option>
+              <option value="20">20A</option>
+              <option value="30">30A</option>
+            </select>
+            <select class="form-control mt-4" id="ina219ShuntResistorSelect">
+              <option selected value="-1">分流电阻选择</option>
+              <option value="0.1">0.1&#937;</option>
+              <option value="0.01">0.01&#937;</option>
+            </select>
+            <div id="ina219DisplayPins" class="row mt-4 d-none">
+                <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+                    <div class="card-body">
+                        <p>SDA引脚</p>
+                        <h5>平台引脚0</h5>
+                    </div>
+                </div>
+
+                <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+                    <div class="card-body">
+                        <p>SCL引脚</p>
+                        <h5>平台引脚0</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+        <div class="row">
+            <div class="col text-center">
+                <button id="startButton" type="button" class="btn btn-primary mt-4">开始</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col text-center">
+                <button id="stopButton" type="button" class="btn btn-secondary mt-4 d-none">停止</button>
+            </div>
+        </div>
+        
+        <canvas id="currentChart" class="mt-4"></canvas>
+
+    </div>
+
+</body>
+
+</html>
