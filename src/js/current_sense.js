@@ -19,7 +19,7 @@ const I2C_SPEED_KHZ = 100;
 const INA219_I2C_ADDR = 0x40;
 const REFRESHING_INTERVAL_MS = 500;
 
-// ASC719 related:
+// ASC712 related:
 var adc_pin = -1;
 var measure_range = -1;
 var calibrate_adc_val = -1;
@@ -121,7 +121,7 @@ async function ina219Capture() {
     2
   );
   const now_event = constructNowEvent(opers);
-  const response = await postHardwareOperation(now_event);
+  const response = await postHardwareOperation(now_event, "http://192.168.1.197");
   if (response["errorcode"] === 0) {
     const current_val = ((response["result"][1][0] << 8) + response["result"][1][1]) * (measure_range / Math.pow(2,15));
     currentChart.data.labels.push((Date.now() - start_time) / 1000);
@@ -147,7 +147,7 @@ async function ina219Calibrate() {
     calibration_register & 0xff
   );
   const now_event = constructNowEvent(opers);
-  const response = await postHardwareOperation(now_event);
+  const response = await postHardwareOperation(now_event, "http://192.168.1.197");
   if (response["errorcode"] === 0) {
     calibrated = true;
   }
@@ -158,9 +158,10 @@ async function asc712Capture() {
   const opers = [];
   adcHardwareOperation(opers, adc_pin, "3.1v");
   const now_event = constructNowEvent(opers);
-  const response = await postHardwareOperation(now_event);
+  const response = await postHardwareOperation(now_event, "http://192.168.1.197");
   if (response["errorcode"] === 0) {
     const adc_val = response["result"][0][0];
+    const sensitivity = measure_range === 5 ? 0.185 : measure_range === 20 ? 0.1 : 0.066
     /* the circuitary uses the following 10K / 20K divider
     5V Signal ---+
                 |
@@ -172,7 +173,7 @@ async function asc712Capture() {
                 |
     GND ---------+
     */
-    const current_val = measure_range * (((adc_val - calibrate_adc_val) / 4096) * 2); // multiply by 2 since using two 480ohm resistor divider
+    const current_val = (((adc_val - calibrate_adc_val) / 4096) * 3.1) / sensitivity;
     currentChart.data.labels.push((Date.now() - start_time) / 1000);
     currentChart.data.datasets[0].data.push(current_val);
     currentChart.update();
@@ -187,7 +188,7 @@ async function asc712Calibrate() {
     adcHardwareOperation(opers, adc_pin, "3.1v");
   }
   const now_event = constructNowEvent(opers);
-  const response = await postHardwareOperation(now_event);
+  const response = await postHardwareOperation(now_event, "http://192.168.1.197");
   let total_adc_count = 0;
   for (i = 0; i < CALIBRATE_NUM_LOOP; i++) {
     if (response["result"][i][0] == 0) {
@@ -284,7 +285,7 @@ document
       }
     } else {
       // INA219
-      measure_range = parseFloat(
+      measure_range = parseInt(
         document.getElementById("ina219RangeSelect").options[
           document.getElementById("ina219RangeSelect").selectedIndex
         ].value
@@ -351,16 +352,16 @@ document
 document
   .getElementById("asc712RangeSelect")
   .addEventListener("change", function (event) {
-    if (event.target.value == 5) {
-      currentChart.options.scales.y.max = 5;
-      currentChart.options.scales.y.min = -5;
-    } else if (event.target.value == 20) {
-      currentChart.options.scales.y.max = 20;
-      currentChart.options.scales.y.min = -20;
-    } else if (event.target.value == 30) {
-      currentChart.options.scales.y.max = 30;
-      currentChart.options.scales.y.min = -30;
-    }
+    // if (event.target.value == 5) {
+    //   currentChart.options.scales.y.max = 5;
+    //   currentChart.options.scales.y.min = -5;
+    // } else if (event.target.value == 20) {
+    //   currentChart.options.scales.y.max = 20;
+    //   currentChart.options.scales.y.min = -20;
+    // } else if (event.target.value == 30) {
+    //   currentChart.options.scales.y.max = 30;
+    //   currentChart.options.scales.y.min = -30;
+    // }
   });
 
 document

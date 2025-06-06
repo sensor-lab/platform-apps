@@ -8,6 +8,9 @@ import {
 } from 'sensorsparks.api';
 import version from "../app_version.json";
 
+// Import all plugins
+import * as bootstrap from "bootstrap";
+
 var mode, ssid, password, mdnsname, voltage, fwver;
 var app_update_filepaths,
   fw_update_filepath,
