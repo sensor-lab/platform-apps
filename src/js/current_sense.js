@@ -162,17 +162,6 @@ async function asc712Capture() {
   if (response["errorcode"] === 0) {
     const adc_val = response["result"][0][0];
     const sensitivity = measure_range === 5 ? 0.185 : measure_range === 20 ? 0.1 : 0.066
-    /* the circuitary uses the following 10K / 20K divider
-    5V Signal ---+
-                |
-                [R1] (480Ω)
-                |
-                +--- To adc measure pin (0-2.5v)
-                |
-                [R2] (480Ω)
-                |
-    GND ---------+
-    */
     const current_val = (((adc_val - calibrate_adc_val) / 4096) * 3.1) / sensitivity;
     currentChart.data.labels.push((Date.now() - start_time) / 1000);
     currentChart.data.datasets[0].data.push(current_val);
