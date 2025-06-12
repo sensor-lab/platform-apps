@@ -15,7 +15,7 @@ const main_apps_categories = [
       "accelerometer",
       "current_sense",
       "force_sensing",
-      "navigation",
+      "ultrasonic",
     ],
   },
   {
@@ -32,7 +32,7 @@ const main_apps_categories = [
   },
   {
     name: "通信",
-    apps: ["nfc", "lora"],
+    apps: ["nfc", "lora", "navigation"],
   },
   {
     name: "游戏",
@@ -166,6 +166,12 @@ const main_apps_info = [
     id: "current_sense",
     name: "电流监控应用",
     description: "监控模块的电流消耗状态。",
+    document: "https://www.sensor-lab.io",
+  },
+  {
+    id: "ultrasonic",
+    name: "超声波测距应用",
+    description: "利用HC-SR04超声波传感器测量前方障碍物的距离。",
     document: "https://www.sensor-lab.io",
   }
 ];

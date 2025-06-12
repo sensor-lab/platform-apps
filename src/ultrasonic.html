@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+    />
+    <title>模块化传感器平台</title>
+    <link rel="stylesheet" href="scss/styles.scss" />
+    <script type="module" src="js/ultrasonic.js"></script>
+  </head>
+
+  <body>
+    <header>
+      <nav class="navbar navbar-expand-lg bg-light">
+        <div class="container d-flex justify-content-between">
+          <div class="container-fluid">
+            <a class="navbar-brand" href="/">模块化传感器平台</a>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert">请在列表中选择正确的触发引脚和返回引脚。</div>
+    <div id="connectionError" class="alert alert-danger d-none" role="alert">未检测到返回信号，请检查连接和引脚选择。</div>
+    <div id="statusMsg" class="alert alert-primary d-none" role="alert"></div>
+    <div class="d-flex flex-column align-items-center">
+      <div class="mt-4 mb-2">
+        <h3>超声波传感器测距应用</h3>
+      </div>
+    </div>
+
+    <div class="container-sm">
+      <select id="connectedTriggerPin" class="form-select my-4">
+        <option selected value="-1">请选择超声波传感器的触发引脚和平台的连接引脚</option>
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+        <option value="13">13</option>
+        <option value="14">14</option>
+        <option value="15">15</option>
+        <option value="16">16</option>
+        <option value="17">17</option>
+        <option value="18">18</option>
+        <option value="19">19</option>
+      </select>
+      <select id="connectedEchoPin" class="form-select my-4">
+        <option selected value="-1">请选择超声波传感器的返回引脚和平台的连接引脚</option>
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+        <option value="13">13</option>
+        <option value="14">14</option>
+        <option value="15">15</option>
+        <option value="16">16</option>
+        <option value="17">17</option>
+        <option value="18">18</option>
+        <option value="19">19</option>
+      </select>
+      <div id="displayPins" class="row mt-4 d-none">
+        <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+          <div class="card-body">
+              <p>触发引脚</p>
+              <h5>平台引脚0</h5>
+          </div>
+        </div>
+
+        <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+          <div class="card-body">
+              <p>返回引脚</p>
+              <h5>平台引脚0</h5>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="card mt-4 mx-auto" style="width: 20rem; height: 14rem">
+          <div class="card-body">
+            <div class="d-flex flex-row">
+              <h3 class="card-title ms-2" style="margin-top: 2.25px">距离</h3>
+            </div>
+            <div class="d-flex flex-row mt-3">
+              <p id="distanceValue" class="display-4">---</p>
+              <p class="display-6 ms-1">cm</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      
+        <div class="row">
+            <div class="col text-center">
+                <button id="startButton" type="button" class="btn btn-primary mt-4">开始</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col text-center">
+                <button id="stopButton" type="button" class="btn btn-secondary mt-4 mb-4 d-none">停止</button>
+            </div>
+        </div>
+    </div>
+  </body>
+</html>
