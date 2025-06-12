@@ -15,13 +15,12 @@ const main_apps_categories = [
       "accelerometer",
       "current_sense",
       "force_sensing",
-      "camera",
       "navigation",
     ],
   },
   {
-    name: "声音类",
-    apps: ["buzzer_note_player"],
+    name: "图像和声音类",
+    apps: ["camera", "buzzer_note_player"],
   },
   {
     name: "电机",
