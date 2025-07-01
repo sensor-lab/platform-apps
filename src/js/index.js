@@ -20,7 +20,7 @@ const main_apps_categories = [
   },
   {
     name: "图像和声音类",
-    apps: ["camera", "buzzer_note_player"],
+    apps: ["camera", "buzzer_note_player", "microphone", "speaker"],
   },
   {
     name: "电机",
@@ -172,6 +172,18 @@ const main_apps_info = [
     id: "ultrasonic",
     name: "超声波测距应用",
     description: "利用HC-SR04超声波传感器测量前方障碍物的距离。",
+    document: "https://www.sensor-lab.io",
+  },
+  {
+    id: "microphone",
+    name: "麦克风录音机",
+    description: "利用inmp441捕捉声音，生成WAV文件。",
+    document: "https://www.sensor-lab.io",
+  },
+  {
+    id: "speaker",
+    name: "音乐播放器",
+    description: "扬声器播放音乐文件。",
     document: "https://www.sensor-lab.io",
   }
 ];
