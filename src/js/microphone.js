@@ -56,7 +56,7 @@ function encodeWAV(response_data) {
   // Block align (channel count * bytes per sample)
   view.setUint16(32, NUM_OF_CHANNELS * 3, true);
   // Bits per sample
-  view.setUint16(34, 24, true);
+  view.setUint16(34, NUM_OF_CHANNELS * 3 * 8, true);
   // Data chunk identifier
   writeString(view, 36, 'data');
   // Data chunk length

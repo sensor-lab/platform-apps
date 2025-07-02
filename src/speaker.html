@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+    />
+    <title>模块化传感器平台</title>
+    <link rel="stylesheet" href="scss/styles.scss" />
+    <script type="module" src="js/speaker.js"></script>
+  </head>
+
+  <body>
+    <header>
+      <nav class="navbar navbar-expand-lg bg-light">
+        <div class="container d-flex justify-content-between">
+          <div class="container-fluid">
+            <a class="navbar-brand" href="/">模块化传感器平台</a>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert">请选择正确的连接引脚和WAV文件。</div>
+    <div id="statusMsg" class="alert alert-primary d-none" role="alert">为了保证声音质量，使用16kHz采样率</div>
+    <div class="d-flex flex-column align-items-center">
+      <div class="mt-4 mb-2">
+        <h3>音乐播放器</h3>
+      </div>
+    </div>
+
+    <div class="container-sm">
+      <select id="connectedPin" class="form-select my-4">
+        <option selected value="-1">
+          请选择max98357模块与平台的连接引脚
+        </option>
+        <option value="0">0</option>
+        <option value="4">4</option>
+        <option value="8">8</option>
+        <option value="12">12</option>
+        <option value="16">16</option>
+      </select>
+
+      <div id="displayPins" class="row mt-4 d-none">
+        <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+          <div class="card-body">
+              <p>Data引脚</p>
+              <h5>平台引脚0</h5>
+          </div>
+        </div>
+
+        <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+          <div class="card-body">
+              <p>BCLK引脚</p>
+              <h5>平台引脚0</h5>
+          </div>
+        </div>
+
+        <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+          <div class="card-body">
+              <p>LRCLK引脚</p>
+              <h5>平台引脚0</h5>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="btn btn-secondary" style="width: 150px; height: 40px; margin-bottom: 30px;">选择wav音频文件
+          <input id="wavFileSelector" type="file" class="invisible" accept=".wav">
+        </label>
+        
+        <div id="fileInfo" class="d-none">
+          <h3>Wav文件信息</h3>
+          <table id="infoTable" class="table table-striped">
+            <tbody>
+              <tr>
+                <td>文件名称</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>文件大小</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>采样频率</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>声道</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>深度</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col text-center">
+            <button id="startButton" type="button" class="btn btn-primary mt-4">开始</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col text-center">
+            <button id="stopButton" type="button" class="btn btn-secondary mt-4 d-none">停止</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
