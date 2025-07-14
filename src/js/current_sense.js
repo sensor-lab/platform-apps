@@ -121,7 +121,7 @@ async function ina219Capture() {
     2
   );
   const now_event = constructNowEvent(opers);
-  const response = await postHardwareOperation(now_event, "http://192.168.1.197");
+  const response = await postHardwareOperation(now_event);
   if (response["errorcode"] === 0) {
     const current_val = ((response["result"][1][0] << 8) + response["result"][1][1]) * (measure_range / Math.pow(2,15));
     currentChart.data.labels.push((Date.now() - start_time) / 1000);
@@ -147,7 +147,7 @@ async function ina219Calibrate() {
     calibration_register & 0xff
   );
   const now_event = constructNowEvent(opers);
-  const response = await postHardwareOperation(now_event, "http://192.168.1.197");
+  const response = await postHardwareOperation(now_event);
   if (response["errorcode"] === 0) {
     calibrated = true;
   }
@@ -158,7 +158,7 @@ async function asc712Capture() {
   const opers = [];
   adcHardwareOperation(opers, adc_pin, "3.1v");
   const now_event = constructNowEvent(opers);
-  const response = await postHardwareOperation(now_event, "http://192.168.1.197");
+  const response = await postHardwareOperation(now_event);
   if (response["errorcode"] === 0) {
     const adc_val = response["result"][0][0];
     const sensitivity = measure_range === 5 ? 0.185 : measure_range === 20 ? 0.1 : 0.066
@@ -177,7 +177,7 @@ async function asc712Calibrate() {
     adcHardwareOperation(opers, adc_pin, "3.1v");
   }
   const now_event = constructNowEvent(opers);
-  const response = await postHardwareOperation(now_event, "http://192.168.1.197");
+  const response = await postHardwareOperation(now_event);
   let total_adc_count = 0;
   for (i = 0; i < CALIBRATE_NUM_LOOP; i++) {
     if (response["result"][i][0] == 0) {

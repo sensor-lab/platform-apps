@@ -56,7 +56,7 @@ function processWavFile(filename, uint8data) {
   wave_info_table.children[0].children[4].children[1].innerHTML = `${bits_per_sample / num_channels} bits`
   wave_info_table_parent.classList.remove("d-none");
   if (shrink_ratio) {
-    pcm_data = uint8data.slice(44).filter((_, index) => index % Math.floor(1 / shrink_ratio) !== 0);
+    pcm_data = uint8data.slice(44);
   } else {
     pcm_data = uint8data.slice(44);
   }
@@ -98,7 +98,7 @@ start_button_ele.addEventListener("click", async function(event) {
     }
     
     let now_event = constructNowEvent(opers);
-    let response = await postHardwareOperation(now_event, "http://192.168.4.1");
+    let response = await postHardwareOperation(now_event);
 
     // playing
     if (response["errorcode"] === 0) {
@@ -116,13 +116,13 @@ start_button_ele.addEventListener("click", async function(event) {
           offset  = pcm_data.length;
         }
         let now_event = constructNowEvent(opers);
-        let response = await postHardwareOperation(now_event, "http://192.168.4.1");
+        let response = await postHardwareOperation(now_event);
       }
 
       opers = [];
       i2sStopHardwareOperation(opers, 0);
       now_event = constructNowEvent(opers);
-      response = await postHardwareOperation(now_event, "http://192.168.4.1");
+      response = await postHardwareOperation(now_event);
 
     } else {
       error_msg_ele.classList.remove("d-none");
