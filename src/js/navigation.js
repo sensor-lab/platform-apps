@@ -88,15 +88,38 @@ class ProtocolParser {
 const protocol_parsers = [
   new ProtocolParser("GGA", ggaProtocolParser),
   new ProtocolParser("RMC", rmcProtocolParser),
+  new ProtocolParser("GPGSV", gpgsvProtocolParser),
+  new ProtocolParser("BDGSV", bdgsvProtocolParser),
 ];
 
+function bdgsvProtocolParser(data) {
+  const bdgsv_data = data.split(",");
+  if (bdgsv_data.length >= 13) {
+    const bd_satellite_num = bdgsv_data[3]
+    document.getElementById("beidouSatelliteInfo").innerHTML = bd_satellite_num+ "个"
+  }
+}
+
+function gpgsvProtocolParser(data) {
+  const gpgsv_dat = data.split(",");
+  if (gpgsv_dat.length >= 4) {
+    const gp_satellite_num = gpgsv_dat[3]
+    document.getElementById("gpsSatelliteInfo").innerHTML = gp_satellite_num + "个"
+  }
+}
+
 function ggaProtocolParser(data) {
-  console.log(`gga parser: ${data}`);
+  const gga_data = data.split(",");
+  if (gga_data.length >= 13) {
+    const altitude = gga_data[9]
+    document.getElementById("altitudeVal").innerHTML = altitude
+    document.getElementById("satelliteInfo").style.display = "block";
+  }
 }
 
 function rmcProtocolParser(data) {
   const rmc_data = data.split(",");
-  if (rmc_data.length == 13) {
+  if (rmc_data.length >= 13) {
     // a valid rmc data
     const utc_time = rmc_data[1];
     const status = rmc_data[2];
@@ -108,9 +131,6 @@ function rmcProtocolParser(data) {
     const course_over_ground = rmc_data[8];
     const utc_date = rmc_data[9];
     if (status === "A") {
-      //   console.log(
-      //     `utc_time: ${utc_time}, status: ${status}, latitude: ${latitude}, n_s_indicator: ${n_s_indicator}, longitude: ${longitude},e_w_indicator: ${e_w_indicator}, speed_over_ground: ${speed_over_ground}, course_over_ground: ${course_over_ground}, utc_date: ${utc_date}`
-      //   );
       document.getElementById("statusVal").innerHTML = "正常";
       document.getElementById("positionDetails").style.display = "block";
       document.getElementById("positionDisplay").style.display = "block";
@@ -158,7 +178,12 @@ function rmcProtocolParser(data) {
 
 function parseNmeaMessage(data) {
   for (let i = 0; i < protocol_parsers.length; i++) {
-    const reg_exp = new RegExp(`^\\$..${protocol_parsers[i].name}(.*)`);
+    let reg_exp;
+    if (protocol_parsers[i].name.length == 5) {
+      reg_exp = new RegExp(`^\\$${protocol_parsers[i].name}(.*)`);
+    } else {
+      reg_exp = new RegExp(`^\\$..${protocol_parsers[i].name}(.*)`);
+    }
     if (data.search(reg_exp) !== -1) {
       protocol_parsers[i].parser(data);
     }

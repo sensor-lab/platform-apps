@@ -27,7 +27,7 @@ const main_apps_categories = [
     apps: ["stepper_motor"],
   },
   {
-    name: "电力传输",
+    name: "电源与储能",
     apps: ["relay"],
   },
   {
