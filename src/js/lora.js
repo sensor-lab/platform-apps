@@ -256,6 +256,8 @@ async function transmitData(...data) {
   registerWrite(opers, LORA_REG_MODULATION_CFG1, ret["result"][0] & 0xfe & 0x0f);   // use 7.8khz bandwidth with explicit header mode
   registerWrite(opers, LORA_REG_FIFO_ADDR_PTR, 0);
   registerWrite(opers, LORA_REG_PAYLOAD_LENGTH, 0);
+  event = constructNowEvent(opers);
+  await postHardwareOperation(event);
 
   // transmit actual data
   opers = [];
