@@ -132,8 +132,8 @@ function showPin() {
 }
 
 function readRegister(opers, reg, len=1) {
-    transmit_data = [reg | 0x80];
-    for (i = 0; i < len - 1; i++) {
+    const transmit_data = [reg | 0x80];
+    for (let i = 0; i < len - 1; i++) {
         transmit_data.push(reg | 0x80);
     }
     
@@ -146,7 +146,7 @@ function writeRegister(opers, reg, ...data) {
 }
 
 async function setBit(reg, val) {
-    opers = [];
+    let opers = [];
     readRegister(opers, reg);
     let now_event = constructNowEvent(opers);
     let ret = await postHardwareOperation(now_event);
@@ -158,7 +158,7 @@ async function setBit(reg, val) {
 } 
 
 async function resetBit(reg, val) {
-    opers = [];
+    let opers = [];
     readRegister(opers, reg);
     let now_event = constructNowEvent(opers);
     let ret = await postHardwareOperation(now_event);
@@ -232,7 +232,7 @@ async function selectCard() {
     let ret_uid = [];
     // start reading UID
     await resetBit(CollReg, 0x80);
-    opers = [];
+    const opers = [];
     writeRegister(opers, BitFramingReg, 0);
     let now_event = constructNowEvent(opers);
     await postHardwareOperation(now_event);
@@ -325,6 +325,24 @@ async function writeData(block_id, ...data) {
     }
 }
 
+async function writeDataUl(block_id, ...data) {
+    let buffer = [];
+    // Build command buffer
+    buffer[0] = PICC_CMD_UL_WRITE;
+    buffer[1] = block_id;
+    buffer[2] = data[0];
+    buffer[3] = data[1];
+    buffer[4] = data[2];
+    buffer[5] = data[3];
+    const crc = await calculateCrc(buffer);
+    if (crc.length == 2) {
+        let rcv_data = [];
+        buffer.push(crc[0]);
+        buffer.push(crc[1]);
+        await transceiveData(TRANSCEIVE, buffer, rcv_data);
+    }
+}
+
 async function readData(block_id) {
     // need select then authenticate first
     let buffer = [];
@@ -332,7 +350,7 @@ async function readData(block_id) {
 	buffer[0] = PICC_CMD_MF_READ;
 	buffer[1] = block_id;
 	// Calculate CRC_A
-	crc = await calculateCrc(buffer);
+	const crc = await calculateCrc(buffer);
     let rcv_data = [];
 	if (crc.length == 2) {
 		buffer[2] = crc[0];
@@ -560,12 +578,17 @@ document.getElementById("readCardBtn").addEventListener("click", async function(
             let start_block_id = parseInt(document.getElementById("readStartBlock").value);
             let number_of_blocks = parseInt(document.getElementById("blockNumbers").value);
             let decode_type = parseInt(document.getElementById("readDataDecodeType").value);
-            if (type != 0x09 && type != 0x08 && type != 0x18) {
-                addErrorMsg("读数据目前只支持NFC卡类型 PICC_TYPE_MIFARE_MINI/PICC_TYPE_MIFARE_1K/PICC_TYPE_MIFARE_4K");
+            if (type != 0x09 && type != 0x08 && type != 0x18 && type != 0x00) {
+                addErrorMsg("读数据目前只支持NFC卡类型 PICC_TYPE_MIFARE_MINI/PICC_TYPE_MIFARE_1K/PICC_TYPE_MIFARE_4K/PICC_TYPE_MIFARE_UL");
             } else {
                 addStatusMsg("正在读取中，请稍后。");
+                if (type == 0x0) {
+                    start_block_id = start_block_id * 4;    // MIFARE_UL card is organized as 4 bytes per block
+                }
                 for (let i = 0; i < number_of_blocks; i++) {
-                    await authentication(start_block_id + i);
+                    if (type != 0x0) {
+                        await authentication(start_block_id + i);
+                    }
                     const read_data = await readData(start_block_id + i);
                     // reference: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template
                     let temp_node = document.querySelector("#readNfcDataTemplate").content.cloneNode(true)
@@ -649,23 +672,40 @@ document.getElementById("writeCardBtn").addEventListener("click", async function
 
         if (card_present) {
             const type = await selectCard();
-            if (type != 0x09 && type != 0x08 && type != 0x18) {
-                addErrorMsg("读数据目前只支持NFC卡类型 PICC_TYPE_MIFARE_MINI/PICC_TYPE_MIFARE_1K/PICC_TYPE_MIFARE_4K");
+            if (type != 0x09 && type != 0x08 && type != 0x18 && type != 0x00) {
+                addErrorMsg("读数据目前只支持NFC卡类型 PICC_TYPE_MIFARE_MINI/PICC_TYPE_MIFARE_1K/PICC_TYPE_MIFARE_4K/PICC_TYPE_MIFARE_UL");
             } else {
-                const number_blocks_to_write = Math.ceil(binary_data.length / 16);
+                let page_size;
+                if (type == 0x00) {
+                    page_size = 4;
+                    start_block_id = start_block_id * 4; // MIFARE_UL card is organized ever 4 bytes
+                } else {
+                    page_size = 16;
+                }
+                const number_blocks_to_write = Math.ceil(binary_data.length / page_size);
                 addStatusMsg("正在写入中，请稍后。");
                 for (let i = 0; i < number_blocks_to_write; i++) {
-                    await authentication(start_block_id + i);
+                    if (type != 0x0) {
+                        await authentication(start_block_id + i);
+                    }
                     if (i == (number_blocks_to_write - 1)) {
                         // last block
-                        const block_data = binary_data.slice(i * 16)
-                        for (let j = 0; j < (number_blocks_to_write * 16 - binary_data.length); j++) {
+                        const block_data = binary_data.slice(i * page_size)
+                        for (let j = 0; j < (number_blocks_to_write * page_size - binary_data.length); j++) {
                             block_data.push(0x20);
                         }
-                        await writeData(start_block_id + i, ...block_data);
+                        if (type == 0x0) {
+                            await writeDataUl(start_block_id + i, ...block_data);
+                        } else {
+                            await writeData(start_block_id + i, ...block_data);
+                        }
                     } else {
-                        const block_data = binary_data.slice(i * 16, (i + 1) * 16);
-                        await writeData(start_block_id + i, ...block_data);
+                        const block_data = binary_data.slice(i * page_size, (i + 1) * page_size);
+                        if (type == 0x0) {
+                            await writeDataUl(start_block_id + i, ...block_data);
+                        } else {
+                            await writeData(start_block_id + i, ...block_data);
+                        }
                     }
                 }
                 await haltA();        
