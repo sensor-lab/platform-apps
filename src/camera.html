@@ -1,140 +1,103 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
-    />
-    <title>赛灵森创意盒</title>
-    <link rel="stylesheet" href="scss/styles.scss" />
-    <script type="module" src="js/camera.js"></script>
-  </head>
 
-  <body>
-    <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
-    <div id="statusMsg" class="alert alert-primary d-none" role="alert"></div>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+  <title>赛灵森创意盒</title>
+  <link rel="stylesheet" href="scss/styles.scss" />
+  <script type="module" src="js/camera.js"></script>
+</head>
 
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
-      <div class="mx-auto order-0">
-        <a class="navbar-brand mx-auto" href="#">远程照相机</a>
-      </div>
-    </nav>
+<body>
+  <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+  <div id="statusMsg" class="alert alert-primary d-none" role="alert"></div>
 
-    <div class="container-sm text-center my-4">
-      <p>
-        将Arducam Mini
-        OV2640照相机和平台连接，选择连接的SPI引脚和I2C引脚，点击初始化相机按钮来测试相机的基本连接。
-      </p>
-      <p>更改不同的相机设置，并点击设置照相机参数按钮。</p>
-      <p>点击拍照按钮进行相机拍照，拍照的结果将显示在网页上。</p>
-      <form class="w-50 my-4 mx-auto">
-        <div class="form-group">
-          <label for="exampleFormControlSelect2" class="my-2"
-            >模块连接引脚</label
-          >
-          <select
-            id="spiPinSelect"
-            class="form-select my-2"
-            aria-label="Default select example"
-          >
-            <option selected value="-1">和平台的连接的SPI引脚</option>
-            <option value="0">0</option>
-            <option value="4">4</option>
-            <option value="8">8</option>
-            <option value="12">12</option>
-            <option value="16">16</option>
-          </select>
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <div class="mx-auto order-0">
+      <a class="navbar-brand mx-auto" href="#">远程照相机</a>
+    </div>
+  </nav>
 
-          <select
-            id="i2cPinSelect"
-            class="form-select my-2"
-            aria-label="Default select example"
-          >
-            <option selected value="-1">和平台的连接的I2C引脚</option>
-            <option value="0">0</option>
-            <option value="4">4</option>
-            <option value="8">8</option>
-            <option value="12">12</option>
-            <option value="16">16</option>
-          </select>
-          <label for="exampleFormControlSelect2" class="my-2"
-            >特别效果选择</label
-          >
-          <select class="form-control" id="exampleFormControlSelect2">
-            <option>正常</option>
-            <option>冷色调</option>
-            <option>暖色调</option>
-            <option>黑白</option>
-            <option>棕褐色</option>
-            <option>负色</option>
-            <option>绿色</option>
-            <option>负黑白色</option>
-          </select>
-          <label for="exampleFormControlSelect2" class="my-2">曝光度选择</label>
-          <select class="form-control" id="exampleFormControlSelect2">
-            <option selected>自动曝光模式</option>
-            <option>低曝光</option>
-            <option>中曝光</option>
-            <option>高曝光</option>
-          </select>
-          <label for="exampleFormControlSelect2" class="my-2">对比度选择</label>
-          <select class="form-control" id="exampleFormControlSelect2">
-            <option>-2</option>
-            <option>-1</option>
-            <option selected>0</option>
-            <option>1</option>
-            <option>2</option>
-          </select>
-          <label for="exampleFormControlSelect2" class="my-2">亮度选择</label>
-          <select class="form-control" id="exampleFormControlSelect2">
-            <option>-2</option>
-            <option>-1</option>
-            <option selected>0</option>
-            <option>1</option>
-            <option>2</option>
-          </select>
-          <label for="exampleFormControlSelect2" class="my-2">饱和度选择</label>
-          <select class="form-control" id="exampleFormControlSelect2">
-            <option>-2</option>
-            <option>-1</option>
-            <option selected>0</option>
-            <option>1</option>
-            <option>2</option>
-          </select>
-          <label for="exampleFormControlSelect2" class="my-2">环境选择</label>
-          <select class="form-control" id="exampleFormControlSelect2">
-            <option selected>自动</option>
-            <option>阳光</option>
-            <option>办公室</option>
-            <option>多云</option>
-            <option>室内</option>
-          </select>
-          <label for="exampleFormControlSelect2" class="my-2"
-            >照片质量(2-60)</label
-          >
-          <input class="form-control" type="number" value="40" />
-          <div class="my-2">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              value=""
-              id="nightModeEnable"
-            />
-            <label class="form-check-label" for="nightModeEnable">
-              启动夜间模式
-            </label>
-          </div>
+  <div class="container-sm text-center my-4">
+    <p>
+      平台兼容多种常见的照相机模块，请参考照相机参考文档。将照相机模块通过转接板和平台连接。
+    </p>
+    <p>点击拍照按钮进行相机拍照，拍照的结果将显示在网页上。</p>
+    <div id="displayPins" class="row mt-4">
+      <div class="card mb-2 mx-auto" style="width: 14rem; height: 8rem; background-color:antiquewhite;">
+        <div class="card-body">
+          <p>SDA引脚：I2C数据信号</p>
+          <h5>平台引脚0</h5>
         </div>
-      </form>
-      <button id="cameraInit" class="btn btn-info mx-auto">初始化相机</button>
-      <button id="cameraSetting" class="btn btn-secondary mx-auto">
-        设置照相机参数
-      </button>
-      <button id="cameraOneshot" class="btn btn-primary mx-auto">拍照</button>
-      <div class="my-4">
-        <img id="photo" style="max-width: 100%" class="mx-auto" />
+      </div>
+
+      <div class="card mb-2 mx-auto" style="width: 14rem; height: 8rem; background-color:antiquewhite;">
+        <div class="card-body">
+          <p>SCL引脚：I2C时钟信号</p>
+          <h5>平台引脚0</h5>
+        </div>
+      </div>
+
+      <div class="card mb-2 mx-auto" style="width: 14rem; height: 8rem; background-color:antiquewhite;">
+        <div class="card-body">
+          <p>XCLK引脚：照相机主时钟信号</p>
+          <h5>平台引脚0</h5>
+        </div>
+      </div>
+
+      <div class="card mb-2 mx-auto" style="width: 14rem; height: 8rem; background-color:antiquewhite;">
+        <div class="card-body">
+          <p>PCLK引脚：像素时钟</p>
+          <h5>平台引脚0</h5>
+        </div>
+      </div>
+
+      <div class="card mb-2 mx-auto" style="width: 14rem; height: 8rem; background-color:antiquewhite;">
+        <div class="card-body">
+          <p>VSYNC引脚：帧同步信号</p>
+          <h5>平台引脚0</h5>
+        </div>
+      </div>
+
+      <div class="card mb-2 mx-auto" style="width: 14rem; height: 8rem; background-color:antiquewhite;">
+        <div class="card-body">
+          <p>HREF引脚：行同步信号</p>
+          <h5>平台引脚0</h5>
+        </div>
+      </div>
+
+      <div class="card mb-2 mx-auto" style="width: 14rem; height: 8rem; background-color:antiquewhite;">
+        <div class="card-body">
+          <p>RESET引脚</p>
+          <h5>平台引脚0</h5>
+        </div>
+      </div>
+
+      <div class="card mb-2 mx-auto" style="width: 14rem; height: 8rem; background-color:antiquewhite;">
+        <div class="card-body">
+          <p>DATA0-7引脚：图像数据信号</p>
+          <h5>平台引脚0</h5>
+        </div>
       </div>
     </div>
-  </body>
+    <form class="w-50 my-4 mx-auto">
+      <div class="form-group">
+        <label for="exampleFormControlSelect2" class="my-2">选择照片尺寸</label>
+        <select id="pictureSize" class="form-select my-2" aria-label="Default select example">
+          <option value="640x480">640 x 480</option>
+          <option value="1024x768">1024 x 768</option>
+        </select>
+      </div>
+    </form>
+    <p id="shotTime"></p>
+    <button id="cameraOneshot" class="btn btn-primary mx-auto">拍照</button>
+    <button id="cameraReset" class="btn btn-primary mx-auto">重置</button>
+    <button id="imageRotate" class="btn btn-secondary mx-auto">翻转</button>
+    <div class="my-4" style="height: 640px;">
+      <img id="photo" style="max-width: 100%; display:block" class="mx-auto" />
+    </div>
+  </div>
+</body>
+
 </html>

@@ -104,7 +104,7 @@ async function playAudio(wav_data) {
   audio.play().catch(e => console.error('Playback failed:', e));
 }
 
-connected_pin_ele.addEventListener("change", async function (event) {
+connected_pin_ele.addEventListener("change", function (event) {
     if (event.target.value !== -1) {
       data_in_pin = parseInt(connected_pin_ele.options[connected_pin_ele.selectedIndex].value);
       sclk_pin = data_in_pin + 1

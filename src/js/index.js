@@ -139,7 +139,7 @@ const main_apps_info = [
   {
     id: "camera",
     name: "远程照相机",
-    description: "使用Arducam Mini照相机，进行远程拍照。",
+    description: "使用照相机进行远程拍照。",
     document: "https://www.sensor-lab.io",
   },
   {
