@@ -11,7 +11,7 @@ import version from "../app_version.json";
 // Import all plugins
 import * as bootstrap from "bootstrap";
 
-var mode, ssid, password, mdnsname, voltage, fwver;
+var mode, ssid, password, mdnsname, voltage, fwver, rssi, num_client;
 var app_update_filepaths,
   fw_update_filepath,
   app_update_files,
@@ -164,6 +164,30 @@ async function getPlatformConfig() {
     document.getElementById("password").setAttribute("value", password);
     document.getElementById("mdnsname").setAttribute("value", mdnsname);
     document.getElementById("platformtime").setAttribute("value", platformtime);
+    if (mode == "station") {
+      document.getElementById("rssiDisp").classList.remove("d-none");
+      if ("rssi" in ret) {
+        rssi = ret["rssi"];
+        if (rssi < -50) {
+          document.getElementById("rssi").setAttribute("value", `强(${rssi}dBm)`);
+        } else if (rssi < -70) {
+          document.getElementById("rssi").setAttribute("value", `中等(${rssi}dBm)`);
+        } else {
+          document.getElementById("rssi").setAttribute("value", `较弱(${rssi}dBm)，请将平台移到距离路由器更近的地方。`);
+        }
+      } else {
+        document.getElementById("rssi").setAttribute("value", "无法获得信号强度，请重试");
+      }
+    } else {
+      // router mode
+      document.getElementById("clientNumDisp").classList.remove("d-none");
+      if ("clientnum" in ret) {
+        num_client = ret["clientnum"];
+        document.getElementById("clientNum").setAttribute("value", `${num_client}个WiFi客户端已连接`);
+      } else {
+        document.getElementById("clientNum").setAttribute("value", "无法获得连接数量，请重试");
+      }
+    }
     document
       .getElementById("version")
       .setAttribute(
