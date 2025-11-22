@@ -168,9 +168,9 @@ async function getPlatformConfig() {
       document.getElementById("rssiDisp").classList.remove("d-none");
       if ("rssi" in ret) {
         rssi = ret["rssi"];
-        if (rssi < -50) {
+        if (rssi > -50) {
           document.getElementById("rssi").setAttribute("value", `强(${rssi}dBm)`);
-        } else if (rssi < -70) {
+        } else if (rssi > -70) {
           document.getElementById("rssi").setAttribute("value", `中等(${rssi}dBm)`);
         } else {
           document.getElementById("rssi").setAttribute("value", `较弱(${rssi}dBm)，请将平台移到距离路由器更近的地方。`);
