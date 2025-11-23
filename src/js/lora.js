@@ -236,9 +236,9 @@ async function begin() {
   const lna = await getLna();
   opers = [];
   registerWrite(opers, BASE_REG_LNA_SET, lna | 0x3);
-  registerWrite(opers, LORA_REG_MODULATION_CFG3, 0x4);
+  registerWrite(opers, LORA_REG_MODULATION_CFG3, 0x04);     // enable AGC
   registerWrite(opers, BASE_REG_PA_DAC, 0x87);    // 0x87 for tx high power
-  registerWrite(opers, LORA_REG_MODULATION_CFG2, 0xa0);     // set spread factor to 10
+  registerWrite(opers, LORA_REG_MODULATION_CFG2, 0x84);     // set spread factor to 8 and enable crc check
   //   registerWrite(opers, BASE_REG_OVER_CURRENT_PROTECTION, 100); need double check
   registerWrite(opers, BASE_REG_PA_POWER_CONFIG, 0x8f);
   event = constructNowEvent(opers);
