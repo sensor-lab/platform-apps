@@ -293,25 +293,13 @@ document
     const timezone_offset = cur_time.getTimezoneOffset() / 60;    // integer as hour
     const config = {
       tmzoneoffset: timezone_offset,
-      timedate:
-        cur_time.getFullYear() +
-        "-" +
-        (cur_time.getMonth() + 1) +
-        "-" +
-        cur_time.getDate() +
-        "T" +
-        cur_time.getHours() +
-        ":" +
-        cur_time.getMinutes() +
-        ":" +
-        cur_time.getSeconds(),
     };
 
     const ret = await setConfig(config);
     if (ret == -1) {
-      addErrorMsg("时间设置失败，请重试。");
+      addErrorMsg("时区设置失败，请重试。");
     } else {
-      addStatusMsg("时间设置成功，请刷新页面。");
+      addStatusMsg("时区设置成功，请刷新页面。");
     }
   });
 
