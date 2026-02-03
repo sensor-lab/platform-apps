@@ -143,6 +143,7 @@ async function getPlatformConfig() {
   if (ret != -1) {
     let platformtime;
     let hwver;
+    let deviceId;
     mode = ret["mode"];
     ssid = ret["ssid"];
     password = ret["password"];
@@ -151,6 +152,7 @@ async function getPlatformConfig() {
     platformtime = ret["timedate"];
     fwver = ret["fwver"];
     hwver = ret["hwver"];
+    deviceId = ret["deviceid"];
 
     if (hwver === "V-1--1") {
       hwver = "未设置";
@@ -159,6 +161,7 @@ async function getPlatformConfig() {
       platformtime = "未设置";
     }
 
+    document.getElementById("deviceId").value = deviceId;
     document.getElementById("modeSelect").value = mode;
     document.getElementById("ssid").setAttribute("value", ssid);
     document.getElementById("password").setAttribute("value", password);
