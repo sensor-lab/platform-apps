@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>赛灵森创意盒</title>
+    <link rel="stylesheet" href="scss/styles.scss">
+    <link rel="stylesheet" href="css/guess_pattern.css">
+    <script type="module" src="js/guess_pattern.js"></script>
+</head>
+
+<body>
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+    <div id="statusMsg" class="alert alert-primary d-none" role="alert"></div>
+
+    <nav class="navbar navbar-expand-lg bg-light">
+        <div class="container d-flex justify-content-between">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">记忆力测试</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="d-flex flex-column align-items-center">
+        <div class="mt-4 mb-2">
+            <h3>记忆力测试</h3>
+        </div>
+    </div>
+
+    <div class="container-md mx-auto px-3 border border-5" class="rounded-3">
+        <div class="text-center mt-4">
+            <select id="pinSelect" class="form-select my-4" aria-label="Default select example">
+                <option selected value="-1">选择灯带和平台连接的引脚</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="16">16</option>
+                <option value="16">17</option>
+            </select>
+
+            <div id="displayPins" class="row mt-4 d-none">
+                <div class="card mb-2 mx-auto" style="width: 14rem; height: 6rem; background-color:antiquewhite;">
+                    <div class="card-body">
+                        <p>灯带数据信号</p>
+                        <h5>平台引脚0</h5>
+                    </div>
+                </div>
+            </div>
+
+            <div id="infoMessage" class="row mt-4">
+                <div class="card mb-2 mx-auto" style="width: 20rem; height: 5rem; background-color: lightcyan;">
+                    <div class="card-body">
+                        <p></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row px-3 my-4" id="bluesky">
+                <div id="redTile" class="col-sm" style="background-color: #ff0000; min-height: 4rem;"></div>
+                <div id="yellowTile" class="col-sm" style="background-color: #ffff00; min-height: 4rem;"></div>
+                <div id="blueTile" class="col-sm" style="background-color: #0000ff; min-height: 4rem;"></div>
+            </div>
+
+            <button id="startBut" type="submit" class="btn btn-primary my-4 mx-auto">开始</button>
+        </div>
+    </div>
+
+</body>
+
+</html>

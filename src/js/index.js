@@ -36,7 +36,7 @@ const main_apps_categories = [
   },
   {
     name: "游戏",
-    apps: ["reactspeed"],
+    apps: ["reactspeed", "guess_pattern"],
   },
   {
     name: "自定义",
@@ -160,6 +160,12 @@ const main_apps_info = [
     id: "reactspeed",
     name: "反应速度测试",
     description: "想知道您的反应速度有多快吗？快来试试这个应用。",
+    document: "https://www.sensor-lab.io",
+  },
+  {
+    id: "guess_pattern",
+    name: "记忆力测试",
+    description: "测试您短时间能记住多少东西。",
     document: "https://www.sensor-lab.io",
   },
   {

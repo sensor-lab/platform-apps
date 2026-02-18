@@ -1,0 +1,29 @@
+@keyframes colorCycle {
+    0% { background-color: #ff0000; }
+    50%{ opacity: 20%;}
+    100% { background-color: #ff0000; }
+}
+
+@keyframes colorCycleYellow {
+    0% { background-color: #ffff00; }
+    50%{ opacity: 20%;}
+    100% { background-color: #ffff00; }
+}
+
+@keyframes colorCycleBlue {
+    0% { background-color: #0000ff; }
+    50%{ opacity: 20%;}
+    100% { background-color: #0000ff; }
+}
+
+.animate-red {
+    animation: colorCycle 1s ease;
+}
+
+.animate-yellow {
+    animation: colorCycleYellow 1s ease;
+}
+
+.animate-blue {
+    animation: colorCycleBlue 1s ease;
+}
