@@ -3,7 +3,7 @@ import {
     advanceOutputStartHardwareOperation,
     constructNowEvent,
     postHardwareOperation 
-} from 'sensorsparks.api'
+} from '@sensorsparks/platform-api'
 
 const INIT_LEVEL = 3
 var level = INIT_LEVEL

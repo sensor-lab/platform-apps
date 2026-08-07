@@ -2,7 +2,7 @@ import {
   captureTriggerHardwareOperation,
   constructNowEvent,
   postHardwareOperation,
-} from "sensorsparks.api";
+} from "@sensorsparks/platform-api";
 
 var trigger_pin = -1;
 var echo_pin = -1;

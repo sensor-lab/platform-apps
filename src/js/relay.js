@@ -1,4 +1,4 @@
-import {gpio, gpioOutputSchedule, setTime, getTime} from 'sensorsparks.api'
+import {gpio, gpioOutputSchedule, setTime, getTime} from '@sensorsparks/platform-api'
 
 var pin = localStorage.getItem("pin");
 var mode = document.getElementById("mode")

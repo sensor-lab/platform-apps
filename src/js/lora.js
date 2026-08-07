@@ -2,7 +2,7 @@ import {
   spiHardwareOperation,
   constructNowEvent,
   postHardwareOperation,
-} from 'sensorsparks.api';
+} from '@sensorsparks/platform-api';
 
 function addErrorMsg(message) {
   document.getElementById("errorMsg").innerHTML = message;

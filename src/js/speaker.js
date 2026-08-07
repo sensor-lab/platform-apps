@@ -4,7 +4,7 @@ import {
   i2sStopHardwareOperation,
   constructNowEvent,
   postHardwareOperation,
-} from "sensorsparks.api";
+} from "@sensorsparks/platform-api";
 
 const wave_file_selector_ele = document.getElementById("wavFileSelector");
 const wave_info_table_parent = document.getElementById("fileInfo");

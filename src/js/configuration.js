@@ -5,7 +5,7 @@ import {
   restartPlatform,
   setState,
   getCrc32,
-} from 'sensorsparks.api';
+} from '@sensorsparks/platform-api';
 import version from "../app_version.json";
 
 // Import all plugins

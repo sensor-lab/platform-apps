@@ -1,4 +1,4 @@
-import {spiHardwareOperation, delayHardwareOperation, constructNowEvent, postHardwareOperation} from 'sensorsparks.api'
+import {spiHardwareOperation, delayHardwareOperation, constructNowEvent, postHardwareOperation} from '@sensorsparks/platform-api'
 
 function addErrorMsg(message) {
     document.getElementById("errorMsg").innerHTML = message;

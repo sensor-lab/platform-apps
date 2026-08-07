@@ -3,7 +3,7 @@ import {
   onewireHardwareOperation,
   constructNowEvent,
   postHardwareOperation,
-} from "sensorsparks.api";
+} from "@sensorsparks/platform-api";
 
 const ENVIRONMENT_UPDATE_SEC = 3;
 

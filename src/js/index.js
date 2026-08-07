@@ -20,7 +20,7 @@ const main_apps_categories = [
   },
   {
     name: "图像和声音类",
-    apps: ["camera", "buzzer_note_player", "microphone", "speaker"],
+    apps: ["camera", "buzzer_note_player", "microphone", "speaker", "camera_thermal"],
   },
   {
     name: "电机",
@@ -140,6 +140,12 @@ const main_apps_info = [
     id: "camera",
     name: "远程照相机",
     description: "使用照相机进行远程拍照。",
+    document: "https://www.sensor-lab.io",
+  },
+  {
+    id: "camera_thermal",
+    name: "热敏照相机",
+    description: "使用热敏照相机组件拍摄热敏照片。",
     document: "https://www.sensor-lab.io",
   },
   {

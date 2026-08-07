@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <title>赛灵森创意盒</title>
+    <link rel="stylesheet" href="scss/styles.scss" />
+    <script type="module" src="js/camera_thermal.js"></script>
+</head>
+
+<body>
+    <div id="errorMsg" class="alert alert-danger d-none" role="alert"></div>
+    <div id="statusMsg" class="alert alert-primary d-none" role="alert"></div>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <div class="mx-auto order-0">
+            <a class="navbar-brand mx-auto" href="#">远程照相机</a>
+        </div>
+    </nav>
+
+    <div class="container-sm text-center my-4">
+        <p id="shotTime"></p>
+        <button id="cameraOneshot" class="btn btn-primary mx-auto">拍照</button>
+        <button id="cameraReset" class="btn btn-primary mx-auto">重置</button>
+        <button id="imageRotate" class="btn btn-secondary mx-auto">翻转</button>
+        <div class="my-4" style="height: 640px;">
+            <img id="photo" style="max-width: 100%; display:block" class="mx-auto" />
+        </div>
+    </div>
+</body>
+
+</html>

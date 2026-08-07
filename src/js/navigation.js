@@ -2,7 +2,7 @@ import {
   uartHardwareOperation,
   constructNowEvent,
   postHardwareOperation,
-} from 'sensorsparks.api';
+} from '@sensorsparks/platform-api';
 
 const EXPECT_NUM_BYTES_RCV = 800;
 const WAITING_TIME_SEC = 3;

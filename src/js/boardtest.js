@@ -1,4 +1,4 @@
-import {sendRequest} from 'sensorsparks.api'
+import {sendRequest} from '@sensorsparks/platform-api'
 
 const predefinedLogo = new URL('../images/upload-solid.svg', import.meta.url);
 const deleteLogo = new URL('../images/trash-solid.svg', import.meta.url);
