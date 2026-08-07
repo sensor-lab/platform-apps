@@ -20,6 +20,8 @@ const GRID_ROWS = 12
 const I2C_SPEED_KHZ = 100
 const MLX90641_I2C_ADDR = 51
 const THERMAL_SDA_PIN_STORAGE_KEY = 'camera_thermal_sda_pin'
+const NEW_DATA_TIMEOUT_MS = 1500
+const NEW_DATA_POLL_MS = 50
 const THERMAL_RANGES = {
   body: { min: 20, max: 45, label: '20.0 °C 到 45.0 °C' },
   environment: { min: -10, max: 50, label: '-10.0 °C 到 50.0 °C' },
@@ -103,8 +105,28 @@ function colorForNormalized(value) {
   return 'rgb(0,0,0)'
 }
 
-function getSelectedRange() {
+function getSelectedRange(frame = null) {
   const key = temperatureRangeElem ? temperatureRangeElem.value : 'body'
+
+  if (key === 'auto') {
+    if (!Array.isArray(frame)) {
+      return { min: 0, max: 1, label: '自动（当前数据）' }
+    }
+
+    const values = frame.filter((value) => Number.isFinite(value))
+    if (values.length === 0) {
+      return { min: 0, max: 1, label: '自动（当前数据）' }
+    }
+
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    return {
+      min,
+      max,
+      label: `${min.toFixed(1)} °C 到 ${max.toFixed(1)} °C（当前数据）`
+    }
+  }
+
   return THERMAL_RANGES[key] || THERMAL_RANGES.body
 }
 
@@ -125,7 +147,7 @@ function renderHeatmap(frame) {
 
   const minValue = Math.min(...values)
   const maxValue = Math.max(...values)
-  const selectedRange = getSelectedRange()
+  const selectedRange = getSelectedRange(frame)
   const scaleMin = selectedRange.min
   const scaleMax = selectedRange.max
   const span = Math.max(scaleMax - scaleMin, 1e-6)
@@ -728,11 +750,29 @@ async function mlx90641ClearNewDataBit() {
   return true
 }
 
+async function mlx90641WaitForNewData(timeoutMs = NEW_DATA_TIMEOUT_MS, pollMs = NEW_DATA_POLL_MS) {
+  const start = Date.now()
+  while ((Date.now() - start) < timeoutMs) {
+    if (await mlx90641IsNewDataAvailable()) {
+      return true
+    }
+    await new Promise((resolve) => setTimeout(resolve, pollMs))
+  }
+
+  return false
+}
+
 async function mlx90641ReadTempC() {
   if (!calibrationLoaded) {
     await mlx90641Init()
   }
 
+  const hasNewData = await mlx90641WaitForNewData()
+  if (!hasNewData) {
+    throw new Error('等待热成像新数据超时，请检查刷新率或连线')
+  }
+
+  await mlx90641ClearNewDataBit()
   const runtimeBlocks = await mlx90641ReadRuntimeBlocks()
 
   await mlx90641ReadKgain(runtimeBlocks)
