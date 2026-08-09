@@ -20,6 +20,12 @@ const GRID_ROWS = 12
 const I2C_SPEED_KHZ = 100
 const MLX90641_I2C_ADDR = 51
 const THERMAL_SDA_PIN_STORAGE_KEY = 'camera_thermal_sda_pin'
+const OFFSET = 0.0
+const REFRESH_RATE = 0x03
+const SAMPLE_DELAY_MS = 300
+const POR_DELAY_MS = SAMPLE_DELAY_MS * 2.0 * 1.2
+const CAL_INT = -45.4209807273067
+const CAL_SLOPE = 2.64896693658985
 const NEW_DATA_TIMEOUT_MS = 1500
 const NEW_DATA_POLL_MS = 50
 const THERMAL_RANGES = {
@@ -35,9 +41,10 @@ let isRotated = false
 let deviceId = null
 let shotTimerId = null
 let shotInProgress = false
-const CONTINUOUS_SHOT_INTERVAL_MS = 1000
+const CONTINUOUS_SHOT_INTERVAL_MS = SAMPLE_DELAY_MS
 let sdaPin = -1
 let sclPin = -1
+let sensorConfigured = false
 
 const thermalCanvas = document.getElementById('thermalMap')
 const tempMinElem = document.getElementById('tempMin')
@@ -403,6 +410,16 @@ async function mlx90641WriteRegister(regAddr, value) {
     if (response["errorcode"] !== 0) {
        throw new Error(`write register error: ${response}`)
     }
+}
+
+async function mlx90641SetRefreshRate(rate) {
+  if (rate < 0 || rate > 0x07) {
+    throw new Error(`invalid refresh rate: ${rate}`)
+  }
+
+  const config = await mlx90641ReadAddrUnsigned(CONTROL_ADDR)
+  const updatedConfig = (config & ~(0x07 << 7)) | ((rate & 0x07) << 7)
+  await mlx90641WriteRegister(CONTROL_ADDR, updatedConfig)
 }
 
 async function mlx90641FetchEEProm() {
@@ -828,7 +845,8 @@ async function mlx90641ReadTempC() {
       continue
     }
 
-    mlx90641State.to[i] = fourthRoot(inner) - 273.15
+    const rawTo = fourthRoot(inner) - 273.15
+    mlx90641State.to[i] = rawTo * CAL_SLOPE + CAL_INT + OFFSET
   }
 
   interpolateBadPixels()
@@ -838,6 +856,12 @@ async function mlx90641ReadTempC() {
 async function mlx90641Init() {
   if (eepromData.length === 0) {
     await mlx90641FetchEEProm()
+  }
+
+  if (!sensorConfigured) {
+    await mlx90641SetRefreshRate(REFRESH_RATE)
+    await new Promise((resolve) => setTimeout(resolve, POR_DELAY_MS))
+    sensorConfigured = true
   }
 
   mlx90641ReadPixelOffset()
@@ -896,6 +920,10 @@ if (sdaPinElem) {
   sdaPinElem.addEventListener('change', function (event) {
     sdaPin = Number(event.target.value)
     sclPin = sdaPin + 1
+    sensorConfigured = false
+    calibrationLoaded = false
+    eepromData = []
+    deviceId = null
     localStorage.setItem(THERMAL_SDA_PIN_STORAGE_KEY, String(event.target.value))
     if (hasValidI2cPins()) {
       setPinWarning(false)
