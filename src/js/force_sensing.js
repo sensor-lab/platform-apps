@@ -2,7 +2,7 @@ import {
   adcHardwareOperation,
   constructNowEvent,
   postHardwareOperation,
-} from "sensorsparks.api";
+} from "@sensorsparks/platform-api";
 import Chart from "chart.js/auto";
 
 var state = "config";      //"config", "capture", "display"

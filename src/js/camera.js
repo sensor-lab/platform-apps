@@ -5,7 +5,7 @@ import {
   dvpResetHardwareOperation,
   constructNowEvent,
   postHardwareOperation
-} from 'sensorsparks.api'
+} from '@sensorsparks/platform-api'
 
 var sda_pin = 0
 var scl_pin = 1

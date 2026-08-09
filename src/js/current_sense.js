@@ -4,7 +4,7 @@ import {
   adcHardwareOperation,
   constructNowEvent,
   postHardwareOperation,
-} from "sensorsparks.api";
+} from "@sensorsparks/platform-api";
 import Chart from "chart.js/auto";
 import zoomPlugin from "chartjs-plugin-zoom";
 

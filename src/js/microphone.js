@@ -4,7 +4,7 @@ import {
   i2sStopHardwareOperation,
   constructNowEvent,
   postHardwareOperation,
-} from "sensorsparks.api";
+} from "@sensorsparks/platform-api";
 
 const start_button_ele = document.getElementById("startButton");
 const stop_button_ele = document.getElementById("stopButton");

@@ -3,7 +3,7 @@ import {
   i2cWriteHardwareOperation,
   constructNowEvent,
   postHardwareOperation
-} from 'sensorsparks.api'
+} from '@sensorsparks/platform-api'
 
 const EEPROM_START = 0x2400
 const EEPROM_WORDS = 832
