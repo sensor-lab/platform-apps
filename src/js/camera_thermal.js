@@ -367,7 +367,8 @@ async function mlx90641ReadRegister(regAddr, len) {
     I2C_SPEED_KHZ,
     MLX90641_I2C_ADDR,
     (regAddr >> 8) & 0xFF,
-    regAddr & 0xFF
+    regAddr & 0xFF,
+    false,
     );
     i2cReadHardwareOperation(
     opers,
