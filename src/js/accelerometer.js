@@ -187,6 +187,7 @@ async function initMpu6050(range) {
     MPU6050_I2C_ADDR,
     107,
     -1,
+    true,
     0
   );
   i2cWriteHardwareOperation(
@@ -197,6 +198,7 @@ async function initMpu6050(range) {
     MPU6050_I2C_ADDR,
     27,
     -1,
+    true,
     range << 3
   );
   i2cWriteHardwareOperation(
@@ -207,6 +209,7 @@ async function initMpu6050(range) {
     MPU6050_I2C_ADDR,
     28,
     -1,
+    true,
     range << 3
   );
   i2cWriteHardwareOperation(
@@ -217,6 +220,7 @@ async function initMpu6050(range) {
     MPU6050_I2C_ADDR,
     -1,
     -1,
+    true,
     117
   );
   i2cReadHardwareOperation(
@@ -227,6 +231,7 @@ async function initMpu6050(range) {
     MPU6050_I2C_ADDR,
     -1,
     -1,
+    true,
     1
   );
   const now_event = constructNowEvent(opers);
@@ -250,6 +255,7 @@ async function startSensorCapture() {
     MPU6050_I2C_ADDR,
     -1,
     -1,
+    true,
     59
   );
   i2cReadHardwareOperation(
@@ -260,6 +266,7 @@ async function startSensorCapture() {
     MPU6050_I2C_ADDR,
     -1,
     -1,
+    true,
     14
   );
   const now_event = constructNowEvent(opers);

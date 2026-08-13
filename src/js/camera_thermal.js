@@ -368,7 +368,7 @@ async function mlx90641ReadRegister(regAddr, len) {
     MLX90641_I2C_ADDR,
     (regAddr >> 8) & 0xFF,
     regAddr & 0xFF,
-    false,
+    true,
     );
     i2cReadHardwareOperation(
     opers,
@@ -378,6 +378,7 @@ async function mlx90641ReadRegister(regAddr, len) {
     MLX90641_I2C_ADDR,
     -1,
     -1,
+    true,
     len
     );
     const now_event = constructNowEvent(opers);
@@ -403,6 +404,7 @@ async function mlx90641WriteRegister(regAddr, value) {
     MLX90641_I2C_ADDR,
     (regAddr >> 8) & 0xFF,
     regAddr & 0xFF,
+    true,
     (value >> 8) & 0xFF,
     value & 0xFF
     );

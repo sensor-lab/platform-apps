@@ -62,7 +62,8 @@ async function startSht30SingleShot () {
     I2C_HIGH_SPEED_KHZ,
     SHT30_I2C_ADDR,
     36,
-    11
+    11,
+    true
   )
   const now_event = constructNowEvent(opers)
   const response = await postHardwareOperation(now_event)
@@ -89,6 +90,7 @@ async function readSht30SingleShot () {
     SHT30_I2C_ADDR,
     -1,
     -1,
+    true,
     6
   )
   const now_event = constructNowEvent(opers)
@@ -124,7 +126,8 @@ async function readMts01Temperature () {
     I2C_MID_SPEED_KHZ,
     MTS01_I2C_ADDR,
     204,
-    68
+    68,
+    true
   )
   i2cReadHardwareOperation(
     opers,
@@ -134,6 +137,7 @@ async function readMts01Temperature () {
     MTS01_I2C_ADDR,
     -1,
     -1,
+    true,
     3
   )
   const now_event = constructNowEvent(opers)
@@ -165,7 +169,8 @@ async function readAgs02ma () {
     scl_pin,
     I2C_LOW_SPEED_KHZ,
     AGS02MA_I2C_ADDR,
-    0
+    0,
+    true
   )
   i2cReadHardwareOperation(
     opers,
@@ -175,6 +180,7 @@ async function readAgs02ma () {
     AGS02MA_I2C_ADDR,
     -1,
     -1,
+    true,
     5
   )
   const now_event = constructNowEvent(opers)
@@ -308,7 +314,8 @@ document
         I2C_MID_SPEED_KHZ,
         MTS01_I2C_ADDR,
         204,
-        68
+        68,
+        true
       )
       i2cReadHardwareOperation(
         opers,
@@ -318,6 +325,7 @@ document
         MTS01_I2C_ADDR,
         -1,
         -1,
+        true,
         3
       )
       // humidity: sht30
@@ -328,7 +336,8 @@ document
         I2C_HIGH_SPEED_KHZ,
         SHT30_I2C_ADDR,
         36,
-        11
+        11,
+        true
       )
       delayHardwareOperation(opers, 'ms', 50) // give 50ms for data ready
       i2cReadHardwareOperation(
@@ -339,6 +348,7 @@ document
         SHT30_I2C_ADDR,
         -1,
         -1,
+        true,
         6
       )
       delayHardwareOperation(opers, 'ms', 50)
@@ -350,7 +360,8 @@ document
         scl_pin,
         I2C_LOW_SPEED_KHZ,
         AGS02MA_I2C_ADDR,
-        0
+        0,
+        true
       )
       i2cReadHardwareOperation(
         opers,
@@ -360,6 +371,7 @@ document
         AGS02MA_I2C_ADDR,
         -1,
         -1,
+        true,
         5
       )
       delayHardwareOperation(opers, 'ms', 50)

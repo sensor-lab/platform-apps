@@ -108,6 +108,7 @@ async function ina219Capture() {
     INA219_I2C_ADDR,
     CURRENT_REGISTER,
     -1,
+    true,
     0
   );
   i2cReadHardwareOperation(
@@ -118,6 +119,7 @@ async function ina219Capture() {
     INA219_I2C_ADDR,
     -1,
     -1,
+    true,
     2
   );
   const now_event = constructNowEvent(opers);
@@ -143,6 +145,7 @@ async function ina219Calibrate() {
     INA219_I2C_ADDR,
     CALIBRATION_REGISTER,
     -1,
+    true,
     (calibration_register >> 8) & 0Xff,
     calibration_register & 0xff
   );
